@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="SiriusDB-common" />
+        <module name="SiriusDB-region" />
+        <module name="SiriusDB-rpc" />
+        <module name="SiriusDB-master" />
+        <module name="SiriusDB-client" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="SiriusDB-master-server" target="8" />
+      <module name="SiriusDB-region-server" target="8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
