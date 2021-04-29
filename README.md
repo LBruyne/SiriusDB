@@ -58,3 +58,9 @@ public class ServiceImpl implements IService {
 ### 异常处理
 
 对于业务逻辑中有可能出现Exception的代码片段，应该用try catch进行包围，不推荐使用throws作用于方法签名上
+
+### 代码提交规范（重要）
+
+- 本部分开发到一半，还没有开发完或者需要补充逻辑的地方，请用TODO标注
+- 不要把生成的二进制文件（target）提交到代码仓库！！！
+- 标注好commit的内容，主要为本次提交的内容和TODO的事项
