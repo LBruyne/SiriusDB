@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-package com.siriusdb.common.thrift;
+package com.siriusdb.thrift;
 
 import org.apache.thrift.EncodingUtils;
 import org.apache.thrift.TException;

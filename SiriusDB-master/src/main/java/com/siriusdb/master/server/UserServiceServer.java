@@ -1,6 +1,6 @@
 package com.siriusdb.master.server;
 
-import com.siriusdb.common.thrift.UserService;
+import com.siriusdb.thrift.UserService;
 import com.siriusdb.master.rpc.UserServiceImpl;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.server.TServer;

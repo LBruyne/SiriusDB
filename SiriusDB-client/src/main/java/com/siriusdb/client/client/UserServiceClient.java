@@ -1,6 +1,6 @@
 package com.siriusdb.client.client;
 
-import com.siriusdb.common.thrift.UserService;
+import com.siriusdb.thrift.UserService;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
