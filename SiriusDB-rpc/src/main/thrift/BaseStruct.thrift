@@ -1,4 +1,4 @@
-namespace java com.siriusdb.rpc.thrift
+namespace java com.siriusdb.thrift
 
 struct TrafficEnv {
     1: bool Open = false,

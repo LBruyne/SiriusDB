@@ -1,6 +1,6 @@
 package com.siriusdb.master.rpc;
 
-import com.siriusdb.common.thrift.UserService;
+import com.siriusdb.thrift.UserService;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,5 +27,4 @@ public class UserServiceImpl implements UserService.Iface {
         logger.info("receive isExist, name = {}", name);
         return NAME.equals(name);
     }
-
 }

@@ -1,4 +1,4 @@
-package com.bytedance.system.plm.utils.time;
+package com.siriusdb.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
