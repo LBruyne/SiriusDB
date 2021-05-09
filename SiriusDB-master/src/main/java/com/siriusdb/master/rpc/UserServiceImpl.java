@@ -27,5 +27,4 @@ public class UserServiceImpl implements UserService.Iface {
         logger.info("receive isExist, name = {}", name);
         return NAME.equals(name);
     }
-
 }
