@@ -5,5 +5,5 @@ package com.siriusdb.annotation;
  * @author: liuxuanming
  * @date: 2021/05/09 10:01 下午
  */
-public class MyAnnotation {
+public @interface MyAnnotation {
 }
