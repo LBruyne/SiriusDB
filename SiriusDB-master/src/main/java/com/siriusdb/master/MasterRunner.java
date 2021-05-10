@@ -1,6 +1,6 @@
 package com.siriusdb.master;
 
-import com.siriusdb.master.server.UserServiceServer;
+import com.siriusdb.master.biz.MasterServerManager;
 
 /**
  * @Description: Master服务启动入口
@@ -18,12 +18,14 @@ public class MasterRunner {
      * 4. 接收客户端的请求，返回需要的元数据
      * 5. (Optional)在3中获得消息后，与相应的服务器进行联系，执行容错容灾、副本复制等策略
      *
+     * 解决方案设计：
+     * 设计两个线程，第一个线程在启动时向ZooKeeper发送请求，获得ZNODE目录下的信息并且持续监控，如果发生了目录的变化则执行回调函数，处理相应策略。
+     * 策略主要包含两个方面，分别是3、5。第二个线程负责监听RPC端口，接收客户端的请求，返回需要的元数据。
+     *
      * @param args
      */
     public static void main(String args[]) {
-        System.out.println("Hello Master!");
-
-        UserServiceServer serviceServer = new UserServiceServer();
-        serviceServer.startServer();
+        MasterServerManager masterServerManager = new MasterServerManager();
+        masterServerManager.run();
     }
 }

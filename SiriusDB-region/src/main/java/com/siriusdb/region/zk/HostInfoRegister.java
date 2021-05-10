@@ -28,6 +28,10 @@ public class HostInfoRegister implements Runnable {
         zk = new ZooKeeper(UtilConstant.ZOOKEEPER_HOST, 10000,null);
     }
 
+    /**
+     * 实现Runnable.run方法
+     * 作为单独线程运行
+     */
     @Override
     public void run() {
         try {
