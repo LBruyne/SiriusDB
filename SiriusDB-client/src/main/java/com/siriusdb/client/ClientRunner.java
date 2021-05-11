@@ -1,10 +1,9 @@
 package com.siriusdb.client;
 
-import com.siriusdb.client.client.UserServiceClient;
+import com.siriusdb.client.rpc.client.BasicServiceClient;
+import com.siriusdb.client.rpc.client.UserServiceClient;
 import com.siriusdb.client.db.api.ServiceImpl;
 import com.siriusdb.client.db.manager.IndexManager;
-
-import javax.annotation.Resource;
 
 /**
  * @Description: 分布式数据库客户端入口
@@ -19,7 +18,7 @@ public class ClientRunner {
         IndexManager im = new IndexManager();
         im.hello();
 
-        UserServiceClient serviceClient = new UserServiceClient();
-        serviceClient.startClient("LIUXUANMING");
+        UserServiceClient client = new UserServiceClient();
+        client.testUserService();
     }
 }

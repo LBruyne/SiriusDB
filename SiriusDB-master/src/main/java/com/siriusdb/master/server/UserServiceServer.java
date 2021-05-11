@@ -1,5 +1,6 @@
 package com.siriusdb.master.server;
 
+import com.siriusdb.common.MasterServerConstant;
 import com.siriusdb.master.rpc.UserServiceImpl;
 import com.siriusdb.thrift.UserService;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -23,7 +24,7 @@ public class UserServiceServer {
     public void startServer() {
         UserService.Processor processor = new UserService.Processor<UserService.Iface>(new UserServiceImpl());
         try {
-            TServerTransport transport = new TServerSocket(2345);
+            TServerTransport transport = new TServerSocket(MasterServerConstant.RPC_LISTEN_PORT);
             TThreadPoolServer.Args tArgs = new TThreadPoolServer.Args(transport);
             tArgs.processor(processor);
             tArgs.protocolFactory(new TBinaryProtocol.Factory());

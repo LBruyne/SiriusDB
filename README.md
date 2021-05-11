@@ -38,6 +38,8 @@ public class ServiceImpl implements IService {
 
 ### 类、接口、枚举等数据模型定义的注释
 
+和这个类似即可，不一定需要写明author之类的。能分得清哪些是谁写的就好，比如在Class上面注明作者，这样就知道整个类是一个人完成的。
+
 ```java
 /**
  * @Description: 用途描述

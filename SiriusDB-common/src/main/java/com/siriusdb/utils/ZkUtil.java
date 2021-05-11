@@ -1,6 +1,7 @@
 package com.siriusdb.utils;
 
 import com.siriusdb.common.UtilConstant;
+import com.siriusdb.common.ZkConstant;
 
 import java.lang.reflect.UndeclaredThrowableException;
 
@@ -16,7 +17,7 @@ public class ZkUtil {
      * @author: liuxuanming
      */
     public static String getRegisterPath() {
-        return UtilConstant.ZNODE + "/" + UtilConstant.HOST_NAME_PREFIX + System.getenv().get("USER");
+        return ZkConstant.ZNODE + "/" + ZkConstant.HOST_NAME_PREFIX + System.getenv().get("USER");
     }
     
     /**
