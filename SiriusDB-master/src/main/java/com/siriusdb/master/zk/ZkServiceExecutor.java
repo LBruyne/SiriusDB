@@ -1,6 +1,7 @@
 package com.siriusdb.master.zk;
 
 import com.siriusdb.common.UtilConstant;
+import com.siriusdb.common.ZkConstant;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
@@ -30,7 +31,7 @@ public class ZkServiceExecutor implements Watcher, Runnable, RegionServerMonitor
      */
     public ZkServiceExecutor() {
         try {
-            zk = new ZooKeeper(UtilConstant.ZOOKEEPER_HOST, 300000, this);
+            zk = new ZooKeeper(ZkConstant.ZOOKEEPER_HOST, ZkConstant.ZK_SESSION_TIMEOUT, this);
             regionServerMonitor = new RegionServerMonitor(zk, null, this);
         } catch (IOException e) {
             logger.warn(e.getMessage(), e);

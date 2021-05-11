@@ -1,6 +1,7 @@
 package com.siriusdb.master.zk;
 
 import com.siriusdb.common.UtilConstant;
+import com.siriusdb.common.ZkConstant;
 import org.apache.zookeeper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class RegionServerMonitor implements Watcher, AsyncCallback.ChildrenCallb
          * 设置本对象为监控对象，回调对象也是本对象。
          * 以后均是事件驱动。
          */
-        zk.getChildren(UtilConstant.ZNODE, true, this, null);
+        zk.getChildren(ZkConstant.ZNODE, true, this, null);
     }
 
     /**
@@ -85,7 +86,7 @@ public class RegionServerMonitor implements Watcher, AsyncCallback.ChildrenCallb
                 return;
             default:
                 // Retry errors
-                zk.getChildren(UtilConstant.ZNODE, true, this, null);
+                zk.getChildren(ZkConstant.ZNODE, true, this, null);
                 return;
         }
 
@@ -94,7 +95,7 @@ public class RegionServerMonitor implements Watcher, AsyncCallback.ChildrenCallb
         // 如果存在，再次查询到最新children，此时仅查询，不要设置监控了
         if (exists) {
             try {
-                serverInfos = zk.getChildren(UtilConstant.ZNODE, null);
+                serverInfos = zk.getChildren(ZkConstant.ZNODE, null);
             } catch (KeeperException e) {
                 // We don't need to worry about recovering now. The watch
                 // callbacks will kick off any exception handling
@@ -137,9 +138,9 @@ public class RegionServerMonitor implements Watcher, AsyncCallback.ChildrenCallb
                     break;
             }
         } else {
-            if (path != null && path.equals(UtilConstant.ZNODE)) {
+            if (path != null && path.equals(ZkConstant.ZNODE)) {
                 // Something has changed on the node, let's find out
-                zk.getChildren(UtilConstant.ZNODE, true, this, null);
+                zk.getChildren(ZkConstant.ZNODE, true, this, null);
             }
         }
         if (chainedWatcher != null) {

@@ -1,5 +1,6 @@
 package com.siriusdb.region.zk;
 
+import com.siriusdb.common.ZkConstant;
 import com.siriusdb.utils.ZkUtil;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -25,7 +26,7 @@ public class HostInfoRegister implements Runnable {
     private ZooKeeper zk;
 
     public HostInfoRegister() throws IOException {
-        zk = new ZooKeeper(UtilConstant.ZOOKEEPER_HOST, 10000,null);
+        zk = new ZooKeeper(ZkConstant.ZOOKEEPER_HOST, 10000,null);
     }
 
     /**
@@ -53,14 +54,14 @@ public class HostInfoRegister implements Runnable {
      */
     private String createEphemeralNode() throws KeeperException, InterruptedException {
         // 如果根节点不存在，则创建根节点
-        Stat stat = zk.exists(UtilConstant.ZNODE, false);
+        Stat stat = zk.exists(ZkConstant.ZNODE, false);
         if (stat == null) {
-            zk.create(UtilConstant.ZNODE, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+            zk.create(ZkConstant.ZNODE, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
 
         // 创建EPHEMERAL类型节点
         String path = zk.create(ZkUtil.getRegisterPath(),
-                UtilConstant.hostUrl.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+                UtilConstant.HOST_URL.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
         return path;
     }
 }

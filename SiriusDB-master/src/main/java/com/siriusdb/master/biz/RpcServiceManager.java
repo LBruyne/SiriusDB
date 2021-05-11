@@ -1,5 +1,6 @@
 package com.siriusdb.master.biz;
 
+import com.siriusdb.master.server.UserServiceServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,7 @@ public class RpcServiceManager {
      * 启动应用时，开始等待，收到客户机的请求时返回相应数据。
      */
     public void startService() {
-
+        UserServiceServer userServiceServer = new UserServiceServer();
+        userServiceServer.startServer();
     }
 }
