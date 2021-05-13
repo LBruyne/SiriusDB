@@ -18,13 +18,13 @@ public class UserServiceImpl implements UserService.Iface {
 
     @Override
     public String getName(int id) throws TException {
-        logger.warn("received getName, id = {}:", id);
+        logger.warn("方法 getName 接收到数据, id = {}:", id);
         return NAME;
     }
 
     @Override
     public boolean isExist(String name) throws TException {
-        logger.warn("receive isExist, name = {}", name);
+        logger.warn("方法 isExist 接收到数据, name = {}", name);
         return NAME.equals(name);
     }
 }

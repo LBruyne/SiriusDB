@@ -59,7 +59,9 @@ public class ServiceImpl implements IService {
 
 ### 异常处理
 
-对于业务逻辑中有可能出现Exception的代码片段，应该用try catch进行包围，不推荐使用throws作用于方法签名上
+对于业务逻辑中有可能出现Exception的代码片段，应该用try catch进行包围，不推荐使用throws作用于方法签名上。
+
+在一些局部的功能性方法上可以throws出异常，然后在业务逻辑中处理。
 
 ### 代码提交规范（重要）
 

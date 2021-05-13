@@ -1,6 +1,8 @@
 package com.siriusdb.master.biz;
 
-import com.siriusdb.master.server.UserServiceServer;
+import com.siriusdb.master.rpc.server.UserServiceImpl;
+import com.siriusdb.master.rpc.server.UserServiceServer;
+import com.siriusdb.thrift.UserService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -15,8 +17,12 @@ public class RpcServiceManager {
      * 启动应用时，开始等待，收到客户机的请求时返回相应数据。
      */
     public void startService() {
-        log.warn("RPC服务启动：UserSeviceServer");
-        UserServiceServer userServiceServer = new UserServiceServer();
-        userServiceServer.startServer();
+        try {
+            UserServiceServer userServiceServer = new UserServiceServer(
+                    new UserService.Processor<>(new UserServiceImpl()));
+            userServiceServer.startServer();
+        } catch (Exception e) {
+            log.warn(e.getMessage(), e);
+        }
     }
 }
