@@ -23,7 +23,23 @@ public class ZkConstant {
     public static final String ZOOKEEPER_HOST = "127.0.0.1:2181";
 
     /**
-     * ZooKeeper Session 超市时间
+     * ZooKeeper会话超时时间
      */
-    public static final Integer ZK_SESSION_TIMEOUT = 300000;
+    public static final Integer ZK_SESSION_TIMEOUT = 3000;
+
+    /**
+     * ZooKeeper连接超时时间
+     */
+    public static final Integer ZK_CONNECTION_TIMEOUT = 3000;
+
+    /**
+     * ZooKeeper最多重新尝试连接次数
+     */
+    public static final int ZK_MAX_RETRIES = 1;
+
+    /**
+     * ZooKeeper尝试连接间隔时间
+     */
+    public static final int ZK_BASE_SLEEP_TIME = 1000;
+
 }

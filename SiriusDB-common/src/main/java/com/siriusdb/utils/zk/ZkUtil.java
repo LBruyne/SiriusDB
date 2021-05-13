@@ -1,7 +1,8 @@
-package com.siriusdb.utils;
+package com.siriusdb.utils.zk;
 
 import com.siriusdb.common.UtilConstant;
 import com.siriusdb.common.ZkConstant;
+import org.apache.curator.retry.ExponentialBackoffRetry;
 
 import java.lang.reflect.UndeclaredThrowableException;
 
@@ -11,6 +12,10 @@ import java.lang.reflect.UndeclaredThrowableException;
  * @date: 2021/05/10 3:33 下午
  */
 public class ZkUtil {
+
+    public static String getRegisterHolderPath() {
+        return ZkConstant.ZNODE;
+    }
 
     /**
      * @description: 获取Zookeeper注册的路径
@@ -27,4 +32,10 @@ public class ZkUtil {
     public static String getHostname() {
         return System.getenv().get("USERNAME");
     }
+
+    /**
+     * @description: ZooKeeper重连接策略
+     * @author: liuxuanming
+     */
+    public static ExponentialBackoffRetry getRetryStrategy() { return new ExponentialBackoffRetry(ZkConstant.ZK_BASE_SLEEP_TIME, ZkConstant.ZK_MAX_RETRIES); }
 }

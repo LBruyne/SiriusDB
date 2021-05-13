@@ -1,7 +1,7 @@
 package com.siriusdb.master.server;
 
 import com.siriusdb.common.MasterServerConstant;
-import com.siriusdb.master.rpc.UserServiceImpl;
+import com.siriusdb.master.rpc.server.UserServiceImpl;
 import com.siriusdb.thrift.UserService;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.server.TServer;
@@ -34,7 +34,7 @@ public class UserServiceServer {
             TServer server = new TThreadPoolServer(tArgs);
             server.serve();
         } catch (Exception e) {
-            logger.error("thrift服务启动失败", e);
+            logger.warn("Thrift服务启动失败", e);
         }
     }
 }

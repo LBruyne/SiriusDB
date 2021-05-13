@@ -1,4 +1,4 @@
-package com.siriusdb.utils;
+package com.siriusdb.utils.time;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

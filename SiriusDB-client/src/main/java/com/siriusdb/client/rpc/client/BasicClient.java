@@ -8,20 +8,17 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Resource;
 
 /**
  * @Description: 基本服务客户端
  * @author: liuxuanming
  * @date: 2021/05/11 2:29 下午
  */
-public class BasicServiceClient<T> {
+public class BasicClient<T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(BasicServiceClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(BasicClient.class);
 
     T client;
 
@@ -31,7 +28,8 @@ public class BasicServiceClient<T> {
      * 初始化客户端
      * 默认使用TBinaryProtocol，连接对象为Master Server
      */
-    public BasicServiceClient() {
+    @SuppressWarnings("unchecked")
+    public BasicClient() {
 
         // 初始化客户端
         try {
@@ -52,7 +50,8 @@ public class BasicServiceClient<T> {
      * @param ip
      * @param port
      */
-    public BasicServiceClient(String ip, Integer port) {
+    @SuppressWarnings("unchecked")
+    public BasicClient(String ip, Integer port) {
 
         // 初始化客户端
         try {
@@ -73,7 +72,8 @@ public class BasicServiceClient<T> {
      * @param ip
      * @param port
      */
-    public BasicServiceClient(String ip, Integer port, TProtocol protocol) {
+    @SuppressWarnings("unchecked")
+    public BasicClient(String ip, Integer port, TProtocol protocol) {
 
         // 初始化客户端
         try {
