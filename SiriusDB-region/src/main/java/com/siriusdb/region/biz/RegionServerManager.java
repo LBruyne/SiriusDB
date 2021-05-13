@@ -1,5 +1,6 @@
 package com.siriusdb.region.biz;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,20 +9,24 @@ import org.slf4j.LoggerFactory;
  * @author: liuxuanming
  * @date: 2021/05/09 10:00 下午
  */
+@Slf4j
 public class RegionServerManager {
-
-    private final static Logger logger = LoggerFactory.getLogger(RegionServerManager.class);
 
     private BufferManager bufferManager;
 
     private ZkServiceManager zkServiceManager;
 
-    public void run() {
-        System.out.println("Hello Region!");
+    public RegionServerManager() {
+        bufferManager = new BufferManager();
+        zkServiceManager = new ZkServiceManager();
+    }
 
+    public void run() {
         // 线程1：在应用启动的时候自动将本机的Host信息注册到ZooKeeper，然后阻塞，直到应用退出的时候也同时退出
-        zkServiceManager.serviceRegister();
+        Thread zkServiceThread = new Thread(zkServiceManager);
+        zkServiceThread.start();
 
         // 主线程：
+        System.out.println("111");
     }
 }

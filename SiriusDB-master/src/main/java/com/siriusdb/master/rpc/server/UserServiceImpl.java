@@ -1,4 +1,4 @@
-package com.siriusdb.master.rpc;
+package com.siriusdb.master.rpc.server;
 
 import com.siriusdb.thrift.UserService;
 import org.apache.thrift.TException;
@@ -18,13 +18,13 @@ public class UserServiceImpl implements UserService.Iface {
 
     @Override
     public String getName(int id) throws TException {
-        logger.info("received getName, id = {}:", id);
+        logger.warn("received getName, id = {}:", id);
         return NAME;
     }
 
     @Override
     public boolean isExist(String name) throws TException {
-        logger.info("receive isExist, name = {}", name);
+        logger.warn("receive isExist, name = {}", name);
         return NAME.equals(name);
     }
 }

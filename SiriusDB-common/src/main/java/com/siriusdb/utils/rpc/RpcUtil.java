@@ -1,4 +1,4 @@
-package com.siriusdb.utils;
+package com.siriusdb.utils.rpc;
 
 import org.apache.thrift.transport.TTransport;
 
