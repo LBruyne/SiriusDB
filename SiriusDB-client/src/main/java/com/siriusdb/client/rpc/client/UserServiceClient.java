@@ -1,28 +1,24 @@
 package com.siriusdb.client.rpc.client;
 
 import com.siriusdb.thrift.UserService;
+import com.siriusdb.utils.rpc.DynamicThriftClient;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @Description: UserService客户端
  * @author: liuxuanming
  * @date: 2021/05/09 11:10 上午
  */
-public class UserServiceClient extends BasicClient<UserService.Iface> {
+@Slf4j
+public class UserServiceClient extends DynamicThriftClient<UserService.Client> {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceClient.class);
-
-    /**
-     * 外部方法调用 测试
-     */
-    public void testUserService() {
-        try {
-            System.out.println(client.getName(1));
-            System.out.println(client.isExist("LIUXUANMING"));
-        } catch (TException e) {
-            logger.warn(e.getMessage(), e);
-        }
+    public UserServiceClient(Class<UserService.Client> ts) {
+        super(ts);
     }
+
+    public UserServiceClient(Class<UserService.Client> ts, String ip, Integer port) {
+        super(ts, ip, port);
+    }
+
 }
