@@ -17,4 +17,9 @@ public class UtilConstant {
      */
     public static final Integer RPC_TIMEOUT = 3000;
 
+    /**
+     * 表格数据请求中，代表请求所有表格数据的字段
+     */
+    public static final String ALL_TABLE_INFO = "ALL";
+
 }
