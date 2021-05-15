@@ -1,4 +1,4 @@
-namespace java com.siriusdb.thrift
+namespace java com.siriusdb.thrift.service
 
 service  UserService {
   string getName(1:i32 id)

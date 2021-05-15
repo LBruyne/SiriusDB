@@ -1,4 +1,4 @@
-namespace java com.siriusdb.thrift
+namespace java com.siriusdb.thrift.model
 
 struct Base {
     1: string caller = "",
@@ -7,6 +7,6 @@ struct Base {
 }
 
 struct BaseResp {
-    1: string message = "",
+    1: string desc = "",
     2: i32 code = 0,
 }
