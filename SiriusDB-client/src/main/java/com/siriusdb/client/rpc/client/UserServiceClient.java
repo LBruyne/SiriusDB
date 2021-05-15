@@ -1,6 +1,6 @@
 package com.siriusdb.client.rpc.client;
 
-import com.siriusdb.thrift.UserService;
+import com.siriusdb.thrift.service.UserService;
 import com.siriusdb.utils.rpc.DynamicThriftClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;

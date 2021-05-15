@@ -3,7 +3,6 @@ package com.siriusdb.utils.zk;
 import com.siriusdb.common.ZkConstant;
 import com.siriusdb.enums.ErrorCodeEnum;
 import com.siriusdb.exception.BasicBusinessException;
-import com.siriusdb.utils.zk.ZkUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;

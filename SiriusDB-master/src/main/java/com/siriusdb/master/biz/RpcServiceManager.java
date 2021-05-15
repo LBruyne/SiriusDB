@@ -2,7 +2,7 @@ package com.siriusdb.master.biz;
 
 import com.siriusdb.master.rpc.server.UserServiceImpl;
 import com.siriusdb.master.rpc.server.UserServiceServer;
-import com.siriusdb.thrift.UserService;
+import com.siriusdb.thrift.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
