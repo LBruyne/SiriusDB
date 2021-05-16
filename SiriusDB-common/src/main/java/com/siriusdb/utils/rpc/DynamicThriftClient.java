@@ -1,6 +1,6 @@
 package com.siriusdb.utils.rpc;
 
-import com.siriusdb.common.MasterServerConstant;
+import com.siriusdb.common.MasterConstant;
 import com.siriusdb.common.UtilConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
@@ -53,7 +53,7 @@ public abstract class DynamicThriftClient<T> {
      */
     @SuppressWarnings("unchecked")
     public DynamicThriftClient(Class<T> ts) {
-        initClient(ts, MasterServerConstant.MASTER_SERVER_IP, MasterServerConstant.MASTER_SERVER_PORT);
+        initClient(ts, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
     }
 
     /**

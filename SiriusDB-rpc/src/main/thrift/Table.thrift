@@ -1,4 +1,4 @@
-include "BaseStruct.thrift"
+include "Base.thrift"
 namespace java com.siriusdb.thrift.model
 
 /**
@@ -31,7 +31,7 @@ struct TableDataDetail {
  */
 struct QueryTableDataRequest {
     1: required list<string> tableName,
-    255: required BaseStruct.Base Base,
+    255: required Base.Base Base,
 }
 
 /**
@@ -39,5 +39,5 @@ struct QueryTableDataRequest {
  */
 struct QueryTableDataResponse {
     1: optional list<TableDataDetail> tableData,
-    255: required BaseStruct.BaseResp BaseResp,
+    255: required Base.BaseResp BaseResp
 }
