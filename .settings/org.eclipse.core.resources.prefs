@@ -1,0 +1,9 @@
+eclipse.preferences.version=1
+encoding//SiriusDB-master/src/main/java/com/siriusdb/master/biz/MasterServerManager.java=UTF-8
+encoding//SiriusDB-master/src/main/java/com/siriusdb/master/biz/RpcServiceManager.java=UTF-8
+encoding//SiriusDB-master/src/main/java/com/siriusdb/master/biz/ZkServiceManager.java=UTF-8
+encoding//SiriusDB-master/src/main/java/com/siriusdb/master/biz/zk/ServiceStrategyManager.java=UTF-8
+encoding//SiriusDB-master/src/main/java/com/siriusdb/master/biz/zk/ZkServiceMonitor.java=UTF-8
+encoding//SiriusDB-region/src/main/java/com/siriusdb/region/RegionRunner.java=UTF-8
+encoding//SiriusDB-region/src/main/java/com/siriusdb/region/biz/BufferManager.java=UTF-16
+encoding//SiriusDB-region/src/main/java/com/siriusdb/region/biz/RegionServerManager.java=UTF-8
