@@ -1,4 +1,4 @@
-include "BaseStruct.thrift"
+include "Base.thrift"
 namespace java com.siriusdb.thrift.model
 
 /**
@@ -7,7 +7,7 @@ namespace java com.siriusdb.thrift.model
 struct ColumnMetaInfo {
     1: required i32 id
     2: required string name,
-    3: required string type,
+    3: required string type
 }
 
 /**
@@ -26,7 +26,7 @@ struct TableMetaInfoDetail {
  */
 struct QueryTableMetaInfoRequest {
     2: required list<string> tableName,
-    255: required BaseStruct.Base Base,
+    255: required Base.Base Base
 }
 
 /**
@@ -34,5 +34,5 @@ struct QueryTableMetaInfoRequest {
  */
 struct QueryTableMetaInfoResponse {
     1: optional list<TableMetaInfoDetail> tableMetaInfo,
-    255: required BaseStruct.BaseResp BaseResp,
+    255: required Base.BaseResp BaseResp
 }

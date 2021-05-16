@@ -10,7 +10,8 @@ import org.omg.CORBA.PUBLIC_MEMBER;
 public class MasterServerConstant {
 
     /**
-     * 发送RPC请求到Master Server需要访问的IP
+     * 发送RPC请求到Master Server需要访问的IP,
+     * TODO：部署时修改为真实的
      */
     public static final String MASTER_SERVER_IP = "127.0.0.1";
 

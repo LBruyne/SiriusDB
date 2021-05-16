@@ -1,10 +1,7 @@
 package com.siriusdb.utils.zk;
 
-import com.siriusdb.common.UtilConstant;
 import com.siriusdb.common.ZkConstant;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-
-import java.lang.reflect.UndeclaredThrowableException;
 
 /**
  * @Description: 工具类，获取本机节点名等信息
@@ -30,7 +27,7 @@ public class ZkUtil {
      * @author: liuxuanming
      */
     public static String getHostname() {
-        return System.getenv().get("USERNAME");
+        return System.getenv().get("USER");
     }
 
     /**

@@ -8,7 +8,8 @@ package com.siriusdb.common;
 public class UtilConstant {
 
     /**
-     * 本机主机名，修改为真实的
+     * 本机主机地址
+     * TODO：部署时修改为真实的
      */
     public static final String HOST_URL = "192.168.0.1:2345";
 
@@ -18,8 +19,14 @@ public class UtilConstant {
     public static final Integer RPC_TIMEOUT = 3000;
 
     /**
-     * 表格数据请求中，代表请求所有表格数据的字段
+     * 表格数据请求中，代表请求所有表格数据
      */
-    public static final String ALL_TABLE_INFO = "ALL";
+    public static final String ALL_TABLE = "ALL";
+
+    /**
+     * 表格数据请求中，代表所有列数据
+     */
+    public static final String ALL_COLUMN = "ALL";
+
 
 }
