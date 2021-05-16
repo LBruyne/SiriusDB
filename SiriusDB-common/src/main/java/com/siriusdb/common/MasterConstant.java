@@ -7,7 +7,7 @@ import org.omg.CORBA.PUBLIC_MEMBER;
  * @author: liuxuanming
  * @date: 2021/05/11 1:49 下午
  */
-public class MasterServerConstant {
+public class MasterConstant {
 
     /**
      * 发送RPC请求到Master Server需要访问的IP,

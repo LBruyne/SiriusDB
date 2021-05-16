@@ -1,6 +1,6 @@
 package com.siriusdb.utils.rpc;
 
-import com.siriusdb.common.MasterServerConstant;
+import com.siriusdb.common.MasterConstant;
 import com.siriusdb.enums.ErrorCodeEnum;
 import com.siriusdb.exception.BasicBusinessException;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +51,7 @@ public abstract class DynamicThriftServer {
      * @throws TTransportException
      */
     public DynamicThriftServer(TProcessor processor) throws TTransportException {
-        initServer(processor, MasterServerConstant.RPC_LISTEN_PORT);
+        initServer(processor, MasterConstant.RPC_LISTEN_PORT);
     }
 
     /**
