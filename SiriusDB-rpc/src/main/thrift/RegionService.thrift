@@ -4,7 +4,7 @@ include "Operation.thrift"
 
 namespace java com.siriusdb.thrift.service
 
-service RegionServerService {
+service RegionService {
 
     /**
      * 根据表格名查询表格实际数据

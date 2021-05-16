@@ -2,7 +2,7 @@ package com.siriusdb.master.rpc.server;
 
 import com.siriusdb.thrift.model.QueryTableMetaInfoRequest;
 import com.siriusdb.thrift.model.QueryTableMetaInfoResponse;
-import com.siriusdb.thrift.service.MasterServerService;
+import com.siriusdb.thrift.service.MasterService;
 import org.apache.thrift.TException;
 
 /**
@@ -10,7 +10,7 @@ import org.apache.thrift.TException;
  * @author: liuxuanming
  * @date: 2021/05/16 11:17 上午
  */
-public class MasterServiceImpl implements MasterServerService.Iface {
+public class MasterServiceImpl implements MasterService.Iface {
 
     @Override
     public QueryTableMetaInfoResponse queryTableMeta(QueryTableMetaInfoRequest req) throws TException {

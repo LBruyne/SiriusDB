@@ -28,5 +28,12 @@ public class UtilConstant {
      */
     public static final String ALL_COLUMN = "ALL";
 
+    /**
+     * 获得本机名称
+     * @return
+     */
+    public static String getHostname() {
+        return System.getenv().get("USER");
+    }
 
 }
