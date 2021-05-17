@@ -9,7 +9,7 @@ service RegionService {
     /**
      * 根据表格名查询表格实际数据
      */
-    Table.QueryTableDataResponse queryTableData(1: Table.QueryTableDataResponse req),
+    Table.QueryTableDataResponse queryTableData(1: Table.QueryTableDataRequest req),
 
     /**
      * 根据表格名查询表格元数据
@@ -24,6 +24,6 @@ service RegionService {
     /**
      * 执行从A服务器到B服务器复制特定表格的数据
      */
-    Operation.ExecDataCopyRequest execDataCopy(1: Operation.ExecDataCopyResponse req)
+    Operation.ExecDataCopyResponse execDataCopy(1: Operation.ExecDataCopyRequest req)
 
 }

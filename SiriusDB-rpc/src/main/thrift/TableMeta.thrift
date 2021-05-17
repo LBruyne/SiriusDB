@@ -5,7 +5,7 @@ namespace java com.siriusdb.thrift.model
  * 表格中每一列（属性）的数据结构
  */
 struct ColumnMetaInfo {
-    1: required i32 id
+    1: required i32 id,
     2: required string name,
     3: required string type
 }
@@ -26,7 +26,7 @@ struct TableMetaInfoDetail {
  */
 struct QueryTableMetaInfoRequest {
     2: required list<string> tableName,
-    255: required Base.Base Base
+    255: required Base.Base base
 }
 
 /**
@@ -34,5 +34,5 @@ struct QueryTableMetaInfoRequest {
  */
 struct QueryTableMetaInfoResponse {
     1: optional list<TableMetaInfoDetail> tableMetaInfo,
-    255: required Base.BaseResp BaseResp
+    255: required Base.BaseResp baseResp
 }

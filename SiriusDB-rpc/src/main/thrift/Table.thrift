@@ -31,7 +31,7 @@ struct TableDataDetail {
  */
 struct QueryTableDataRequest {
     1: required list<string> tableName,
-    255: required Base.Base Base,
+    255: required Base.Base base,
 }
 
 /**
@@ -39,5 +39,5 @@ struct QueryTableDataRequest {
  */
 struct QueryTableDataResponse {
     1: optional list<TableDataDetail> tableData,
-    255: required Base.BaseResp BaseResp
+    255: required Base.BaseResp baseResp
 }

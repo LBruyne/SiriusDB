@@ -1,5 +1,8 @@
 package com.siriusdb.model;
 
+import lombok.Data;
+
+@Data
 public class Index {
     //.. 描述一张表格的一个索引的情况，更多具体的内容请IndexManager编写人员负责补充完善
     //此处只列举RecordManager必需的

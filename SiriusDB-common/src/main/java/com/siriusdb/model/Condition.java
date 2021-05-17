@@ -1,5 +1,8 @@
 package com.siriusdb.model;
 import com.siriusdb.enums.PredicateManagerEnum;
+import lombok.Data;
+
+@Data
 public class Condition {
     private String formerTableName, latterTableName;
     private Attribute formAttribute, latterAttribute;
