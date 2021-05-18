@@ -1,4 +1,4 @@
-package com.siriusdb.model;
+package com.siriusdb.model.db;
 
 import lombok.Data;
 

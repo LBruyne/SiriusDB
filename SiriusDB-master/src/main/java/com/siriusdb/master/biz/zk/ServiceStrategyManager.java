@@ -1,18 +1,10 @@
 package com.siriusdb.master.biz.zk;
 
-import com.siriusdb.common.UtilConstant;
-import com.siriusdb.master.rpc.client.RegionServiceClient;
-import com.siriusdb.model.HostUrl;
-import com.siriusdb.thrift.model.Base;
-import com.siriusdb.thrift.model.QueryTableMetaInfoRequest;
-import com.siriusdb.thrift.service.RegionService;
+import com.siriusdb.enums.ErrorCodeEnum;
+import com.siriusdb.enums.StrategyTypeEnum;
+import com.siriusdb.exception.BasicBusinessException;
+import com.siriusdb.model.master.DataServer;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @Description: 根据ZooKeeper监视器得到的各种事件实行相应的策略
@@ -22,41 +14,69 @@ import java.util.stream.Stream;
 @Slf4j
 public class ServiceStrategyManager {
 
-    private static Map<String, String> dataServerInfo = new HashMap<>();
+    ServiceStrategyExecutor strategyExecutor;
 
-    public static Map<String, String> getDataServerInfo() {
-        return dataServerInfo;
+    public ServiceStrategyManager() {
+        strategyExecutor = new ServiceStrategyExecutor();
     }
 
-    public void addDataServer(String hostName, String hostUrl) {
+    /**
+     * 处理服务器节点出现事件
+     *
+     * @param hostName
+     * @param hostUrl
+     */
+    public void eventServerAppear(String hostName, String hostUrl) {
         log.warn("新增服务器节点：主机名 {}, 地址 {}", hostName, hostUrl);
-        dataServerInfo.put(hostName, hostUrl);
-        getMetaInfoFromRegionServer(hostName, hostUrl);
+        DataServer thisServer;
+        if (ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName) != null) {
+            // 该服务器已经存在，即从失效状态中恢复
+            thisServer = ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName);
+            thisServer.serverRecover();
+            log.warn("对该服务器{}执行恢复策略", hostName);
+            strategyExecutor.exceStrategy(thisServer, StrategyTypeEnum.RECOVER);
+        } else {
+            // 新发现的服务器，新增一份数据
+            ServiceStrategyExecutor.DataHolder.addServer(hostName, hostUrl);
+            thisServer = ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName);
+            log.warn("对该服务器{}执行新增策略", hostName);
+            strategyExecutor.exceStrategy(thisServer, StrategyTypeEnum.NEW_COME);
+        }
     }
 
-    public void deleteDataServer(String hostName) {
+    /**
+     * 处理服务器节点失效事件
+     *
+     * @param hostName
+     */
+    public void eventServerDisappear(String hostName) {
         log.warn("删除服务器节点：主机名 {}", hostName);
-        dataServerInfo.remove(hostName);
+        DataServer thisServer;
+        if (ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName) == null) {
+            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "需要删除信息的服务器不存在于服务器列表中");
+        } else {
+            // 更新并处理下线的服务器
+            thisServer = ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName);
+            strategyExecutor.exceStrategy(thisServer, StrategyTypeEnum.INVALID);
+            thisServer.serverInvalid();
+        }
     }
 
-    public void updateDataServer(String hostName, String hostUrl) {
+    /**
+     * 处理服务器节点更新事件
+     *
+     * @param hostName
+     * @param hostUrl
+     */
+    public void eventServerUpdate(String hostName, String hostUrl) {
         log.warn("更新服务器节点：主机名 {}, 地址 {}", hostName, hostUrl);
-        dataServerInfo.replace(hostName, hostUrl);
-    }
-
-    private void getMetaInfoFromRegionServer(String hostName, String hostUrl) {
-        HostUrl targetUrl = HostUrl.parseHostUrl(hostUrl);
-        RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, targetUrl.getIp(), targetUrl.getPort());
-
-        // 构造请求对象
-        QueryTableMetaInfoRequest request = new QueryTableMetaInfoRequest();
-        request.setBase(new Base()
-                .setCaller(UtilConstant.getHostname())
-                .setHostName(hostName)
-                .setHostUrl(hostUrl))
-               .setTableName(Stream.of(UtilConstant.ALL_TABLE).collect(Collectors.toList()));
-
-        // 发起客户端调用，获取该服务器上所有表格的元数据
-        client.getTableMetaInfo(request);
+        DataServer thisServer;
+        if (ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName) == null) {
+            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "需要更新信息的服务器不存在于服务器列表中");
+        } else {
+            // 更新服务器的URL
+            thisServer = ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName);
+            thisServer.setHostUrl(hostUrl);
+        }
     }
 }

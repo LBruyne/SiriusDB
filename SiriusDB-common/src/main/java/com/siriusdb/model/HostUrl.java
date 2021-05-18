@@ -2,9 +2,6 @@ package com.siriusdb.model;
 
 import lombok.Data;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * @Description: 主机目标的数据结构
  * @author: liuxuanming

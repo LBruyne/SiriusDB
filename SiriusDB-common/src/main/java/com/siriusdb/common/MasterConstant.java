@@ -24,4 +24,9 @@ public class MasterConstant {
      * Master Server自身监听的RPC端口
      */
     public static final Integer RPC_LISTEN_PORT = 2345;
+
+    /**
+     * 主副本机标识：没有对偶机器
+     */
+    public static final Integer NO_DUAL_SERVER = -1;
 }

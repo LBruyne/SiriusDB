@@ -1,5 +1,5 @@
-package com.siriusdb.model;
-//import com.siriusdb.model.Attribute;
+package com.siriusdb.model.db;
+//import com.siriusdb.model.db.Attribute;
 import lombok.Data;
 
 import java.util.List;

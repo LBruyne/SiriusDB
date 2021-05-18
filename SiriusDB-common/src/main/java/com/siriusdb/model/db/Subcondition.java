@@ -1,4 +1,4 @@
-package com.siriusdb.model;
+package com.siriusdb.model.db;
 import com.siriusdb.enums.PredicateManagerEnum;
 import lombok.Data;
 

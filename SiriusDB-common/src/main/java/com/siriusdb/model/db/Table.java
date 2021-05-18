@@ -1,7 +1,13 @@
-package com.siriusdb.model;
+package com.siriusdb.model.db;
+
+import com.siriusdb.model.db.Attribute;
+import com.siriusdb.model.db.Index;
+import com.siriusdb.model.db.Row;
+import lombok.Data;
 
 import java.util.List;
 
+@Data
 public class Table {
     private String name;
     private List<Attribute> attributes;

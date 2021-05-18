@@ -1,9 +1,9 @@
 package com.siriusdb.client.db.manager;
 import com.siriusdb.client.db.api.IRecordManager;
-import com.siriusdb.model.RecordManagerResult;
-import com.siriusdb.model.Attribute;
-import com.siriusdb.model.Condition;
-import com.siriusdb.model.Table;
+import com.siriusdb.model.db.RecordManagerResult;
+import com.siriusdb.model.db.Attribute;
+import com.siriusdb.model.db.Condition;
+import com.siriusdb.model.db.Table;
 
 import java.util.List;
 
