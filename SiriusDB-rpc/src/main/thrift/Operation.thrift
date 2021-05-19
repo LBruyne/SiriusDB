@@ -35,3 +35,35 @@ struct ExecDataCopyRequest {
 struct ExecDataCopyResponse {
     255: required Base.BaseResp BaseResp,
 }
+
+/**
+ * 根据表格名服务器请求相应表格数据
+ */
+struct QueryTableDataRequest {
+    1: required list<string> tableName,
+    255: required Base.Base base,
+}
+
+/**
+ * 查询表格数据响应
+ */
+struct QueryTableDataResponse {
+    1: optional list<Table.VTable> tableData,
+    255: required Base.BaseResp baseResp
+}
+
+/**
+ * 根据表格名查询相应表格元数据
+ */
+struct QueryTableMetaInfoRequest {
+    1: required list<string> name,
+    255: required Base.Base base
+}
+
+/**
+ * 查询表格元数据响应
+ */
+struct QueryTableMetaInfoResponse {
+    1: optional list<TableMeta.VTableMeta> meta,
+    255: required Base.BaseResp baseResp
+}
