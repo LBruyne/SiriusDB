@@ -7,7 +7,7 @@ import com.siriusdb.enums.StrategyTypeEnum;
 import com.siriusdb.master.rpc.client.RegionServiceClient;
 import com.siriusdb.model.HostUrl;
 import com.siriusdb.model.master.DataServer;
-import com.siriusdb.model.master.TableMeta;
+import com.siriusdb.model.db.TableMeta;
 import com.siriusdb.thrift.model.Base;
 import com.siriusdb.thrift.model.QueryTableMetaInfoRequest;
 import com.siriusdb.thrift.service.RegionService;
@@ -141,7 +141,7 @@ public class ServiceStrategyExecutor {
             return getIdleServerNum() + getRunningServerNum();
         }
 
-        public static TableMeta findTableMetaInfo(String name) {
+        public static TableMeta findTable(String name) {
             TableMeta result = null;
             for (TableMeta item : DataHolder.tableMetaList) {
                 if (item.getName().equals(name)) {

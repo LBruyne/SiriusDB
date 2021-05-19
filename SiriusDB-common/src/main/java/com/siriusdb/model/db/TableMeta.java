@@ -1,4 +1,4 @@
-package com.siriusdb.model.master;
+package com.siriusdb.model.db;
 
 import com.siriusdb.model.db.Attribute;
 import lombok.Data;
