@@ -19,19 +19,3 @@ struct VTableMeta {
     3: required list<VAttribute> attributes,
     4: required string locatedServerName
 }
-
-/**
- * 根据表格名查询相应表格元数据
- */
-struct QueryTableMetaInfoRequest {
-    1: required list<string> name,
-    255: required Base.Base base
-}
-
-/**
- * 查询表格元数据响应
- */
-struct QueryTableMetaInfoResponse {
-    1: optional list<VTableMeta> meta,
-    255: required Base.BaseResp baseResp
-}

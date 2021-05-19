@@ -25,18 +25,3 @@ struct VTable {
     2: required list<VRow> rows
 }
 
-/**
- * 根据表格名服务器请求相应表格数据
- */
-struct QueryTableDataRequest {
-    1: required list<string> tableName,
-    255: required Base.Base base,
-}
-
-/**
- * 查询表格数据响应
- */
-struct QueryTableDataResponse {
-    1: optional list<VTable> tableData,
-    255: required Base.BaseResp baseResp
-}

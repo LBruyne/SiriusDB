@@ -1,5 +1,3 @@
-include "Table.thrift"
-include "TableMeta.thrift"
 include "Operation.thrift"
 
 namespace java com.siriusdb.thrift.service
@@ -9,12 +7,12 @@ service RegionService {
     /**
      * 根据表格名查询表格实际数据
      */
-    Table.QueryTableDataResponse queryTableData(1: Table.QueryTableDataRequest req),
+    Operation.QueryTableDataResponse queryTableData(1: Operation.QueryTableDataRequest req),
 
     /**
      * 根据表格名查询表格元数据
      */
-    TableMeta.QueryTableMetaInfoResponse queryTableMetaInfo(1: TableMeta.QueryTableMetaInfoRequest req),
+    Operation.QueryTableMetaInfoResponse queryTableMetaInfo(1: Operation.QueryTableMetaInfoRequest req),
 
     /**
      * 请求从A服务器到B服务器复制特定表格的数据
