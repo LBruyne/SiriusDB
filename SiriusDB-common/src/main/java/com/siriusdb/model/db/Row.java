@@ -6,5 +6,7 @@ import java.util.List;
 
 @Data
 public class Row {
-    private List<Attribute<?>> colData;
+
+    private List<Element<?>> elements;
+
 }

@@ -4,14 +4,14 @@ namespace java com.siriusdb.thrift.model
 /**
  * 数据表中每一行的数据结构
  */
-struct Row {
-    1: required list<Element> element
+struct VRow {
+    1: required list<VElement> elements
 }
 
 /**
  * 数据表中每个数据项的数据结构
  */
-struct Element {
+struct VElement {
     1: required i32 columnId,
     2: required string type,
     3: required string data
@@ -20,10 +20,9 @@ struct Element {
 /**
  * 表格元数据的数据结构
  */
-struct TableDataDetail {
-    1: required i32 id,
-    2: required string name,
-    3: required list<Row> rows
+struct VTable {
+    1: required string name,
+    2: required list<VRow> rows
 }
 
 /**
@@ -38,6 +37,6 @@ struct QueryTableDataRequest {
  * 查询表格数据响应
  */
 struct QueryTableDataResponse {
-    1: optional list<TableDataDetail> tableData,
+    1: optional list<VTable> tableData,
     255: required Base.BaseResp baseResp
 }

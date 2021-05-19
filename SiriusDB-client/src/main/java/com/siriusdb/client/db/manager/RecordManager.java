@@ -1,7 +1,6 @@
 package com.siriusdb.client.db.manager;
 import com.siriusdb.client.db.api.IRecordManager;
 import com.siriusdb.model.db.RecordManagerResult;
-import com.siriusdb.model.db.Attribute;
 import com.siriusdb.model.db.Condition;
 import com.siriusdb.model.db.Table;
 
@@ -13,6 +12,7 @@ import java.util.List;
  * @date: 2021/05/16 8:37 下午
  */
 public class RecordManager implements IRecordManager{
+    /*
     private Object data;
 
     public void ReacordManager() {
@@ -33,5 +33,7 @@ public class RecordManager implements IRecordManager{
                                   List<Condition> whereConditions){return null;}
 
     public RecordManagerResult<?> insert(Table table, List<Attribute<?>> values){return null;}
+
+     */
 
 }

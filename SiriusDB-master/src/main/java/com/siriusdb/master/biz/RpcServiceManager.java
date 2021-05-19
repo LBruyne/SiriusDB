@@ -1,7 +1,10 @@
 package com.siriusdb.master.biz;
 
+import com.siriusdb.master.rpc.server.MasterServiceImpl;
+import com.siriusdb.master.rpc.server.MasterServiceServer;
 import com.siriusdb.master.rpc.server.UserServiceImpl;
 import com.siriusdb.master.rpc.server.UserServiceServer;
+import com.siriusdb.thrift.service.MasterService;
 import com.siriusdb.thrift.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +24,10 @@ public class RpcServiceManager {
             UserServiceServer userServiceServer = new UserServiceServer(
                     new UserService.Processor<>(new UserServiceImpl()));
             userServiceServer.startServer();
+
+            MasterServiceServer masterServiceServer = new MasterServiceServer(
+                    new MasterService.Processor<>(new MasterServiceImpl()));
+            masterServiceServer.startServer();
         } catch (Exception e) {
             log.warn(e.getMessage(), e);
         }

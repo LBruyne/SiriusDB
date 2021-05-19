@@ -7,7 +7,7 @@ package com.siriusdb.enums;
  */
 public enum StrategyTypeEnum {
 
-    NEW_COME(1),
+    DISCOVER(1),
 
     RECOVER(2),
 

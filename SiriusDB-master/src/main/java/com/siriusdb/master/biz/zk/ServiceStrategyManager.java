@@ -29,18 +29,18 @@ public class ServiceStrategyManager {
     public void eventServerAppear(String hostName, String hostUrl) {
         log.warn("新增服务器节点：主机名 {}, 地址 {}", hostName, hostUrl);
         DataServer thisServer;
-        if (ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName) != null) {
+        if (ServiceStrategyExecutor.DataHolder.dataServers.get(hostName) != null) {
             // 该服务器已经存在，即从失效状态中恢复
-            thisServer = ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName);
+            thisServer = ServiceStrategyExecutor.DataHolder.dataServers.get(hostName);
             thisServer.serverRecover();
             log.warn("对该服务器{}执行恢复策略", hostName);
-            strategyExecutor.exceStrategy(thisServer, StrategyTypeEnum.RECOVER);
+            strategyExecutor.execStrategy(thisServer, StrategyTypeEnum.RECOVER);
         } else {
             // 新发现的服务器，新增一份数据
             ServiceStrategyExecutor.DataHolder.addServer(hostName, hostUrl);
-            thisServer = ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName);
+            thisServer = ServiceStrategyExecutor.DataHolder.dataServers.get(hostName);
             log.warn("对该服务器{}执行新增策略", hostName);
-            strategyExecutor.exceStrategy(thisServer, StrategyTypeEnum.NEW_COME);
+            strategyExecutor.execStrategy(thisServer, StrategyTypeEnum.DISCOVER);
         }
     }
 
@@ -52,12 +52,12 @@ public class ServiceStrategyManager {
     public void eventServerDisappear(String hostName) {
         log.warn("删除服务器节点：主机名 {}", hostName);
         DataServer thisServer;
-        if (ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName) == null) {
+        if (ServiceStrategyExecutor.DataHolder.dataServers.get(hostName) == null) {
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "需要删除信息的服务器不存在于服务器列表中");
         } else {
             // 更新并处理下线的服务器
-            thisServer = ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName);
-            strategyExecutor.exceStrategy(thisServer, StrategyTypeEnum.INVALID);
+            thisServer = ServiceStrategyExecutor.DataHolder.dataServers.get(hostName);
+            strategyExecutor.execStrategy(thisServer, StrategyTypeEnum.INVALID);
             thisServer.serverInvalid();
         }
     }
@@ -71,11 +71,11 @@ public class ServiceStrategyManager {
     public void eventServerUpdate(String hostName, String hostUrl) {
         log.warn("更新服务器节点：主机名 {}, 地址 {}", hostName, hostUrl);
         DataServer thisServer;
-        if (ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName) == null) {
+        if (ServiceStrategyExecutor.DataHolder.dataServers.get(hostName) == null) {
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "需要更新信息的服务器不存在于服务器列表中");
         } else {
             // 更新服务器的URL
-            thisServer = ServiceStrategyExecutor.DataHolder.dataServerInfo.get(hostName);
+            thisServer = ServiceStrategyExecutor.DataHolder.dataServers.get(hostName);
             thisServer.setHostUrl(hostUrl);
         }
     }

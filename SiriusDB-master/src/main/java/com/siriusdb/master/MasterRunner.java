@@ -1,12 +1,17 @@
 package com.siriusdb.master;
 
 import com.siriusdb.master.biz.MasterServerManager;
+import com.siriusdb.master.biz.zk.ServiceStrategyExecutor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
 
 /**
  * @Description: Master服务启动入口
  * @author: liuxuanming
  * @date: 2021/04/29 5:05 下午
  */
+@Slf4j
 public class MasterRunner {
 
     /**
