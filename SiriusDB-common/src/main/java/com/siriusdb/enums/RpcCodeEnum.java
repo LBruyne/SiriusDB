@@ -11,7 +11,7 @@ public enum RpcCodeEnum {
 
     FAIL(-1, "fail"),
 
-    NOT_FOUND(1, "not found")
+    NOT_FOUND(1, "not found"),
 
     ;
 

@@ -21,14 +21,6 @@ public class ZkUtil {
     public static String getRegisterPath() {
         return ZkConstant.ZNODE + "/" + ZkConstant.HOST_NAME_PREFIX + System.getenv().get("USER");
     }
-    
-    /**
-     * @description: 获取本机名称
-     * @author: liuxuanming
-     */
-    public static String getHostname() {
-        return System.getenv().get("USER");
-    }
 
     /**
      * @description: ZooKeeper重连接策略

@@ -24,8 +24,8 @@ struct QueryDataCopyResponse {
  * RegionServer执行复制请求，将一个服务器的数据复制到另一个服务器上
  */
 struct ExecDataCopyRequest {
-    1: required list<Table.TableDataDetail> tables,
-    2: required TableMeta.TableMetaInfoDetail meta,
+    1: required list<Table.VTable> tables,
+    2: required TableMeta.VTableMeta meta,
     255: required Base.Base Base,
 }
 

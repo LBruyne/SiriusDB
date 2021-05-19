@@ -32,18 +32,18 @@ public class ZkServiceMonitor implements PathChildrenCacheListener {
         switch (pathChildrenCacheEvent.getType()) {
             case CHILD_ADDED:
                 log.warn("服务器目录新增节点: " + pathChildrenCacheEvent.getData().getPath());
-                serviceStrategyManager.addDataServer(
+                serviceStrategyManager.eventServerAppear(
                         eventPath.replaceFirst(ZkConstant.ZNODE + "/", ""),
                         client.getData(eventPath));
                 break;
             case CHILD_REMOVED:
                 log.warn("服务器目录删除节点: " + pathChildrenCacheEvent.getData().getPath());
-                serviceStrategyManager.deleteDataServer(
+                serviceStrategyManager.eventServerDisappear(
                         eventPath.replaceFirst(ZkConstant.ZNODE + "/", ""));
                 break;
             case CHILD_UPDATED:
                 log.warn("服务器目录更新节点: " + pathChildrenCacheEvent.getData().getPath());
-                serviceStrategyManager.updateDataServer(
+                serviceStrategyManager.eventServerUpdate(
                         eventPath.replaceFirst(ZkConstant.ZNODE + "/", ""),
                         client.getData(eventPath));
                 break;

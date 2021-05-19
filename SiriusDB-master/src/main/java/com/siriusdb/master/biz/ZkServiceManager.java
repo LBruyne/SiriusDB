@@ -30,7 +30,6 @@ public class ZkServiceManager implements Runnable {
         try {
             // 开启一个连接
             CuratorClientHolder curatorClientHolder = new CuratorClientHolder(ZkConstant.ZOOKEEPER_HOST);
-
             log.warn("服务器目录下有子节点：" + curatorClientHolder.getChildren(ZkUtil.getRegisterHolderPath()));
 
             // 开始监听服务器目录，如果有节点的变化，则处理相应事件

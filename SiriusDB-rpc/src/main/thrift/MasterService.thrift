@@ -3,7 +3,7 @@ include "TableMeta.thrift"
 
 namespace java com.siriusdb.thrift.service
 
-service MasterServerService {
+service MasterService {
 
     /**
      * 根据表格名查询表格元数据
