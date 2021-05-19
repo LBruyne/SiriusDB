@@ -9,7 +9,7 @@ public class Table {
 
     private String name;
 
-    private List<MetaAttribute> metaAttributes;
+    private List<Attribute> attributes;
 
     private List<Index> indexes;
 

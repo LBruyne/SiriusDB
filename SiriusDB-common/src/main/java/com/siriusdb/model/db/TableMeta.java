@@ -1,6 +1,5 @@
 package com.siriusdb.model.db;
 
-import com.siriusdb.model.db.MetaAttribute;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -20,5 +19,5 @@ public class TableMeta implements Serializable {
 
     private String locatedServerName;
 
-    private List<MetaAttribute> metaAttributes;
+    private List<Attribute> attributes;
 }

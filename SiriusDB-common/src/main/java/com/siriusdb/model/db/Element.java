@@ -2,7 +2,7 @@ package com.siriusdb.model.db;
 
 import lombok.Data;
 import java.io.Serializable;
-import com.siriusdb.enums.DataTypeEnum;
+
 /**
  * @Description: 单个数据元素
  * @author: liuxuanming
@@ -13,5 +13,7 @@ public class Element<T> implements Serializable{
 
     private T data;
 
-    private MetaAttribute metaAttribute;
+    private Integer columnId;
+
+    private String type;
 }

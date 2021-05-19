@@ -6,5 +6,5 @@ import lombok.Data;
 public class RecordManagerResult<T> {
     private T value;
     private String message;
-    private boolean status;
+    private Boolean status;
 }
