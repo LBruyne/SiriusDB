@@ -9,13 +9,13 @@ public class Table {
 
     private String name;
 
-    private List<Attribute> attributes;
+    private List<MetaAttribute> metaAttributes;
 
-    private List<Index> indexs;
+    private List<Index> indexes;
 
     private List<Row> data;
     //...
-    public int checkIfAttributesExist(Attribute toBeChecked) {
+    public int checkIfAttributesExist(Element toBeChecked) {
         //if exist return colIndex
         //else return -1
         return 1;
