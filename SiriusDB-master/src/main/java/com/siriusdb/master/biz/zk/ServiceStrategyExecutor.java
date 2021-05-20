@@ -12,6 +12,7 @@ import com.siriusdb.thrift.model.Base;
 import com.siriusdb.thrift.model.QueryTableMetaInfoRequest;
 import com.siriusdb.thrift.service.RegionService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.thrift.TException;
 
 import java.io.*;
 import java.util.HashMap;
@@ -58,6 +59,7 @@ public class ServiceStrategyExecutor {
     }
 
     private void execInvalidStrategy(DataServer server) {
+
     }
 
     private void execRecoverStrategy(DataServer server) {
@@ -68,20 +70,20 @@ public class ServiceStrategyExecutor {
 
     }
 
-    private void getMetaInfoFromRegionServer(String hostName, String hostUrl) {
+    public void queryTableMeta(String hostName, String hostUrl, List<String> tableNames) throws TException {
         HostUrl targetUrl = HostUrl.parseHostUrl(hostUrl);
         RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, targetUrl.getIp(), targetUrl.getPort());
 
-        // 构造请求对象
-        QueryTableMetaInfoRequest request = new QueryTableMetaInfoRequest();
-        request.setBase(new Base()
-                .setCaller(UtilConstant.getHostname())
-                .setHostName(hostName)
-                .setHostUrl(hostUrl))
-                .setName(Stream.of(UtilConstant.ALL_TABLE).collect(Collectors.toList()));
+        // 得到数据结果
+        List<TableMeta> result = client.queryTableMeta(tableNames, hostName);
+    }
 
-        // 发起客户端调用，获取该服务器上所有表格的元数据
-        client.getTableMetaInfo(request);
+    public void queryAllTableMeta(String hostName, String hostUrl) throws TException {
+        HostUrl targetUrl = HostUrl.parseHostUrl(hostUrl);
+        RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, targetUrl.getIp(), targetUrl.getPort());
+
+        // 得到数据结果
+        List<TableMeta> result = client.queryTableMeta(Stream.of(UtilConstant.ALL_TABLE).collect(Collectors.toList()), hostName);
     }
 
     public static class DataHolder {

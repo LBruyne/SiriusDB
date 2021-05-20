@@ -30,8 +30,8 @@ public class MasterServiceImpl implements MasterService.Iface {
         // 对请求头进行验证
         // 这里简单的对hostname进行验证
         // TODO: 添加更多验证，如caller是否在Client列表中等
-        String hostName = base.getHostName();
-        if(!hostName.equals(UtilConstant.getHostname())) {
+        String receiver = base.getReceiver();
+        if(!receiver.equals(UtilConstant.getHostname())) {
             log.warn("请求对象和本机不符合");
             return new QueryTableMetaInfoResponse()
                     .setMeta(null)

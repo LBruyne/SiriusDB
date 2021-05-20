@@ -14,7 +14,6 @@ import org.apache.thrift.TProcessor;
 import org.apache.thrift.transport.TTransportException;
 import org.springframework.beans.BeanUtils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,7 +48,7 @@ public class MasterServiceServer extends DynamicThriftServer {
             log.warn("请求所有表格的元数据");
             List<VTableMeta> result = ServiceStrategyExecutor.DataHolder.tableMetaList
                     .stream()
-                    .map(table -> tableToVTable(table)).collect(Collectors.toList());
+                    .map(table -> tableMToVTableM(table)).collect(Collectors.toList());
             response = new QueryTableMetaInfoResponse()
                     .setMeta(result)
                     .setBaseResp(RpcResult.successResp());
@@ -69,7 +68,7 @@ public class MasterServiceServer extends DynamicThriftServer {
                 } else {
                     // 该表格存在
                     log.warn("查询表格{}成功", name);
-                    result.add(tableToVTable(table));
+                    result.add(tableMToVTableM(table));
                 }
             }
             response = new QueryTableMetaInfoResponse()
@@ -79,7 +78,7 @@ public class MasterServiceServer extends DynamicThriftServer {
         return response;
     }
 
-    private static VTableMeta tableToVTable(TableMeta table) {
+    private static VTableMeta tableMToVTableM(TableMeta table) {
 //        // 比较复杂的办法，一个个属性复制
 //        VTableMeta vtable = new VTableMeta();
 //        // 复制name属性
