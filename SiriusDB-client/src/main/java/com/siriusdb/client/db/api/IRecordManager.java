@@ -1,13 +1,13 @@
 package com.siriusdb.client.db.api;
 
-import com.siriusdb.model.db.Condition;
-import com.siriusdb.model.db.Table;
-import com.siriusdb.model.db.RecordManagerResult;
+import com.siriusdb.model.Attribute;
+import com.siriusdb.model.Condition;
+import com.siriusdb.model.Table;
+import com.siriusdb.model.RecordManagerResult;
 import java.util.List;
 
 public interface IRecordManager {
 
-    /*
     RecordManagerResult<List<Attribute[]>> select(List<Attribute> selectedAttributes, List<Table> tables,
                                                                   List<Condition> joinCondition, List<Condition> whereCondition, Attribute orderBy, boolean asc);
     //  select        studentName, ID          from students joins instructor on student.ID = instructor.ID  where studentName = "..." OR ID = "" order by ID asc;\
@@ -21,7 +21,6 @@ public interface IRecordManager {
                                                   List<Condition> whereConditions);
 
     RecordManagerResult<?> insert(Table table, List<Attribute<?>> values);
-     */
 }
 
 
