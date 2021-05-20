@@ -2,7 +2,6 @@ package com.siriusdb.model.db;
 
 import lombok.Data;
 
-import java.util.List;
 import java.util.Vector;
 
 @Data
