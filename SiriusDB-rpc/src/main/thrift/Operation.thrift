@@ -24,7 +24,6 @@ struct QueryDataCopyResponse {
  */
 struct ExecDataCopyRequest {
     1: required list<Table.VTable> tables,
-    2: required Table.VTableMeta meta,
     255: required Base.Base Base,
 }
 

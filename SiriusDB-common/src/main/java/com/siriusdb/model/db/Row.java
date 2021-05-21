@@ -1,11 +1,9 @@
 package com.siriusdb.model.db;
-//import com.siriusdb.model.db.Attribute;
-import com.siriusdb.enums.DataTypeEnum;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
