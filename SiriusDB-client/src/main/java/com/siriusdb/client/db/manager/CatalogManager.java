@@ -18,6 +18,7 @@ import java.util.Vector;
  */
 public class CatalogManager {
 
+    /*
     private static LinkedHashMap<String, Table> tables = new LinkedHashMap<>();
     private static LinkedHashMap<String, Index> indexes = new LinkedHashMap<>();
     private static String tableFilename = "table_catalog";
@@ -64,7 +65,7 @@ public class CatalogManager {
                 tmpIsUnique = dis.readBoolean();
                 tmpIndexName = dis.readUTF();
                 tmpType = DataTypeEnum.valueOf(tmpTypeName);
-                tmpAttributeVector.addElement(new Attribute(tmpId, tmpAttributeName, tmpType.getType(), tmpHasIndex, tmpIsUnique, tmpIndexName));
+                tmpAttributeVector.addElement(new Attribute(tmpId, tmpAttributeName, tmpType.getType(), tmpHasIndex, tmpIsUnique));
             }
             tables.put(tmpTableName, new Table(tmpTableName, tmpPrimaryKey, tmpAttributeVector, tmpIndexVector));
         }
@@ -368,4 +369,5 @@ public class CatalogManager {
     public static void hello() {
         System.out.println("Hello Client 1 !");
     }
+     */
 }

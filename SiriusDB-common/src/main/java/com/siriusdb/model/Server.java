@@ -8,7 +8,7 @@ import lombok.Data;
  * @date: 2021/05/16 2:33 下午
  */
 @Data
-public class HostUrl {
+public class Server {
 
     private String ip;
 
@@ -16,8 +16,8 @@ public class HostUrl {
 
     private static final String HOST_URL_REGEX = "(\\d+\\.\\d+\\.\\d+\\.\\d+)\\:(\\d+)";
 
-    public static HostUrl parseHostUrl(String hostUrl) {
-        HostUrl result = new HostUrl();
+    public static Server parseHostUrl(String hostUrl) {
+        Server result = new Server();
 
         if(hostUrl == null && hostUrl.equals("")) return null;
         else if(!hostUrl.matches(HOST_URL_REGEX)) return null;

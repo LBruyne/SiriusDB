@@ -23,5 +23,7 @@ public class TableMeta implements Serializable {
 
     private String locatedServerName;
 
+    private String locatedServerUrl;
+
     private List<Attribute> attributes;
 }

@@ -1,5 +1,4 @@
 include "Base.thrift"
-include "TableMeta.thrift"
 include "Table.thrift"
 namespace java com.siriusdb.thrift.model
 
@@ -25,7 +24,7 @@ struct QueryDataCopyResponse {
  */
 struct ExecDataCopyRequest {
     1: required list<Table.VTable> tables,
-    2: required TableMeta.VTableMeta meta,
+    2: required Table.VTableMeta meta,
     255: required Base.Base Base,
 }
 
@@ -64,6 +63,6 @@ struct QueryTableMetaInfoRequest {
  * 查询表格元数据响应
  */
 struct QueryTableMetaInfoResponse {
-    1: optional list<TableMeta.VTableMeta> meta,
+    1: optional list<Table.VTableMeta> meta,
     255: required Base.BaseResp baseResp
 }

@@ -15,11 +15,4 @@ public class Attribute {
 
     private String type;
 
-    private Boolean hasIndex;
-
-    private Boolean isUnique;
-
-    private String indexName;
-
-    //private Table table;
 }

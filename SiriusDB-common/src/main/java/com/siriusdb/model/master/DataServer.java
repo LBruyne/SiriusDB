@@ -2,6 +2,7 @@ package com.siriusdb.model.master;
 
 import com.siriusdb.common.MasterConstant;
 import com.siriusdb.enums.DataServerStateEnum;
+import com.siriusdb.model.Server;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,7 +15,7 @@ import java.io.Serializable;
  */
 @Data
 @Builder
-public class DataServer implements Serializable {
+public class DataServer extends Server implements Serializable {
 
     private Integer id;
 

@@ -1,10 +1,5 @@
 package com.siriusdb.client.db.manager;
 import com.siriusdb.client.db.api.IRecordManager;
-import com.siriusdb.model.db.RecordManagerResult;
-import com.siriusdb.model.db.Condition;
-import com.siriusdb.model.db.Table;
-
-import java.util.List;
 
 /**
  * @Description: module for record management.

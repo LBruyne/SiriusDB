@@ -2,7 +2,6 @@ package com.siriusdb.master.rpc.server;
 
 import com.siriusdb.common.UtilConstant;
 import com.siriusdb.thrift.model.Base;
-import com.siriusdb.thrift.model.BaseResp;
 import com.siriusdb.thrift.model.QueryTableMetaInfoRequest;
 import com.siriusdb.thrift.model.QueryTableMetaInfoResponse;
 import com.siriusdb.thrift.service.MasterService;

@@ -22,7 +22,7 @@ public class ServiceImpl implements IService {
     private RecordManager recordManager;
 
     public static void DemoMethod1() {
-        catalogManager.hello();
+        // catalogManager.hello();
     }
 
     public void DemoMethod2() {

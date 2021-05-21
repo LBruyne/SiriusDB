@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @Description: 索引数据结构
  * @author: ylx
@@ -14,10 +16,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Index {
 
-    private String indexName;
+    private String name;
 
-    private String tableName;
-
-    private String attributeName;
+    private List<Integer> attributeIds;
 
 }

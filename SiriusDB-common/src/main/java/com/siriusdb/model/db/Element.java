@@ -21,4 +21,5 @@ public class Element<T> implements Serializable{
     private Integer columnId;
 
     private String type;
+
 }

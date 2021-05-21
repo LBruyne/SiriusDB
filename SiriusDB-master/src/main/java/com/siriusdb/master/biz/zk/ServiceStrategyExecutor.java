@@ -5,11 +5,9 @@ import com.siriusdb.common.UtilConstant;
 import com.siriusdb.enums.DataServerStateEnum;
 import com.siriusdb.enums.StrategyTypeEnum;
 import com.siriusdb.master.rpc.client.RegionServiceClient;
-import com.siriusdb.model.HostUrl;
+import com.siriusdb.model.Server;
 import com.siriusdb.model.master.DataServer;
 import com.siriusdb.model.db.TableMeta;
-import com.siriusdb.thrift.model.Base;
-import com.siriusdb.thrift.model.QueryTableMetaInfoRequest;
 import com.siriusdb.thrift.service.RegionService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
@@ -71,7 +69,7 @@ public class ServiceStrategyExecutor {
     }
 
     public void queryTableMeta(String hostName, String hostUrl, List<String> tableNames) throws TException {
-        HostUrl targetUrl = HostUrl.parseHostUrl(hostUrl);
+        Server targetUrl = Server.parseHostUrl(hostUrl);
         RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, targetUrl.getIp(), targetUrl.getPort());
 
         // 得到数据结果
@@ -79,7 +77,7 @@ public class ServiceStrategyExecutor {
     }
 
     public void queryAllTableMeta(String hostName, String hostUrl) throws TException {
-        HostUrl targetUrl = HostUrl.parseHostUrl(hostUrl);
+        Server targetUrl = Server.parseHostUrl(hostUrl);
         RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, targetUrl.getIp(), targetUrl.getPort());
 
         // 得到数据结果
