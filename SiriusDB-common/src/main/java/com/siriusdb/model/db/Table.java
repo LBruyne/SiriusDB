@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Vector;
 
 @Data
 @AllArgsConstructor
@@ -29,6 +30,13 @@ public class Table {
      * 表格下的数据
      */
     private List<Row> data;
+
+    public Table(String name, String primaryKey, List<Attribute> attributes, List<Index> indexes) {
+        this.name = name;
+        this.primaryKey = primaryKey;
+        this.attributes = attributes;
+        this.indexes = indexes;
+    }
 
     public int checkIfAttributesExist(Element toBeChecked) {
         //if exist return colIndex
