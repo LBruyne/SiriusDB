@@ -73,14 +73,12 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
         tableMeta.setAttributes(vTableMeta.getAttributes()
                 .stream()
                 .map(vAttr -> vAttrToAttr(vAttr)).collect(Collectors.toList()));
-        // TODO
         return tableMeta;
     }
 
     private Attribute vAttrToAttr(VAttribute vAttribute) {
         Attribute attribute = new Attribute();
         BeanUtils.copyProperties(vAttribute, attribute);
-        // TODO
         return attribute;
     }
 }

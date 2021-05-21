@@ -105,14 +105,12 @@ public class MasterServiceServer extends DynamicThriftServer {
         BeanUtils.copyProperties(table, vtable);
         // 复制attributes属性
         vtable.setAttributes( table.getAttributes().stream().map(attribute -> attrToVAttr(attribute)).collect(Collectors.toList()) );
-        // TODO 可能有其他信息
         return vtable;
     }
 
     private static VAttribute attrToVAttr(Attribute attribute) {
         VAttribute vAttribute = new VAttribute();
         BeanUtils.copyProperties(attribute, vAttribute);
-        // TODO 可能有其他信息
         return vAttribute;
     }
 
