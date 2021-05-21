@@ -1,6 +1,9 @@
 package com.siriusdb.model.db;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 
 /**
@@ -9,6 +12,8 @@ import java.io.Serializable;
  * @date: 2021/05/19 4:10 下午
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Element<T> implements Serializable{
 
     private T data;
