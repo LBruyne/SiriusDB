@@ -18,6 +18,10 @@ public class Index {
 
     private String name;
 
-    private List<Integer> attributeIds;
+    /**
+     * 假设我们的数据库内的索引只能建立在单个属性上，
+     * 这个字段是该属性的id，见Attribute属性
+     */
+    private Integer attribute;
 
 }

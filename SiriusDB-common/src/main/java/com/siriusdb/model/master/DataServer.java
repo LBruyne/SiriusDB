@@ -15,7 +15,7 @@ import java.io.Serializable;
  */
 @Data
 @Builder
-public class DataServer extends Server implements Serializable {
+public class DataServer implements Serializable {
 
     private Integer id;
 

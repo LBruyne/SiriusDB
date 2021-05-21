@@ -30,8 +30,8 @@ struct VAttribute {
  * 表格中的索引(Index)
  */
 struct VIndex{
-    1: required list<i32> attributeIds,
-    2: required string name
+    1: required string name,
+    2: required i32 attribute
 }
 
 /**
