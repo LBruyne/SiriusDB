@@ -13,7 +13,7 @@ public class Attribute {
 
     private String name;
 
-    private DataTypeEnum type;
+    private String type;
 
     private Boolean hasIndex;
 

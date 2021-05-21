@@ -17,6 +17,7 @@ import java.util.Vector;
  * @Description: The module for Catalog Management.
  */
 public class CatalogManager {
+
     private static LinkedHashMap<String, Table> tables = new LinkedHashMap<>();
     private static LinkedHashMap<String, Index> indexes = new LinkedHashMap<>();
     private static String tableFilename = "table_catalog";
@@ -63,7 +64,7 @@ public class CatalogManager {
                 tmpIsUnique = dis.readBoolean();
                 tmpIndexName = dis.readUTF();
                 tmpType = DataTypeEnum.valueOf(tmpTypeName);
-                tmpAttributeVector.addElement(new Attribute(tmpId, tmpAttributeName, tmpType, tmpHasIndex, tmpIsUnique, tmpIndexName));
+                tmpAttributeVector.addElement(new Attribute(tmpId, tmpAttributeName, tmpType.getType(), tmpHasIndex, tmpIsUnique, tmpIndexName));
             }
             tables.put(tmpTableName, new Table(tmpTableName, tmpPrimaryKey, tmpAttributeVector, tmpIndexVector));
         }
@@ -101,18 +102,18 @@ public class CatalogManager {
             tmpTable = (Table) entry.getValue();
             dos.writeUTF(tmpTable.getName());
             dos.writeUTF(tmpTable.getPrimaryKey());
-            dos.writeInt(tmpTable.getAttributeNum());
-            dos.writeInt(tmpTable.getIndexNum());
-            for (int i = 0; i < tmpTable.getIndexNum(); i++) {
+            dos.writeInt(tmpTable.getAttributes().size());
+            dos.writeInt(tmpTable.getIndexes().size());
+            for (int i = 0; i < tmpTable.getIndexes().size(); i++) {
                 Index tmpIndex = tmpTable.getIndexes().get(i);
                 dos.writeUTF(tmpIndex.getIndexName());
                 dos.writeUTF(tmpIndex.getAttributeName());
             }
-            dos.writeInt(tmpTable.getAttributeNum());
-            for (int i = 0; i < tmpTable.getAttributeNum(); i++) {
+            dos.writeInt(tmpTable.getAttributes().size());
+            for (int i = 0; i < tmpTable.getAttributes().size(); i++) {
                 Attribute tmpAttribute = tmpTable.getAttributes().get(i);
                 dos.writeUTF(tmpAttribute.getName());
-                dos.writeUTF(tmpAttribute.getType().getType());
+                dos.writeUTF(tmpAttribute.getType());
                 //dos.writeInt(tmpAttribute.type.get_length());
                 dos.writeBoolean(tmpAttribute.getIsUnique());
             }
@@ -189,9 +190,9 @@ public class CatalogManager {
             String format = "|%-" + get_max_attr_length(tmpTable) + "s";
             format += "|%-5s|%-6s|%-6s|\n";
             System.out.printf(format, "ATTRIBUTE", "TYPE",  "UNIQUE");
-            for (int i = 0; i < tmpTable.getAttributeNum(); i++) {
+            for (int i = 0; i < tmpTable.getAttributes().size(); i++) {
                 tmpAttribute = tmpTable.getAttributes().get(i);
-                System.out.printf(format, tmpAttribute.getName(), tmpAttribute.getType().getType(), tmpAttribute.getIsUnique());
+                System.out.printf(format, tmpAttribute.getName(), tmpAttribute.getType(), tmpAttribute.getIsUnique());
             }
             if (iter.hasNext()) System.out.println("--------------------------------");
         }
@@ -210,7 +211,7 @@ public class CatalogManager {
     }
 
     public static int get_attribute_num(String tableName) {
-        return get_table(tableName).getAttributeNum();
+        return get_table(tableName).getAttributes().size();
     }
 
     //check
@@ -304,7 +305,7 @@ public class CatalogManager {
         return -1;
     }
 
-    public static DataTypeEnum get_attribute_type(String tableName, String attributeName) {
+    public static String get_attribute_type(String tableName, String attributeName) {
         Table tmpTable = tables.get(tableName);
         Attribute tmpAttribute;
         for (int i = 0; i < tmpTable.getAttributes().size(); i++) {
@@ -318,7 +319,7 @@ public class CatalogManager {
 
     public static String get_type(String tableName, int i) {
         //Table tmpTable=tables.get(tableName);
-        return tables.get(tableName).getAttributes().get(i).getType().getType();
+        return tables.get(tableName).getAttributes().get(i).getType();
     }
 
     public static boolean update_index_table(String indexName, Index tmpIndex) {
@@ -352,8 +353,7 @@ public class CatalogManager {
 
     public static boolean create_index(Index newIndex) throws NullPointerException{
         Table tmpTable = get_table(newIndex.getTableName());
-        tmpTable.getIndexes().addElement(newIndex);
-        tmpTable.setIndexNum(tmpTable.getIndexes().size());
+        tmpTable.getIndexes().add(newIndex);
         indexes.put(newIndex.getIndexName(), newIndex);
         return true;
     }
@@ -362,7 +362,6 @@ public class CatalogManager {
         Index tmpIndex = get_index(indexName);
         Table tmpTable = get_table(tmpIndex.getTableName());
         tmpTable.getIndexes().remove(tmpIndex);
-        tmpTable.setIndexNum(tmpTable.getIndexes().size());
         indexes.remove(indexName);
         return true;
     }
