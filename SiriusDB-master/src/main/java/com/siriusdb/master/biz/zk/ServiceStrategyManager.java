@@ -32,7 +32,6 @@ public class ServiceStrategyManager {
         if (ServiceStrategyExecutor.DataHolder.dataServers.get(hostName) != null) {
             // 该服务器已经存在，即从失效状态中恢复
             thisServer = ServiceStrategyExecutor.DataHolder.dataServers.get(hostName);
-            thisServer.serverRecover();
             log.warn("对该服务器{}执行恢复策略", hostName);
             strategyExecutor.execStrategy(thisServer, StrategyTypeEnum.RECOVER);
         } else {
@@ -57,8 +56,8 @@ public class ServiceStrategyManager {
         } else {
             // 更新并处理下线的服务器
             thisServer = ServiceStrategyExecutor.DataHolder.dataServers.get(hostName);
+            log.warn("对该服务器{}执行失效策略", hostName);
             strategyExecutor.execStrategy(thisServer, StrategyTypeEnum.INVALID);
-            thisServer.serverInvalid();
         }
     }
 

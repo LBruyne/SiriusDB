@@ -2,7 +2,7 @@ package com.siriusdb.master.rpc.client;
 
 import com.siriusdb.common.UtilConstant;
 import com.siriusdb.enums.ErrorCodeEnum;
-import com.siriusdb.enums.RpcCodeEnum;
+import com.siriusdb.enums.RpcResultCodeEnum;
 import com.siriusdb.exception.BasicBusinessException;
 import com.siriusdb.model.db.Attribute;
 import com.siriusdb.model.db.TableMeta;
@@ -15,7 +15,6 @@ import org.springframework.beans.BeanUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @Description: MasterServer的RPC客户端
@@ -40,7 +39,7 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
      * @param receiver 目标服务器名称
      * @return
      */
-    public List<TableMeta> queryTableMeta(List<String> name, String receiver) throws TException {
+/*    public List<TableMeta> queryTableMeta(List<String> name, String receiver) throws TException {
         if(name == null || name.size() == 0) throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求的名字列表为空");
         QueryTableMetaInfoRequest request = new QueryTableMetaInfoRequest()
                 .setBase(new Base()
@@ -48,16 +47,16 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
                         .setReceiver(receiver))
                 .setName(name);
 
-        QueryTableMetaInfoResponse response = client.queryTableMetaInfo(request);
+        QueryTableMetaInfoResponse response = client.(request);
 
         List<TableMeta> result = null;
         if(response == null || response.getBaseResp() == null) {
             log.warn("向{}请求表格{}元数据结果为空", receiver ,name);
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求元数据结果为空");
-        } else if(response.getBaseResp().getCode() == RpcCodeEnum.FAIL.getCode()) {
+        } else if(response.getBaseResp().getCode() == RpcResultCodeEnum.FAIL.getCode()) {
             log.warn("向{}请求表格{}元数据失败", receiver, name);
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求元数据失败");
-        } else if(response.getBaseResp().getCode() == RpcCodeEnum.NOT_FOUND.getCode()){
+        } else if(response.getBaseResp().getCode() == RpcResultCodeEnum.NOT_FOUND.getCode()){
             log.warn("向{}请求表格{}元数据未找到", receiver, name);
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求的元数据未找到");
         } else {
@@ -65,7 +64,7 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
             result = response.getMeta().stream().map(vTableMeta -> vTableMToTableM(vTableMeta)).collect(Collectors.toList());
         }
         return result;
-    }
+    }*/
 
     private TableMeta vTableMToTableM(VTableMeta vTableMeta) {
         TableMeta tableMeta = new TableMeta();

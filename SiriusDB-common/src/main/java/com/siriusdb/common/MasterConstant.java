@@ -34,4 +34,9 @@ public class MasterConstant {
      * meta数据本地保存的文件
      */
     public static final String META_INFO_STORAGE_FILE = "meta.dat";
+
+    /**
+     *
+     */
+    public static final Integer MIN_VALID_DATA_SERVER = 3;
 }

@@ -1,9 +1,7 @@
 package com.siriusdb.master.rpc.server;
 
 import com.siriusdb.common.UtilConstant;
-import com.siriusdb.thrift.model.Base;
-import com.siriusdb.thrift.model.QueryTableMetaInfoRequest;
-import com.siriusdb.thrift.model.QueryTableMetaInfoResponse;
+import com.siriusdb.thrift.model.*;
 import com.siriusdb.thrift.service.MasterService;
 import com.siriusdb.utils.rpc.RpcResult;
 import lombok.extern.slf4j.Slf4j;
@@ -38,5 +36,15 @@ public class MasterServiceImpl implements MasterService.Iface {
         }
 
         return MasterServiceServer.queryTableMeta(tables);
+    }
+
+    @Override
+    public NotifyTableMetaChangeResponse notifyTableMetaChange(NotifyTableMetaChangeRequest req) throws TException {
+        return null;
+    }
+
+    @Override
+    public QueryCreateTableResponse queryCreateTable(QueryCreateTableRequest req) throws TException {
+        return null;
     }
 }

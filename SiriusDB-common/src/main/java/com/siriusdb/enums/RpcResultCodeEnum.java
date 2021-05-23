@@ -5,13 +5,15 @@ package com.siriusdb.enums;
  * @author: liuxuanming
  * @date: 2021/05/15 1:02 下午
  */
-public enum RpcCodeEnum {
+public enum RpcResultCodeEnum {
 
     SUCCESS(0, "success"),
 
     FAIL(-1, "fail"),
 
     NOT_FOUND(1, "not found"),
+
+    HAS_EXISTED(2, "has existed"),
 
     ;
 
@@ -25,7 +27,7 @@ public enum RpcCodeEnum {
      */
     private final String desc;
 
-    RpcCodeEnum(int code, String desc){
+    RpcResultCodeEnum(int code, String desc){
         this.code = code;
         this.desc = desc;
     }
