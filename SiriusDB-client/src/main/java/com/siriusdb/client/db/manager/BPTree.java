@@ -6,7 +6,7 @@ import java.util.Vector;
  * @Date: 2021/05/23/14:11
  * @Description: B-plus Tree interface
  */
-public class BPTree <K extends Comparable<? super K>, V>{  //// K:key type; V:value type
+public class BPTree <K extends Comparable<K>, V>{  // K:key type; V:value type
 
     private Node<K, V> root;
 
@@ -129,7 +129,7 @@ public class BPTree <K extends Comparable<? super K>, V>{  //// K:key type; V:va
         this.root.checkStructure();
     }
 
-    static abstract class Node<K extends Comparable<? super K>, V> {
+    static abstract class Node<K extends Comparable<K>, V> {
         protected internalNode<K, V> parent;
         protected Integer order;
         protected Integer cnt;
@@ -200,7 +200,7 @@ public class BPTree <K extends Comparable<? super K>, V>{  //// K:key type; V:va
         }
     }
 
-    static class internalNode<K extends Comparable<? super K>, V> extends Node<K, V> {
+    static class internalNode<K extends Comparable<K>, V> extends Node<K, V> {
 
         protected Node<K, V>[] children;
 
@@ -572,7 +572,7 @@ public class BPTree <K extends Comparable<? super K>, V>{  //// K:key type; V:va
         }
     }
 
-    static class leafNode<K extends Comparable<? super K>, V> extends Node<K, V> {
+    static class leafNode<K extends Comparable<K>, V> extends Node<K, V> {
 
         private V[] values;
         private leafNode<K, V> next; //the next sibling

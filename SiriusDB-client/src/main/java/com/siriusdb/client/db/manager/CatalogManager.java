@@ -307,16 +307,6 @@ public class CatalogManager {
         return true;
     }
 
-    public static boolean create_index(Index newIndex) throws NullPointerException{
-        indexes.put(newIndex.getName(), newIndex);
-        return true;
-    }
-
-    public static boolean drop_index(String indexName) throws NullPointerException{
-        Index tmpIndex = get_index(indexName);
-        indexes.remove(indexName);
-        return true;
-    }
     public static void hello() {
         System.out.println("Hello Client 1 !");
     }
