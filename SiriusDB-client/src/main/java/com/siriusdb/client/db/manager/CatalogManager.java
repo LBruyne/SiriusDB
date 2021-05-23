@@ -242,15 +242,15 @@ public class CatalogManager {
         return tables.get(tableName).getAttributes().get(i).getName();
     }
 
-    public static String get_attribute_index(String indexName, Integer attribute) {
+    public static Integer get_attribute_index(String indexName, Integer attribute) {
         Index tmpIndex = indexes.get(indexName);
         Integer tmpAttribute;
         for (int i = 0; i < indexes.size(); i++) {
             tmpAttribute = tmpIndex.getAttribute();
             if (tmpAttribute.equals(attribute))
-                return tmpIndex.getName();
+                return i;
         }
-        return "The attribute ID" + attribute + "doesn't exist any index";
+        return -1;
     }
 
     public static String get_attribute_type(String tableName, String attributeName) {
