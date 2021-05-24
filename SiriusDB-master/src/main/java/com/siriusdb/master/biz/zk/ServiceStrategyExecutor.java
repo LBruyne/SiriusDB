@@ -14,10 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,11 +49,11 @@ public class ServiceStrategyExecutor {
     public void execStrategy(DataServer server, StrategyTypeEnum type) {
         try {
             switch (type) {
-                case DISCOVER:
-                    execDiscoverStrategy(server);
-                    break;
                 case RECOVER:
                     execRecoverStrategy(server);
+                    break;
+                case DISCOVER:
+                    execDiscoverStrategy(server);
                     break;
                 case INVALID:
                     execInvalidStrategy(server);
@@ -68,12 +65,13 @@ public class ServiceStrategyExecutor {
         }
     }
 
-    private void execInvalidStrategy(DataServer server) {
+    private void execInvalidStrategy(DataServer server) throws TException{
         server.serverInvalid();
     }
 
-    private void execRecoverStrategy(DataServer server) {
+    private void execRecoverStrategy(DataServer server) throws TException {
         server.serverRecover();
+        execDiscoverStrategy(server);
     }
 
     private void execDiscoverStrategy(DataServer server) throws TException {
@@ -109,7 +107,7 @@ public class ServiceStrategyExecutor {
                 log.warn("服务器{}被设置为备用服务器", server);
                 if(DataHolder.getIdleServerNum() > MasterConstant.REALLOCATE_PAIR_LOW_BOUND) {
                     // 备用机数量过多，可以重新分配一对备用机进行结对
-                    DataHolder.makeServerPairFromIdleServer();
+                    DataHolder.makeServerPairFromIdleServer(server);
                 }
             }
         }
@@ -131,6 +129,15 @@ public class ServiceStrategyExecutor {
                             .dualServerId(MasterConstant.NO_DUAL_SERVER)
                             .build());
             dataServers.get(hostName).parseHostUrl();
+        }
+
+        public static DataServer getDataServerById(Integer id) {
+            for(DataServer server : dataServers.values()) {
+                if(server.getId().equals(id)) {
+                    return server;
+                }
+            }
+            return null;
         }
 
         static Integer getPrimaryServerNum() {
@@ -188,11 +195,38 @@ public class ServiceStrategyExecutor {
         }
 
         /**
+         * 从闲置服务器中选择一台和当前服务器不一样的
+         * @param server
+         * @return
+         */
+        static DataServer getOneServerInIdle(DataServer server) {
+            for(DataServer dataServer: dataServers.values()) {
+                if(dataServer.getState() == DataServerStateEnum.IDLE && dataServer != server) {
+                    return dataServer;
+                }
+            }
+            return null;
+        }
+
+        /**
          * 从闲置服务器中选择两台结对
          */
-        public static void makeServerPairFromIdleServer() {
+        public static void makeServerPairFromIdleServer(DataServer server) throws TException {
+            DataServer server2 = getOneServerInIdle(server);
+            if(server2 == null)
+                throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "不存在其他闲置服务器");
 
-            // TODO 通知机器
+            server.makePair(server2);
+
+            // 建立一个目标是server服务器的客户端
+            RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, server.getIp(), server.getPort());
+            // 通知机器状态变化
+            client.notifyStateChange(server, server.getHostName());
+
+            // 建立一个目标是server2服务器的客户端
+            client = new RegionServiceClient(RegionService.Client.class, server2.getIp(), server2.getPort());
+            // 通知机器状态变化
+            client.notifyStateChange(server2, server2.getHostName());
         }
 
         /**
@@ -204,11 +238,16 @@ public class ServiceStrategyExecutor {
             // 状态改变
             server.remakePair(serverNotInPair);
 
-            // TODO 通知机器
-            
-            // 数据复制
+            // 建立一个目标是server服务器的客户端
+            RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, server.getIp(), server.getPort());
+            // 通知机器状态变化
+            client.notifyStateChange(serverNotInPair, serverNotInPair.getHostName());
+
             // 建立一个目标是serverNotInPair服务器的客户端
-            RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, serverNotInPair.getIp(), serverNotInPair.getPort());
+            client = new RegionServiceClient(RegionService.Client.class, serverNotInPair.getIp(), serverNotInPair.getPort());
+            // 通知机器状态变化
+            client.notifyStateChange(serverNotInPair, serverNotInPair.getHostName());
+            // 通知机器数据复制
             client.execTableCopy(Stream.of(UtilConstant.ALL_TABLE).collect(Collectors.toList()), server, serverNotInPair.getHostName());
         }
 
