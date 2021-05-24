@@ -6,6 +6,7 @@ import com.siriusdb.enums.ErrorCodeEnum;
 import com.siriusdb.exception.BasicBusinessException;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 
@@ -16,6 +17,7 @@ import java.io.Serializable;
  */
 @Data
 @Builder
+@Slf4j
 public class DataServer implements Serializable {
 
     private Integer id;
@@ -51,6 +53,7 @@ public class DataServer implements Serializable {
     public void serverRecover() {
         setState(DataServerStateEnum.IDLE);
         setDualServerId(MasterConstant.NO_DUAL_SERVER);
+        log.warn("服务器{}恢复", getHostName());
     }
 
     /**
@@ -59,6 +62,7 @@ public class DataServer implements Serializable {
     public void serverInvalid() {
         setState(DataServerStateEnum.INVAILID);
         setDualServerId(MasterConstant.NO_DUAL_SERVER);
+        log.warn("服务器{}失效", getHostName());
     }
 
     /**
@@ -67,6 +71,7 @@ public class DataServer implements Serializable {
     public void serverIdle() {
         setState(DataServerStateEnum.IDLE);
         setDualServerId(MasterConstant.NO_DUAL_SERVER);
+        log.warn("服务器{}空闲", getHostName());
     }
 
     /**
@@ -91,6 +96,7 @@ public class DataServer implements Serializable {
             // 设置dualServerId
             this.setDualServerId(server.getId());
             server.setDualServerId(this.getId());
+            log.warn("{}的配偶是{}", this.getHostName(), server.getHostName());
         }
     }
 
@@ -107,6 +113,7 @@ public class DataServer implements Serializable {
             server.setState(DataServerStateEnum.COPY);
             this.setDualServerId(server.getDualServerId());
             server.setDualServerId(this.getDualServerId());
+            log.warn("{}的配偶是{}", this.getHostName(), server.getHostName());
         }
     }
 }

@@ -73,6 +73,7 @@ public class ServiceStrategyExecutor {
                 // 没有备用机器，非正常状态
                 DataHolder.getDataServerById(server.getDualServerId()).setDualServerId(MasterConstant.NO_DUAL_SERVER);
                 server.serverInvalid();
+                log.warn("服务器数量不足");
                 throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "服务器失效后没有备用机器，系统非正常状态");
             } else {
                 // 有备用机器，进行一次结对
@@ -81,6 +82,7 @@ public class ServiceStrategyExecutor {
                 DataServer idleServer = DataHolder.getOneServerInIdle();                             // 闲置的服务器
                 DataHolder.remakeServerPair(idleServer, serverNotInPair);
                 server.serverInvalid();
+                log.warn("服务器{}和服务器{}重新完成结对", idleServer.getHostName(), serverNotInPair.getHostName());
             }
         } else if (server.getState() == DataServerStateEnum.IDLE) {
             if (DataHolder.getIdleServerNum() > 1) {
