@@ -19,4 +19,9 @@ service RegionService {
      */
     Operation.NotifyStateResponse notifyStateChange(1: Operation.NotifyStateRequest req)
 
+    /**
+     * Master告知某服务器进行复制
+     */
+    Operation.ExecTableCopyResponse execTableCopy(1: Operation.ExecTableCopyRequest req)
+
 }

@@ -7,12 +7,24 @@ package com.siriusdb.enums;
  */
 public enum RpcResultCodeEnum {
 
+    /**
+     * 成功请求
+     */
     SUCCESS(0, "success"),
 
+    /**
+     * 校验失败或者参数传递错误或者接收者错误
+     */
     FAIL(-1, "fail"),
 
+    /**
+     * 表格、数据没有找到
+     */
     NOT_FOUND(1, "not found"),
 
+    /**
+     * 表格、数据已经存在
+     */
     HAS_EXISTED(2, "has existed"),
 
     ;

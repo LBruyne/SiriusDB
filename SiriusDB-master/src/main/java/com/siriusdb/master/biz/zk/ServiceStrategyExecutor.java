@@ -7,7 +7,6 @@ import com.siriusdb.enums.ErrorCodeEnum;
 import com.siriusdb.enums.StrategyTypeEnum;
 import com.siriusdb.exception.BasicBusinessException;
 import com.siriusdb.master.rpc.client.RegionServiceClient;
-import com.siriusdb.model.Server;
 import com.siriusdb.model.master.DataServer;
 import com.siriusdb.model.db.TableMeta;
 import com.siriusdb.thrift.service.RegionService;
@@ -64,7 +63,7 @@ public class ServiceStrategyExecutor {
                     break;
             }
             DataHolder.write();
-        } catch (IOException e) {
+        } catch (IOException | TException e) {
             log.warn(e.getMessage(), e);
         }
     }
@@ -77,44 +76,44 @@ public class ServiceStrategyExecutor {
         server.serverRecover();
     }
 
-    private void execDiscoverStrategy(DataServer server) {
+    private void execDiscoverStrategy(DataServer server) throws TException {
         Integer validServerNum = DataHolder.getValidServerNum();
-        // 如果目前能够运行的服务器小于3台，提示无法完成服务
+
         if(validServerNum < MasterConstant.MIN_VALID_DATA_SERVER) {
+            // 如果目前能够运行的服务器小于3台，提示无法完成服务
             log.warn("目前数据服务器数量少于{}，服务无法完成", MasterConstant.MIN_VALID_DATA_SERVER);
-            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "目前数据服务器数量不足");
-        }
-        // 服务器数量足够
-        // 如果目前数据服务器不成对存在，与不成对的那一台服务器结对
-        DataServer serverNotInPair = DataHolder.getServerNotInPair();
-        if(serverNotInPair != null) {
-            // 发现有服务器不成对存在
-
-        }
-        // 没有服务器不成对存在，成为备用服务器
-        else {
-            server.setState(DataServerStateEnum.IDLE);
-            log.warn("服务器{}被设置为备用服务器", server);
+            DataServer serverNotInPair = DataHolder.getServerNotInPair();
+            if(serverNotInPair == null) {
+                // 没有机器不成对存在，设置这台机器成为备用机器
+                server.serverIdle();
+                log.warn("当前没有机器不成对存在，服务器{}成为备用机器", server.getHostName());
+            } else {
+                // 和未结对的机器进行结对
+                DataHolder.remakeServerPair(server, serverNotInPair);
+                log.warn("服务器{}和服务器{}重新结对", server.getHostName(), serverNotInPair.getHostName());
+            }
+            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "目前数据服务器数量不足,服务处于非正常状态");
+        } else {
+            // 服务器数量足够
+            // 如果目前数据服务器不成对存在，与不成对的那一台服务器结对
+            log.warn("当前服务器数量充足");
+            DataServer serverNotInPair = DataHolder.getServerNotInPair();
+            if(serverNotInPair != null) {
+                // 发现有服务器不成对存在，与未结对的机器进行结对
+                DataHolder.remakeServerPair(server, serverNotInPair);
+                log.warn("服务器{}和服务器{}重新结对", server.getHostName(), serverNotInPair.getHostName());
+            }
+            else {
+                // 没有服务器不成对存在，成为备用服务器
+                server.setState(DataServerStateEnum.IDLE);
+                log.warn("服务器{}被设置为备用服务器", server);
+                if(DataHolder.getIdleServerNum() > MasterConstant.REALLOCATE_PAIR_LOW_BOUND) {
+                    // 备用机数量过多，可以重新分配一对备用机进行结对
+                    DataHolder.makeServerPairFromIdleServer();
+                }
+            }
         }
     }
-
-/*
-    public void queryTableMeta(String hostName, String hostUrl, List<String> tableNames) throws TException {
-        Server targetUrl = Server.parseHostUrl(hostUrl);
-        RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, targetUrl.getIp(), targetUrl.getPort());
-
-        // 得到数据结果
-        List<TableMeta> result = client.queryTableMeta(tableNames, hostName);
-    }
-
-    public void queryAllTableMeta(String hostName, String hostUrl) throws TException {
-        Server targetUrl = Server.parseHostUrl(hostUrl);
-        RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, targetUrl.getIp(), targetUrl.getPort());
-
-        // 得到数据结果
-        List<TableMeta> result = client.queryTableMeta(Stream.of(UtilConstant.ALL_TABLE).collect(Collectors.toList()), hostName);
-    }
-*/
 
     public static class DataHolder {
 
@@ -131,6 +130,7 @@ public class ServiceStrategyExecutor {
                             .state(DataServerStateEnum.IDLE)
                             .dualServerId(MasterConstant.NO_DUAL_SERVER)
                             .build());
+            dataServers.get(hostName).parseHostUrl();
         }
 
         static Integer getPrimaryServerNum() {
@@ -185,6 +185,31 @@ public class ServiceStrategyExecutor {
                 }
             }
             return null;
+        }
+
+        /**
+         * 从闲置服务器中选择两台结对
+         */
+        public static void makeServerPairFromIdleServer() {
+
+            // TODO 通知机器
+        }
+
+        /**
+         * 让一台服务器和一台已经结对过但配偶失效的服务器重新结对
+         * @param server
+         * @param serverNotInPair
+         */
+        static void remakeServerPair(DataServer server, DataServer serverNotInPair) throws TException {
+            // 状态改变
+            server.remakePair(serverNotInPair);
+
+            // TODO 通知机器
+            
+            // 数据复制
+            // 建立一个目标是serverNotInPair服务器的客户端
+            RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, serverNotInPair.getIp(), serverNotInPair.getPort());
+            client.execTableCopy(Stream.of(UtilConstant.ALL_TABLE).collect(Collectors.toList()), server, serverNotInPair.getHostName());
         }
 
         public static TableMeta findTable(String name) {

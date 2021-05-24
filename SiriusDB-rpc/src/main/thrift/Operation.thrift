@@ -101,3 +101,20 @@ struct NotifyTableChangeRequest {
 struct NotifyTableChangeResponse {
     255: required Base.BaseResp baseResp
 }
+
+/**
+ * master告知region表格复制请求
+ */
+struct ExecTableCopyRequest {
+    1: required string targetName,
+    2: required string targetUrl,
+    3: required list<string> tableNames,
+    255: required Base.Base base
+}
+
+/**
+ * master告知region表格复制响应
+ */
+struct ExecTableCopyResponse {
+    255: required Base.BaseResp baseResp
+}

@@ -1,11 +1,13 @@
 package com.siriusdb.master.rpc.client;
 
+import com.siriusdb.common.MasterConstant;
 import com.siriusdb.common.UtilConstant;
 import com.siriusdb.enums.ErrorCodeEnum;
 import com.siriusdb.enums.RpcResultCodeEnum;
 import com.siriusdb.exception.BasicBusinessException;
 import com.siriusdb.model.db.Attribute;
 import com.siriusdb.model.db.TableMeta;
+import com.siriusdb.model.master.DataServer;
 import com.siriusdb.thrift.model.*;
 import com.siriusdb.thrift.service.RegionService;
 import com.siriusdb.utils.rpc.DynamicThriftClient;
@@ -32,39 +34,29 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
         super(ts);
     }
 
-    /**
-     * 请求表格数据
-     *
-     * @param name     目标表格名称
-     * @param receiver 目标服务器名称
-     * @return
-     */
-/*    public List<TableMeta> queryTableMeta(List<String> name, String receiver) throws TException {
-        if(name == null || name.size() == 0) throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求的名字列表为空");
-        QueryTableMetaInfoRequest request = new QueryTableMetaInfoRequest()
+    public void execTableCopy(List<String> tableNames, DataServer targetServer, String receiver) throws TException {
+        if(tableNames == null || tableNames.size() == 0) throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求复制的表格名字列表为空");
+        ExecTableCopyRequest request = new ExecTableCopyRequest()
                 .setBase(new Base()
-                        .setCaller(UtilConstant.getHostname())
+                        .setCaller(MasterConstant.MASTER_HOST_NAME)
                         .setReceiver(receiver))
-                .setName(name);
+                .setTargetName(targetServer.getHostName())
+                .setTargetUrl(targetServer.getHostUrl())
+                .setTableNames(tableNames);
 
-        QueryTableMetaInfoResponse response = client.(request);
+        log.warn("请求服务器{}向服务器{}复制表格{}的数据", receiver, targetServer.getHostName(), tableNames);
+        ExecTableCopyResponse response = client.execTableCopy(request);
 
-        List<TableMeta> result = null;
         if(response == null || response.getBaseResp() == null) {
-            log.warn("向{}请求表格{}元数据结果为空", receiver ,name);
-            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求元数据结果为空");
-        } else if(response.getBaseResp().getCode() == RpcResultCodeEnum.FAIL.getCode()) {
-            log.warn("向{}请求表格{}元数据失败", receiver, name);
-            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求元数据失败");
-        } else if(response.getBaseResp().getCode() == RpcResultCodeEnum.NOT_FOUND.getCode()){
-            log.warn("向{}请求表格{}元数据未找到", receiver, name);
-            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求的元数据未找到");
+            log.warn("向{}请求表格复制结果为空", receiver);
+            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求表格复制结果为空");
+        } else if(response.getBaseResp().getCode() == RpcResultCodeEnum.SUCCESS.getCode()) {
+            log.warn("向{}请求表格复制成功", receiver);
         } else {
-            log.warn("在{}找到了表格{}的元数据", receiver, name);
-            result = response.getMeta().stream().map(vTableMeta -> vTableMToTableM(vTableMeta)).collect(Collectors.toList());
+            log.warn("向{}请求表格复制失败", receiver);
+            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求表格复制失败");
         }
-        return result;
-    }*/
+    }
 
     private TableMeta vTableMToTableM(VTableMeta vTableMeta) {
         TableMeta tableMeta = new TableMeta();

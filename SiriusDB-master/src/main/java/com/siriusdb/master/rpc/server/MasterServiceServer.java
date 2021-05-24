@@ -1,12 +1,13 @@
 package com.siriusdb.master.rpc.server;
 
 import com.siriusdb.common.UtilConstant;
+import com.siriusdb.enums.ErrorCodeEnum;
+import com.siriusdb.enums.RpcOperationEnum;
+import com.siriusdb.exception.BasicBusinessException;
 import com.siriusdb.master.biz.zk.ServiceStrategyExecutor;
 import com.siriusdb.model.db.Attribute;
 import com.siriusdb.model.db.TableMeta;
-import com.siriusdb.thrift.model.QueryTableMetaInfoResponse;
-import com.siriusdb.thrift.model.VAttribute;
-import com.siriusdb.thrift.model.VTableMeta;
+import com.siriusdb.thrift.model.*;
 import com.siriusdb.utils.rpc.DynamicThriftServer;
 import com.siriusdb.utils.rpc.RpcResult;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class MasterServiceServer extends DynamicThriftServer {
+
     public MasterServiceServer(TProcessor processor, Integer port) throws TTransportException {
         super(processor, port);
     }
@@ -78,6 +80,25 @@ public class MasterServiceServer extends DynamicThriftServer {
         return response;
     }
 
+    public static NotifyTableMetaChangeResponse notifyTableMetaChange(String tableName, VTableMeta vTableMeta, Integer operationCode) {
+        NotifyTableMetaChangeResponse response = null;
+
+        if (operationCode.equals(RpcOperationEnum.CREATE.getCode())) {
+
+        } else if (operationCode.equals(RpcOperationEnum.DELETE.getCode())) {
+
+        } else if (operationCode.equals(RpcOperationEnum.UPDATE.getCode())) {
+
+        } else {
+            throw new BasicBusinessException(ErrorCodeEnum.BUSINESS_VALIDATION_FAILED.getCode(), "未定义的操作码");
+        }
+        return response;
+    }
+
+    public static QueryCreateTableResponse queryCreateTable(String name) {
+        return null;
+    }
+
     private static VTableMeta tableMToVTableM(TableMeta table) {
 //        // 比较复杂的办法，一个个属性复制
 //        VTableMeta vtable = new VTableMeta();
@@ -104,7 +125,7 @@ public class MasterServiceServer extends DynamicThriftServer {
         // 公共属性复制：要求属性类型、属性名称一致
         BeanUtils.copyProperties(table, vtable);
         // 复制attributes属性
-        vtable.setAttributes( table.getAttributes().stream().map(attribute -> attrToVAttr(attribute)).collect(Collectors.toList()) );
+        vtable.setAttributes(table.getAttributes().stream().map(attribute -> attrToVAttr(attribute)).collect(Collectors.toList()));
         return vtable;
     }
 
@@ -113,5 +134,4 @@ public class MasterServiceServer extends DynamicThriftServer {
         BeanUtils.copyProperties(attribute, vAttribute);
         return vAttribute;
     }
-
 }
