@@ -1,5 +1,7 @@
 package com.siriusdb.utils.zk;
 
+import com.siriusdb.common.MasterConstant;
+import com.siriusdb.common.UtilConstant;
 import com.siriusdb.common.ZkConstant;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 
@@ -19,7 +21,7 @@ public class ZkUtil {
      * @author: liuxuanming
      */
     public static String getRegisterPath() {
-        return ZkConstant.ZNODE + "/" + ZkConstant.HOST_NAME_PREFIX + System.getenv().get("USER");
+        return ZkConstant.ZNODE + "/" + ZkConstant.HOST_NAME_PREFIX + MasterConstant.MASTER_HOST_NAME;
     }
 
     /**

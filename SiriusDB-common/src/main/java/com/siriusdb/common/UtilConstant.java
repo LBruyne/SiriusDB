@@ -1,17 +1,30 @@
 package com.siriusdb.common;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Random;
+
 /**
  * @Description: 公共常量写在这里
  * @author: liuxuanming
  * @date: 2021/04/29 4:37 下午
  */
+@Slf4j
 public class UtilConstant {
 
+    public static final Integer INF = 10000000;
     /**
      * 本机主机地址
      * TODO：部署时修改为真实的
      */
-    public static final String HOST_URL = "192.168.0.1:2345";
+    public static String HOST_URL = getHostAddress() + ":2345";
+
+    /**
+     * 随机的本机主机名
+     */
+    public static String HOST_NAME = getHostname();
 
     /**
      * RPC超时时间
@@ -29,11 +42,40 @@ public class UtilConstant {
     public static final String ALL_COLUMN = "ALL";
 
     /**
-     * 获得本机名称
+     * 找不到
+     */
+    public static final Integer NOT_FOUND = -1;
+
+    /**
+     * 获得本机IP
+     *
+     * @return
+     */
+    private static String getHostAddress() {
+        String ip = null;
+        try {
+            ip = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            log.warn("获取本机IP失败");
+        }
+        return ip;
+    }
+
+
+    /**
+     * 随机获得本机名称
+     *
      * @return
      */
     public static String getHostname() {
-        return System.getenv().get("USER");
+        if (HOST_NAME != null) return HOST_NAME;
+        String basicCharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < 8; i++) {
+            int number = random.nextInt(basicCharSet.length());
+            sb.append(basicCharSet.charAt(number));
+        }
+        return sb.toString();
     }
-
 }

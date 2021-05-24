@@ -21,6 +21,11 @@ public class MasterConstant {
     public static final Integer MASTER_SERVER_PORT = 2345;
 
     /**
+     * MASTER主机名
+     */
+    public static final String MASTER_HOST_NAME = "MASTER";
+
+    /**
      * Master Server自身监听的RPC端口
      */
     public static final Integer RPC_LISTEN_PORT = 2345;
@@ -34,4 +39,15 @@ public class MasterConstant {
      * meta数据本地保存的文件
      */
     public static final String META_INFO_STORAGE_FILE = "meta.dat";
+
+    /**
+     * 集群能够运行需要的最小服务器数量
+     */
+    public static final Integer MIN_VALID_DATA_SERVER = 3;
+
+    /**
+     * 闲置服务器大于2则可以重新分配一对
+     */
+    public static final Integer REALLOCATE_PAIR_LOW_BOUND = 2;
+
 }

@@ -1,10 +1,5 @@
 package com.siriusdb.client.db.api;
 
-import com.siriusdb.model.db.Condition;
-import com.siriusdb.model.db.Table;
-import com.siriusdb.model.db.RecordManagerResult;
-import java.util.List;
-
 public interface IRecordManager {
 
     /*
@@ -21,7 +16,7 @@ public interface IRecordManager {
                                                   List<Condition> whereConditions);
 
     RecordManagerResult<?> insert(Table table, List<Attribute<?>> values);
-     */
+    */
 }
 
 

@@ -1,7 +1,8 @@
-package com.siriusdb.model.master;
+package com.siriusdb.model.db;
 
-import com.siriusdb.model.db.Attribute;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.List;
  * @date: 2021/05/17 8:11 下午
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TableMeta implements Serializable {
 
     private String name;
@@ -19,6 +22,8 @@ public class TableMeta implements Serializable {
     private String primaryKey;
 
     private String locatedServerName;
+
+    private String locatedServerUrl;
 
     private List<Attribute> attributes;
 }

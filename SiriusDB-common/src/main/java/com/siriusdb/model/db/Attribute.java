@@ -1,15 +1,14 @@
 package com.siriusdb.model.db;
-
+import com.siriusdb.enums.DataTypeEnum;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * @Description: 列属性元数据
- * @author: liuxuanming
- * @date: 2021/05/18 4:18 下午
- */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Attribute implements Serializable {
 
     private Integer id;
@@ -17,4 +16,5 @@ public class Attribute implements Serializable {
     private String name;
 
     private String type;
+
 }
