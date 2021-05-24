@@ -28,4 +28,11 @@ public class RpcResult {
                 .setDesc(RpcResultCodeEnum.NOT_FOUND.getDesc());
     }
 
+    public static BaseResp hasExistedResp() {
+        return new BaseResp()
+                .setCode(RpcResultCodeEnum.HAS_EXISTED.getCode())
+                .setDesc(RpcResultCodeEnum.HAS_EXISTED.getDesc());
+    }
+
+
 }

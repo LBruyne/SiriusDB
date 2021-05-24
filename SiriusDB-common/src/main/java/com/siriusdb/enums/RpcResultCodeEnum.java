@@ -13,7 +13,7 @@ public enum RpcResultCodeEnum {
     SUCCESS(0, "success"),
 
     /**
-     * 校验失败或者参数传递错误或者接收者错误
+     * 参数校验失败，或者参数传递错误，或者服务处于异常状态
      */
     FAIL(-1, "fail"),
 

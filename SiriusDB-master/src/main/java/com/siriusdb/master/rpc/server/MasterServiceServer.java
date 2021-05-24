@@ -5,15 +5,15 @@ import com.siriusdb.enums.ErrorCodeEnum;
 import com.siriusdb.enums.RpcOperationEnum;
 import com.siriusdb.exception.BasicBusinessException;
 import com.siriusdb.master.biz.zk.ServiceStrategyExecutor;
-import com.siriusdb.model.db.Attribute;
 import com.siriusdb.model.db.TableMeta;
+import com.siriusdb.model.master.DataServer;
 import com.siriusdb.thrift.model.*;
+import com.siriusdb.utils.copy.CopyUtils;
 import com.siriusdb.utils.rpc.DynamicThriftServer;
 import com.siriusdb.utils.rpc.RpcResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.transport.TTransportException;
-import org.springframework.beans.BeanUtils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,11 +35,22 @@ public class MasterServiceServer extends DynamicThriftServer {
         super(processor);
     }
 
+    /**
+     * 根据请求的表格名返回相应的TableMeta数据
+     *
+     * @param names
+     * @return
+     */
     public static QueryTableMetaInfoResponse queryTableMeta(List<String> names) {
         QueryTableMetaInfoResponse response = null;
 
         // 这里是真正的业务逻辑
-        if (names == null || names.size() == 0) {
+        if (ServiceStrategyExecutor.DataHolder.isServiceAbnormalState()) {
+            log.warn("服务处于非正常状态");
+            response = new QueryTableMetaInfoResponse()
+                    .setMeta(null)
+                    .setBaseResp(RpcResult.failResp());
+        } else if (names == null || names.size() == 0) {
             // 对参数进行验证
             log.warn("请求参数有误");
             response = new QueryTableMetaInfoResponse()
@@ -50,7 +61,7 @@ public class MasterServiceServer extends DynamicThriftServer {
             log.warn("请求所有表格的元数据");
             List<VTableMeta> result = ServiceStrategyExecutor.DataHolder.tableMetaList
                     .stream()
-                    .map(table -> tableMToVTableM(table)).collect(Collectors.toList());
+                    .map(table -> CopyUtils.tableMToVTableM(table)).collect(Collectors.toList());
             response = new QueryTableMetaInfoResponse()
                     .setMeta(result)
                     .setBaseResp(RpcResult.successResp());
@@ -70,7 +81,7 @@ public class MasterServiceServer extends DynamicThriftServer {
                 } else {
                     // 该表格存在
                     log.warn("查询表格{}成功", name);
-                    result.add(tableMToVTableM(table));
+                    result.add(CopyUtils.tableMToVTableM(table));
                 }
             }
             response = new QueryTableMetaInfoResponse()
@@ -80,58 +91,79 @@ public class MasterServiceServer extends DynamicThriftServer {
         return response;
     }
 
+    /**
+     * 接收RegionServer的告知，然后让TableMeta进行相应的变化
+     *
+     * @param tableName
+     * @param vTableMeta
+     * @param operationCode
+     * @return
+     */
     public static NotifyTableMetaChangeResponse notifyTableMetaChange(String tableName, VTableMeta vTableMeta, Integer operationCode) {
-        NotifyTableMetaChangeResponse response = null;
-
-        if (operationCode.equals(RpcOperationEnum.CREATE.getCode())) {
-
+        if (ServiceStrategyExecutor.DataHolder.isServiceAbnormalState()) {
+            log.warn("服务处于非正常状态");
+            return new NotifyTableMetaChangeResponse()
+                    .setBaseResp(RpcResult.failResp());
+        } else if (operationCode.equals(RpcOperationEnum.CREATE.getCode())) {
+            // 如果该表格已经存在
+            if (ServiceStrategyExecutor.DataHolder.isTableExisted(tableName)) {
+                return new NotifyTableMetaChangeResponse().setBaseResp(RpcResult.hasExistedResp());
+            }
+            // 否则添加数据
+            TableMeta tableMeta = CopyUtils.vTableMToTableM(vTableMeta);
+            ServiceStrategyExecutor.DataHolder.addTableData(tableMeta);
+            log.warn("创建表格{}数据成功", tableName);
         } else if (operationCode.equals(RpcOperationEnum.DELETE.getCode())) {
-
+            // 如果该表格不存在
+            if (!ServiceStrategyExecutor.DataHolder.isTableExisted(tableName)) {
+                return new NotifyTableMetaChangeResponse().setBaseResp(RpcResult.notFoundResp());
+            }
+            // 否则删除数据
+            ServiceStrategyExecutor.DataHolder.removeTableMeta(tableName);
+            log.warn("删除表格{}数据成功", tableName);
         } else if (operationCode.equals(RpcOperationEnum.UPDATE.getCode())) {
-
+            // 如果该表格不存在
+            if (!ServiceStrategyExecutor.DataHolder.isTableExisted(tableName)) {
+                return new NotifyTableMetaChangeResponse().setBaseResp(RpcResult.notFoundResp());
+            }
+            TableMeta tableMeta = CopyUtils.vTableMToTableM(vTableMeta);
+            ServiceStrategyExecutor.DataHolder.updateTableMeta(tableMeta);
+            log.warn("更新表格{}数据成功", tableName);
         } else {
             throw new BasicBusinessException(ErrorCodeEnum.BUSINESS_VALIDATION_FAILED.getCode(), "未定义的操作码");
         }
-        return response;
+        return new NotifyTableMetaChangeResponse().setBaseResp(RpcResult.successResp());
     }
 
+    /**
+     * 判断该表格是否存在，如果不存在，根据负载均衡选择一台服务器存储表格
+     *
+     * @param name
+     * @return
+     */
     public static QueryCreateTableResponse queryCreateTable(String name) {
-        return null;
-    }
-
-    private static VTableMeta tableMToVTableM(TableMeta table) {
-//        // 比较复杂的办法，一个个属性复制
-//        VTableMeta vtable = new VTableMeta();
-//        // 复制name属性
-//        vtable.setName(table.getName());
-//        // 复制primaryKey属性
-//        vtable.setPrimaryKey(table.getPrimaryKey());
-//        // 复制locatedServerName属性
-//        vtable.setLocatedServerName(table.getLocatedServerName());
-//        // 复制attributes属性
-//        List<VAttribute> vAttributes = new LinkedList<>();
-//        for (Attribute attribute : table.getAttributes()) {
-//            VAttribute vAttribute = new VAttribute();
-//            vAttribute.setId(attribute.getId());
-//            vAttribute.setName(attribute.getName());
-//            vAttribute.setType(attribute.getType());
-//            vAttributes.add(vAttribute);
-//        }
-//        vtable.setAttributes(vAttributes);
-//        return vtable;
-
-        // 比较简单的办法，用BeanUtils进行属性拷贝
-        VTableMeta vtable = new VTableMeta();
-        // 公共属性复制：要求属性类型、属性名称一致
-        BeanUtils.copyProperties(table, vtable);
-        // 复制attributes属性
-        vtable.setAttributes(table.getAttributes().stream().map(attribute -> attrToVAttr(attribute)).collect(Collectors.toList()));
-        return vtable;
-    }
-
-    private static VAttribute attrToVAttr(Attribute attribute) {
-        VAttribute vAttribute = new VAttribute();
-        BeanUtils.copyProperties(attribute, vAttribute);
-        return vAttribute;
+        if (ServiceStrategyExecutor.DataHolder.isServiceAbnormalState()) {
+            log.warn("服务处于非正常状态");
+            return new QueryCreateTableResponse()
+                    .setLocatedServerName(null)
+                    .setLocatedServerUrl(null)
+                    .setBaseResp(RpcResult.failResp());
+        } else {
+            if (ServiceStrategyExecutor.DataHolder.isTableExisted(name)) {
+                log.warn("该表格已经存在");
+                return new QueryCreateTableResponse()
+                        .setLocatedServerName(null)
+                        .setLocatedServerUrl(null)
+                        .setBaseResp(RpcResult.hasExistedResp());
+            } else {
+                Integer serverId = ServiceStrategyExecutor.DataHolder.allocateLocatedServer();
+                DataServer server = ServiceStrategyExecutor.DataHolder.getDataServerById(serverId);
+                log.warn("选择服务器{}作为该表格存储的位置", server.getHostName());
+                return new QueryCreateTableResponse()
+                        .setLocatedServerUrl(server.getHostUrl())
+                        .setLocatedServerName(server.getHostName())
+                        .setBaseResp(RpcResult.successResp());
+            }
+        }
     }
 }

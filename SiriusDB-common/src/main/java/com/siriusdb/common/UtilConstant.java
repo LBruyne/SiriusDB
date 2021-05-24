@@ -14,6 +14,7 @@ import java.util.Random;
 @Slf4j
 public class UtilConstant {
 
+    public static final Integer INF = 10000000;
     /**
      * 本机主机地址
      * TODO：部署时修改为真实的
@@ -41,7 +42,13 @@ public class UtilConstant {
     public static final String ALL_COLUMN = "ALL";
 
     /**
+     * 找不到
+     */
+    public static final Integer NOT_FOUND = -1;
+
+    /**
      * 获得本机IP
+     *
      * @return
      */
     private static String getHostAddress() {
@@ -61,7 +68,7 @@ public class UtilConstant {
      * @return
      */
     public static String getHostname() {
-        if(HOST_NAME != null) return HOST_NAME;
+        if (HOST_NAME != null) return HOST_NAME;
         String basicCharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
         StringBuffer sb = new StringBuffer();

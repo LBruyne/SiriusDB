@@ -62,7 +62,7 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
 
     public void notifyStateChange(DataServer server, String receiver) throws TException {
         DataServer dualServer = ServiceStrategyExecutor.DataHolder.getDataServerById(server.getDualServerId());
-        if(dualServer == null)
+        if (dualServer == null)
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "该服务器不存在对偶服务器");
         NotifyStateRequest request = new NotifyStateRequest()
                 .setBase(new Base()
@@ -85,20 +85,5 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
             log.warn("向{}通知状态变化失败", receiver);
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "通知状态变化失败");
         }
-    }
-
-    private TableMeta vTableMToTableM(VTableMeta vTableMeta) {
-        TableMeta tableMeta = new TableMeta();
-        BeanUtils.copyProperties(vTableMeta, tableMeta);
-        tableMeta.setAttributes(vTableMeta.getAttributes()
-                .stream()
-                .map(vAttr -> vAttrToAttr(vAttr)).collect(Collectors.toList()));
-        return tableMeta;
-    }
-
-    private Attribute vAttrToAttr(VAttribute vAttribute) {
-        Attribute attribute = new Attribute();
-        BeanUtils.copyProperties(vAttribute, attribute);
-        return attribute;
     }
 }

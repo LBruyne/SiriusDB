@@ -100,7 +100,7 @@ public class DataServer implements Serializable {
      * @param server
      */
     public void makePair(DataServer server) {
-        if(server.getState() != DataServerStateEnum.IDLE || this.getState() != DataServerStateEnum.IDLE) {
+        if (server.getState() != DataServerStateEnum.IDLE || this.getState() != DataServerStateEnum.IDLE) {
             throw new BasicBusinessException(ErrorCodeEnum.BUSINESS_VALIDATION_FAILED.getCode(), "不能和不为空闲状态的机器结对");
         } else {
             this.setState(DataServerStateEnum.PRIMARY);
