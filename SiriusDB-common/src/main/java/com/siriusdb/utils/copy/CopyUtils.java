@@ -17,6 +17,7 @@ public class CopyUtils {
 
     /**
      * TableMeta -> VTableMeta
+     *
      * @param table
      * @return
      */
@@ -46,12 +47,15 @@ public class CopyUtils {
         // 公共属性复制：要求属性类型、属性名称一致
         BeanUtils.copyProperties(table, vtable);
         // 复制attributes属性
-        vtable.setAttributes(table.getAttributes().stream().map(attribute -> attrToVAttr(attribute)).collect(Collectors.toList()));
+        vtable.setAttributes(table.getAttributes()
+                .stream()
+                .map(attribute -> attrToVAttr(attribute)).collect(Collectors.toList()));
         return vtable;
     }
 
     /**
      * Attr -> VAttr
+     *
      * @param attribute
      * @return
      */
@@ -63,6 +67,7 @@ public class CopyUtils {
 
     /**
      * VTableMeta -> TableMeta
+     *
      * @param vTableMeta
      * @return
      */
@@ -77,6 +82,7 @@ public class CopyUtils {
 
     /**
      * VAttr -> Attr
+     *
      * @param vAttribute
      * @return
      */
