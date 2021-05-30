@@ -1,9 +1,7 @@
 package com.siriusdb.utils.copy;
 
-import com.siriusdb.model.db.Attribute;
-import com.siriusdb.model.db.TableMeta;
-import com.siriusdb.thrift.model.VAttribute;
-import com.siriusdb.thrift.model.VTableMeta;
+import com.siriusdb.model.db.*;
+import com.siriusdb.thrift.model.*;
 import org.springframework.beans.BeanUtils;
 
 import java.util.stream.Collectors;
@@ -51,17 +49,6 @@ public class CopyUtils {
     }
 
     /**
-     * Attr -> VAttr
-     * @param attribute
-     * @return
-     */
-    public static VAttribute attrToVAttr(Attribute attribute) {
-        VAttribute vAttribute = new VAttribute();
-        BeanUtils.copyProperties(attribute, vAttribute);
-        return vAttribute;
-    }
-
-    /**
      * VTableMeta -> TableMeta
      * @param vTableMeta
      * @return
@@ -76,13 +63,132 @@ public class CopyUtils {
     }
 
     /**
+     * VTable -> Table
+     * @param vTable
+     * @return
+     */
+    public static Table vTableToTable(VTable vTable){
+        Table table = new Table();
+        BeanUtils.copyProperties(vTable, table);
+        table.setMeta(vTableMToTableM(vTable.getMeta()));
+        table.setIndexes(vTable.getIndexes()
+                .stream()
+                .map(vIndex -> vIndexToIndex(vIndex)).collect(Collectors.toList()));
+        table.setData(vTable.getData()
+                .stream()
+                .map(vRow -> vRowToRow(vRow)).collect(Collectors.toList()));
+        return table;
+    }
+
+    /**
+     * Table -> VTable
+     * @param table
+     * @return
+     */
+    public static VTable tableToVTable(Table table){
+        VTable vTable = new VTable();
+        BeanUtils.copyProperties(table,vTable);
+        vTable.setMeta(tableMToVTableM(table.getMeta()));
+        vTable.setIndexes(table.getIndexes()
+                .stream()
+                .map(index -> indexToVIndex(index)).collect(Collectors.toList()));
+        vTable.setData(table.getData()
+                .stream()
+                .map(row -> rowToVRow(row)).collect(Collectors.toList()));
+        return vTable;
+    }
+
+
+    /**
+     * Index -> VIndex
+     * @param index
+     * @return
+     */
+    public static VIndex indexToVIndex(Index index){
+        VIndex vIndex = new VIndex();
+        BeanUtils.copyProperties(index,vIndex);
+        return vIndex;
+    }
+
+    /**
+     * VIndex -> Index
+     * @param vIndex
+     * @return
+     */
+    public static Index vIndexToIndex(VIndex vIndex){
+        Index index = new Index();
+        BeanUtils.copyProperties(vIndex,index);
+        return index;
+    }
+
+
+    /**
      * VAttr -> Attr
      * @param vAttribute
      * @return
      */
-    public static Attribute vAttrToAttr(VAttribute vAttribute) {
+    public static Attribute vAttrToAttr(VAttribute vAttribute){
         Attribute attribute = new Attribute();
         BeanUtils.copyProperties(vAttribute, attribute);
         return attribute;
     }
+
+    /**
+     * Attr -> VAttr
+     * @param attribute
+     * @return
+     */
+    public static VAttribute attrToVAttr(Attribute attribute) {
+        VAttribute vAttribute = new VAttribute();
+        BeanUtils.copyProperties(attribute, vAttribute);
+        return vAttribute;
+    }
+
+
+    /**
+     * VElement -> Element
+     * @param vElement
+     * @return
+     */
+    public static Element vElementToElement(VElement vElement){
+        Element element = new Element();
+        BeanUtils.copyProperties(vElement,element);
+        return element;
+    }
+
+    /**
+     * Element -> VElement
+     * @param element
+     * @return
+     */
+    public static VElement elementToVElement(Element element){
+        VElement vElement = new VElement();
+        BeanUtils.copyProperties(element,vElement);
+        return vElement;
+    }
+
+    /**
+     * Row -> VRow
+     * @param row
+     * @return
+     */
+    public static VRow rowToVRow(Row row){
+        VRow vRow = new VRow();
+        BeanUtils.copyProperties(row,vRow);
+        vRow.setElements(row.getElements().stream().map(element -> elementToVElement(element)).collect(Collectors.toList()));
+        return vRow;
+    }
+
+    /**
+     * VRow -> Row
+     * @param vRow
+     * @return
+     */
+    public static Row vRowToRow(VRow vRow){
+        Row row = new Row();
+        BeanUtils.copyProperties(vRow,row);
+        row.setElements(vRow.getElements().stream().map(vElement -> vElementToElement(vElement)).collect(Collectors.toList()));
+        return row;
+    }
+
 }

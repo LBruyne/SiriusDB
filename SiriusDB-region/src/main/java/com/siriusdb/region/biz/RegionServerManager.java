@@ -12,12 +12,12 @@ import org.slf4j.LoggerFactory;
 @Slf4j
 public class RegionServerManager {
 
-    private BufferManager bufferManager;
+    private RegionServiceManager regionServiceManager;
 
     private ZkServiceManager zkServiceManager;
 
     public RegionServerManager() {
-        bufferManager = new BufferManager();
+        regionServiceManager = new RegionServiceManager();
         zkServiceManager = new ZkServiceManager();
     }
 
@@ -27,6 +27,6 @@ public class RegionServerManager {
         zkServiceThread.start();
 
         // 主线程：
-        System.out.println("111");
+        regionServiceManager.startService();
     }
 }

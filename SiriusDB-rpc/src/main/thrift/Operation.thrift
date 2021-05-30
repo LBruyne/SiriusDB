@@ -60,7 +60,6 @@ struct NotifyStateRequest {
     3: required string dualServerUrl,
     255: required Base.Base base
 }
-
 /**
  * Master告知Region当前状态响应
  */
