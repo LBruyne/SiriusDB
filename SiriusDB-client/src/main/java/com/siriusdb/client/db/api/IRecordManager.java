@@ -1,5 +1,10 @@
 package com.siriusdb.client.db.api;
 
+import com.siriusdb.model.RecordManagerResult;
+import com.siriusdb.model.db.*;
+
+import java.util.List;
+
 public interface IRecordManager {
 
     /*
@@ -17,6 +22,25 @@ public interface IRecordManager {
 
     RecordManagerResult<?> insert(Table table, List<Attribute<?>> values);
     */
+
+    RecordManagerResult<List<Row>> select(List<TableAttribute> selectedAttributes, List<Table> tables, List<ICondition> joinCondition, List<ICondition> whereCondition, boolean isAnd);
+    /*
+     * 举例：
+     * select student.studentID, grades.studentGrade from student join grades on student.studentID = grades.studentID where student.studentID = 123 and grades.courseName = "NLP";
+     * selectedAttributes： List<Element<?>> (len = 2), 每一个element内部需要指明table，否则不知道是哪个table的属性了
+     * tables: List<Table> (len = 2)
+     * joinCondition: List<Condition<?>> (len = 1) Condition类内部还是需要将它的Element中的Table设置好，不然不知道是哪个表了
+     * whereCondition: List<Condition<?>> (len = 2) Condition类内部还是需要将它的Element中的Table设置好，不然不知道是哪个表了
+     * isAnd = true 表示where 后面的每个condition中间用and连接，如果是or就传入false | 不支持and和or混合
+     * */
+
+
+    RecordManagerResult delete(Table table, List<AttrVSValueCondition<?>> cons);
+
+    RecordManagerResult insert(Table table, List<Element<?>> values);
+
+    RecordManagerResult update(Table table, List<AttrVSValueCondition<?>> setCondition, List<AttrVSValueCondition<?>> attrVSValueCondition);
+
 }
 
 
