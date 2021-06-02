@@ -116,4 +116,5 @@ public class DataServer implements Serializable {
             log.warn("{}的配偶是{}", this.getHostName(), server.getHostName());
         }
     }
+
 }
