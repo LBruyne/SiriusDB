@@ -23,7 +23,7 @@ public interface IRecordManager {
     RecordManagerResult<?> insert(Table table, List<Attribute<?>> values);
     */
 
-    RecordManagerResult<List<Row>> select(List<TableAttribute> selectedAttributes, List<Table> tables, List<ICondition> joinCondition, List<ICondition> whereCondition, boolean isAnd);
+    RecordManagerResult<RecordManagerTable> select(List<TableAttribute> selectedAttributes, List<Table> tables, List<ICondition> joinCondition, List<ICondition> whereCondition, boolean isAnd);
     /*
      * 举例：
      * select student.studentID, grades.studentGrade from student join grades on student.studentID = grades.studentID where student.studentID = 123 and grades.courseName = "NLP";
