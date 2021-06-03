@@ -1,6 +1,7 @@
 package com.siriusdb.client.rpc.client;
 
 import com.siriusdb.common.MasterConstant;
+import com.siriusdb.common.UtilConstant;
 import com.siriusdb.enums.ErrorCodeEnum;
 import com.siriusdb.enums.RpcOperationEnum;
 import com.siriusdb.enums.RpcResultCodeEnum;
@@ -9,6 +10,7 @@ import com.siriusdb.model.db.Table;
 import com.siriusdb.thrift.model.*;
 import com.siriusdb.thrift.service.MasterService;
 import com.siriusdb.thrift.service.RegionService;
+import com.siriusdb.utils.copy.CopyUtils;
 import com.siriusdb.utils.rpc.DynamicThriftClient;
 import org.apache.thrift.TException;
 import org.springframework.beans.BeanUtils;
@@ -33,15 +35,14 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
         List<String> list1 = new ArrayList<>();
         list1.add(newTable.getMeta().getName());
         List<VTable> list2 = new ArrayList<VTable>();
-        VTable vtable = new VTable();
-        BeanUtils.copyProperties(newTable, vtable);
+        VTable vtable = CopyUtils.tableToVTable(newTable);
         list2.add(vtable);
         NotifyTableChangeRequest req = new NotifyTableChangeRequest()
                 .setTables(list2)
                 .setTableNames(list1)
                 .setOperationCode(RpcOperationEnum.CREATE.getCode())
                 .setBase(new Base()
-                        .setCaller(MasterConstant.MASTER_HOST_NAME)
+                        .setCaller(UtilConstant.HOST_NAME)
                         .setReceiver(receiver));
         NotifyTableChangeResponse res = client.notifyTableChange(req);
 
@@ -54,19 +55,18 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
         }
     }
 
-    public void trueDropTable(Table newTable, String receiver) throws TException {
+    public void trueDropTable(Table oldTable, String receiver) throws TException {
         List<String> list1 = new ArrayList<>();
-        list1.add(newTable.getMeta().getName());
+        list1.add(oldTable.getMeta().getName());
         List<VTable> list2 = new ArrayList<VTable>();
-        VTable vtable = new VTable();
-        BeanUtils.copyProperties(newTable, vtable);
+        VTable vtable = CopyUtils.tableToVTable(oldTable);
         list2.add(vtable);
         NotifyTableChangeRequest req = new NotifyTableChangeRequest()
                 .setTables(list2)
                 .setTableNames(list1)
                 .setOperationCode(RpcOperationEnum.DELETE.getCode())
                 .setBase(new Base()
-                        .setCaller(MasterConstant.MASTER_HOST_NAME)
+                        .setCaller(UtilConstant.HOST_NAME)
                         .setReceiver(receiver));
         NotifyTableChangeResponse res = client.notifyTableChange(req);
 
