@@ -45,7 +45,6 @@ public class RegionServiceImpl implements RegionService.Iface {
         }
         //建立循环
         for(int i=0;i<tableName1.size();i++){
-            //先读取到
             Table tableTmp = null;
             VTable vtableTmp = null;
             File file = new File(tableName1.get(i) + ".dat");
