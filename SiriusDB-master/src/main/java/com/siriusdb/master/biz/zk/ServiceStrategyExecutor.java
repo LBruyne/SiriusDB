@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 
 import java.io.*;
-import java.sql.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -60,8 +59,8 @@ public class ServiceStrategyExecutor {
                     execInvalidStrategy(server);
                     break;
             }
-            DataHolder.write();
-        } catch (IOException | TException e) {
+            // DataHolder.write();
+        } catch (TException e) {
             log.warn(e.getMessage(), e);
         }
     }
@@ -74,7 +73,7 @@ public class ServiceStrategyExecutor {
                 DataHolder.getDataServerById(server.getDualServerId()).setDualServerId(MasterConstant.NO_DUAL_SERVER);
                 server.serverInvalid();
                 log.warn("服务器数量不足");
-                throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "服务器失效后没有备用机器，系统非正常状态");
+                log.warn("服务器失效后没有备用机器，系统非正常状态");
             } else {
                 // 有备用机器，进行一次结对
                 DataServer serverNotInPair = DataHolder.getDataServerById(server.getDualServerId()); // 孤单的服务器
@@ -90,11 +89,11 @@ public class ServiceStrategyExecutor {
                 server.serverInvalid();
             } else {
                 server.serverInvalid();
-                throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "空闲机数量不足，系统非正常状态");
+                log.warn("空闲机数量不足，系统非正常状态");
             }
         } else {
             server.serverInvalid();
-            throw new BasicBusinessException(ErrorCodeEnum.BASIC_VALIDATION_FAILED.getCode(), "失效的服务器原本的状态不合法");
+            log.warn("失效的服务器原本的状态不合法");
         }
     }
 
@@ -119,11 +118,11 @@ public class ServiceStrategyExecutor {
                 DataHolder.remakeServerPair(server, serverNotInPair);
                 log.warn("服务器{}和服务器{}重新结对", server.getHostName(), serverNotInPair.getHostName());
             }
-            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "目前数据服务器数量不足,服务处于非正常状态");
+            log.warn("目前数据服务器数量不足,服务处于非正常状态");
         } else {
             // 服务器数量足够
             // 如果目前数据服务器不成对存在，与不成对的那一台服务器结对
-            log.warn("当前服务器数量充足");
+            log.warn("当前服务器数量充足，有{}台", DataHolder.dataServers.size());
             DataServer serverNotInPair = DataHolder.getServerNotInPair();
             if (serverNotInPair != null) {
                 // 发现有服务器不成对存在，与未结对的机器进行结对
@@ -213,7 +212,7 @@ public class ServiceStrategyExecutor {
                 // 运行中
                 if (server.getState() == DataServerStateEnum.PRIMARY || server.getState() == DataServerStateEnum.COPY) {
                     // 但没有对偶机器
-                    if (server.getDualServerId() == MasterConstant.NO_DUAL_SERVER) {
+                    if (server.getDualServerId().equals(MasterConstant.NO_DUAL_SERVER)) {
                         log.warn("查询到目前数据服务器{}处于未结对状态", server);
                         return server;
                     }
@@ -257,7 +256,7 @@ public class ServiceStrategyExecutor {
         public static void makeServerPairFromIdleServer(DataServer server) throws TException {
             DataServer server2 = getOneServerInIdle(server);
             if (server2 == null)
-                throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "不存在其他闲置服务器");
+                log.warn("不存在其他闲置服务器");
 
             server.makePair(server2);
 

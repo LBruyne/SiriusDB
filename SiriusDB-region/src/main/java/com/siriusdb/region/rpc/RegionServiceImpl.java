@@ -1,15 +1,15 @@
 package com.siriusdb.region.rpc;
 
-import com.siriusdb.common.MasterConstant;
+
 import com.siriusdb.common.UtilConstant;
 import com.siriusdb.enums.RpcOperationEnum;
 import com.siriusdb.model.db.Table;
 import com.siriusdb.model.master.DataServer;
 import com.siriusdb.thrift.model.*;
-import com.siriusdb.thrift.service.MasterService;
 import com.siriusdb.thrift.service.RegionService;
 import com.siriusdb.utils.copy.CopyUtils;
 import com.siriusdb.utils.rpc.RpcResult;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 
 
@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 
+@Slf4j
 public class RegionServiceImpl implements RegionService.Iface {
     //返回一系列特定的表格数据
     @Override
@@ -28,9 +29,9 @@ public class RegionServiceImpl implements RegionService.Iface {
         //声明一个临时对象用来存储读取出来的数据
         List<VTable> vtables = null;
         //获取表名称
-        List<String> tableName= req.getTableNames();
+        List<String> tableName = req.getTableNames();
         List<String> tableName1 = new ArrayList<String>();
-        if(tableName.get(0) == "ALL_TABLE"){
+        if (tableName.get(0) == "ALL_TABLE") {
             File file = new File(this.getClass().getResource("").getPath());
             File[] tempList = file.listFiles();
             for (int i = 0; i < tempList.length; i++) {
@@ -40,23 +41,21 @@ public class RegionServiceImpl implements RegionService.Iface {
                 if (tempList[i].isDirectory()) {
                 }
             }
-        }
-        else{
+        } else {
             tableName1.addAll(tableName);
         }
         //建立循环
-        for(int i=0;i<tableName1.size();i++){
+        for (int i = 0; i < tableName1.size(); i++) {
             Table tableTmp = null;
             VTable vtableTmp = null;
             File file = new File(tableName1.get(i) + ".dat");
             FileInputStream in;
             try {
                 in = new FileInputStream(file);
-                ObjectInputStream objIn=new ObjectInputStream(in);
-                tableTmp=(Table) objIn.readObject();
+                ObjectInputStream objIn = new ObjectInputStream(in);
+                tableTmp = (Table) objIn.readObject();
                 objIn.close();
-            }
-            catch (Exception e){
+            } catch (Exception e) {
                 return new QueryTableDataResponse().setBaseResp(RpcResult.failResp());
             }
             //将table的值赋值给vtable
@@ -72,24 +71,24 @@ public class RegionServiceImpl implements RegionService.Iface {
     //Master告知某服务器状态变化,存储该变化
     @Override
     public NotifyStateResponse notifyStateChange(NotifyStateRequest req) throws TException {
-        try{
-            BufferedWriter bw = new BufferedWriter(new FileWriter("dualmachine.txt"));
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(UtilConstant.getHostname() + "-dual.txt"));
             String stateCode = Integer.toString(req.getStateCode());
             String dualServerUrl = req.getDualServerUrl();
-            String dulServerName = req.getDualServerName();
+            String daulServerName = req.getDualServerName();
             /*要先判断是否是否存在那个文件，如果存在就要更新，否则就直接写入*/
             bw.write(stateCode);
             bw.newLine();
-            bw.write(dulServerName);
+            bw.write(daulServerName);
             bw.newLine();
             bw.write(dualServerUrl);
             bw.newLine();
             bw.close();
-        }
-        catch (Exception e){
+            log.warn("接收到Master的状态变更告知，状态变更为{}，对偶服务器为{}:{}", stateCode, daulServerName, dualServerUrl);
+        } catch (Exception e) {
             return new NotifyStateResponse().setBaseResp(RpcResult.failResp());
         }
-        
+
         return new NotifyStateResponse()
                 .setBaseResp(RpcResult.successResp());
     }
@@ -104,7 +103,7 @@ public class RegionServiceImpl implements RegionService.Iface {
         String stateCode = "";
         String dualServerName = "";
         String dualServerUrl = "";
-        try{
+        try {
             FileReader fr = new FileReader(stateFile);
             BufferedReader br = new BufferedReader(fr);
             stateCode = br.readLine();
@@ -112,78 +111,66 @@ public class RegionServiceImpl implements RegionService.Iface {
             dualServerUrl = br.readLine();
             fr.close();
             br.close();
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return new NotifyTableChangeResponse()
                     .setBaseResp(RpcResult.failResp());
         }
         DataServer dataServer = DataServer.builder().hostUrl(dualServerUrl).hostName(dualServerName).build();
         String dualIp = dataServer.getIp();
         Integer dualPort = dataServer.getPort();
-        RegionServerClient regionServerClient = new RegionServerClient(RegionService.Client.class,dualIp,dualPort);
-        MasterServerClient masterServerClient = new MasterServerClient(MasterService.Client.class,MasterConstant.MASTER_SERVER_IP,MasterConstant.MASTER_SERVER_PORT);
-        if(stateCode == "0") {
+        RegionServerClient regionServerClient = new RegionServerClient(RegionService.Client.class, dualIp, dualPort);
+
+        if (stateCode == "0") {
             /*读取文件状态文件，如果是主机要调用副机的，如果是副机直接执行*/
             regionServerClient.notifyTableChange(req);
         }
-            if (operationCode == RpcOperationEnum.DELETE.getCode()) {
-                for (int i = 0; i < tableNames.size(); i++) {
-                    masterServerClient.notifyTableMetaChange(tableNames.get(i),RpcOperationEnum.DELETE.getCode(), vTableList.get(i).getMeta(),new Base()
-                            .setCaller(UtilConstant.getHostname())
-                            .setReceiver(MasterConstant.MASTER_HOST_NAME));
-                    File file = new File(tableNames.get(i) + ".dat");
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                }
-            } else if (operationCode == RpcOperationEnum.UPDATE.getCode()) {
-                for (int i = 0; i < tableNames.size(); i++) {
-                    masterServerClient.notifyTableMetaChange(tableNames.get(i),RpcOperationEnum.UPDATE.getCode(), vTableList.get(i).getMeta(),new Base()
-                            .setCaller(UtilConstant.getHostname())
-                            .setReceiver(MasterConstant.MASTER_HOST_NAME));
-                    File file = new File(tableNames.get(i) + ".dat");
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                    //先删除再写入
-                    VTable vTableTmp = vTableList.get(i);
-                    Table tableTmp = CopyUtils.vTableToTable(vTableTmp);
-                    FileOutputStream out;
-                    try {
-                        out = new FileOutputStream(file);
-                        ObjectOutputStream objOut = new ObjectOutputStream(out);
-                        objOut.writeObject(tableTmp);
-                        objOut.flush();
-                        objOut.close();
-                    }
-                    catch (Exception e){
-                        return new NotifyTableChangeResponse()
-                                .setBaseResp(RpcResult.failResp());
-                    }
-                }
-                /*更新文件*/
-            } else if (operationCode == RpcOperationEnum.CREATE.getCode()) {
-                for (int i = 0; i < vTableList.size(); i++) {
-                    masterServerClient.notifyTableMetaChange(tableNames.get(i),RpcOperationEnum.CREATE.getCode(), vTableList.get(i).getMeta(),new Base()
-                            .setCaller(UtilConstant.getHostname())
-                            .setReceiver(MasterConstant.MASTER_HOST_NAME));
-                    VTable vTableTmp = vTableList.get(i);
-                    File file = new File(vTableTmp.getMeta().getName() + ".dat");
-                    Table tableTmp = CopyUtils.vTableToTable(vTableTmp);
-                    FileOutputStream out;
-                    try {
-                        out = new FileOutputStream(file);
-                        ObjectOutputStream objOut = new ObjectOutputStream(out);
-                        objOut.writeObject(tableTmp);
-                        objOut.flush();
-                        objOut.close();
-                    }
-                    catch (Exception e){
-                        return new NotifyTableChangeResponse()
-                                .setBaseResp(RpcResult.failResp());
-                    }
+        if (operationCode == RpcOperationEnum.DELETE.getCode()) {
+            for (int i = 0; i < tableNames.size(); i++) {
+                File file = new File(tableNames.get(i) + ".dat");
+                if (file.exists()) {
+                    file.delete();
                 }
             }
+        } else if (operationCode == RpcOperationEnum.UPDATE.getCode()) {
+            for (int i = 0; i < tableNames.size(); i++) {
+                File file = new File(tableNames.get(i) + ".dat");
+                if (file.exists()) {
+                    file.delete();
+                }
+                //先删除再写入
+                VTable vTableTmp = vTableList.get(i);
+                Table tableTmp = CopyUtils.vTableToTable(vTableTmp);
+                FileOutputStream out;
+                try {
+                    out = new FileOutputStream(file);
+                    ObjectOutputStream objOut = new ObjectOutputStream(out);
+                    objOut.writeObject(tableTmp);
+                    objOut.flush();
+                    objOut.close();
+                } catch (Exception e) {
+                    return new NotifyTableChangeResponse()
+                            .setBaseResp(RpcResult.failResp());
+                }
+            }
+            /*更新文件*/
+        } else if (operationCode == RpcOperationEnum.CREATE.getCode()) {
+            for (int i = 0; i < vTableList.size(); i++) {
+                VTable vTableTmp = vTableList.get(i);
+                File file = new File(vTableTmp.getMeta().getName() + ".dat");
+                Table tableTmp = CopyUtils.vTableToTable(vTableTmp);
+                FileOutputStream out;
+                try {
+                    out = new FileOutputStream(file);
+                    ObjectOutputStream objOut = new ObjectOutputStream(out);
+                    objOut.writeObject(tableTmp);
+                    objOut.flush();
+                    objOut.close();
+                } catch (Exception e) {
+                    return new NotifyTableChangeResponse()
+                            .setBaseResp(RpcResult.failResp());
+                }
+            }
+        }
         return new NotifyTableChangeResponse()
                 .setBaseResp(RpcResult.successResp());
     }
@@ -194,7 +181,7 @@ public class RegionServiceImpl implements RegionService.Iface {
         DataServer dataServer = DataServer.builder().hostUrl(req.getTargetUrl()).hostName(req.getTargetName()).build();
         String targetIp = dataServer.getIp();
         Integer targetPort = dataServer.getPort();
-        RegionServerClient regionServerClient = new RegionServerClient(RegionService.Client.class,targetIp,targetPort);
+        RegionServerClient regionServerClient = new RegionServerClient(RegionService.Client.class, targetIp, targetPort);
 
         NotifyTableChangeRequest notifyTableChangeRequest = new NotifyTableChangeRequest()
                 .setTableNames(req.getTableNames())

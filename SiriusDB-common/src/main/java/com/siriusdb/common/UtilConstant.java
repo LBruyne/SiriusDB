@@ -19,7 +19,7 @@ public class UtilConstant {
      * 本机主机地址
      * TODO：部署时修改为真实的
      */
-    public static String HOST_URL = getHostAddress() + ":2345";
+    public static String HOST_URL = getHostAddress() + ":" + RegionConstant.port.toString();
 
     /**
      * 随机的本机主机名
