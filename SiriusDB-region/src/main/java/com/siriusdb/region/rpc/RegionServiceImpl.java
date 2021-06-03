@@ -1,6 +1,8 @@
 package com.siriusdb.region.rpc;
 
 
+import com.siriusdb.common.UtilConstant;
+import com.siriusdb.enums.RpcOperationEnum;
 import com.siriusdb.model.db.Table;
 import com.siriusdb.model.master.DataServer;
 import com.siriusdb.thrift.model.*;
@@ -55,6 +57,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                 objIn.close();
             }
             catch (Exception e){
+                return new QueryTableDataResponse().setBaseResp(RpcResult.failResp());
             }
             //将table的值赋值给vtable
             vtableTmp = CopyUtils.tableToVTable(tableTmp);
@@ -110,7 +113,10 @@ public class RegionServiceImpl implements RegionService.Iface {
             fr.close();
             br.close();
         }
-        catch (Exception e){ }
+        catch (Exception e){
+            return new NotifyTableChangeResponse()
+                    .setBaseResp(RpcResult.failResp());
+        }
         DataServer dataServer = DataServer.builder().hostUrl(dualServerUrl).hostName(dualServerName).build();
         String dualIp = dataServer.getIp();
         Integer dualPort = dataServer.getPort();
@@ -120,14 +126,14 @@ public class RegionServiceImpl implements RegionService.Iface {
             /*读取文件状态文件，如果是主机要调用副机的，如果是副机直接执行*/
             regionServerClient.notifyTableChange(req);
         }
-            if (operationCode == 2) {
+            if (operationCode == RpcOperationEnum.DELETE.getCode()) {
                 for (int i = 0; i < tableNames.size(); i++) {
                     File file = new File(tableNames.get(i) + ".dat");
                     if (file.exists()) {
                         file.delete();
                     }
                 }
-            } else if (operationCode == 1) {
+            } else if (operationCode == RpcOperationEnum.UPDATE.getCode()) {
                 for (int i = 0; i < tableNames.size(); i++) {
                     File file = new File(tableNames.get(i) + ".dat");
                     if (file.exists()) {
@@ -144,10 +150,13 @@ public class RegionServiceImpl implements RegionService.Iface {
                         objOut.flush();
                         objOut.close();
                     }
-                    catch (Exception e){}
+                    catch (Exception e){
+                        return new NotifyTableChangeResponse()
+                                .setBaseResp(RpcResult.failResp());
+                    }
                 }
                 /*更新文件*/
-            } else if (operationCode == 0) {
+            } else if (operationCode == RpcOperationEnum.CREATE.getCode()) {
                 for (int i = 0; i < vTableList.size(); i++) {
                     VTable vTableTmp = vTableList.get(i);
                     File file = new File(vTableTmp.getMeta().getName() + ".dat");
@@ -160,7 +169,10 @@ public class RegionServiceImpl implements RegionService.Iface {
                         objOut.flush();
                         objOut.close();
                     }
-                    catch (Exception e){}
+                    catch (Exception e){
+                        return new NotifyTableChangeResponse()
+                                .setBaseResp(RpcResult.failResp());
+                    }
                 }
             }
         return new NotifyTableChangeResponse()
@@ -181,10 +193,10 @@ public class RegionServiceImpl implements RegionService.Iface {
                 .setTables(queryTableData(new QueryTableDataRequest()
                         .setTableNames(req.getTableNames())
                         .setBase(new Base()
-                                .setCaller("127.0.0.1")//怎么得到自己的ip
+                                .setCaller(UtilConstant.getHostname())//怎么得到自己的ip
                                 .setReceiver(targetIp))).getTables())
                 .setBase(new Base()
-                        .setCaller("127.0.0.1")//怎么得到自己的ip
+                        .setCaller(UtilConstant.getHostname())//怎么得到自己的ip
                         .setReceiver(targetIp));
 
         regionServerClient.notifyTableChange(notifyTableChangeRequest);
