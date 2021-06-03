@@ -28,49 +28,49 @@ public class MasterServiceClient extends DynamicThriftClient<MasterService.Clien
         super(ts, ip, port);
     }
 
-    public boolean createTable(Table newTable, String receiver) throws TException {
+    public QueryCreateTableResponse createTable(Table newTable, String caller) throws TException {
         QueryCreateTableRequest req = new QueryCreateTableRequest()
                 .setName(newTable.getMeta().getName())
                 .setBase(new Base()
-                        .setCaller(MasterConstant.MASTER_HOST_NAME)
-                        .setReceiver(receiver));
+                        .setCaller(caller)
+                        .setReceiver(MasterConstant.MASTER_HOST_NAME));
         QueryCreateTableResponse res = client.queryCreateTable(req);
 
         if (res.getBaseResp().getCode() == RpcResultCodeEnum.HAS_EXISTED.getCode()) {
-            log.warn("向{}请求创建表格已存在", receiver);
+            log.warn("向{}请求创建表格已存在", caller);
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求创建表格已存在");
         }
         else if (res.getBaseResp().getCode() == RpcResultCodeEnum.SUCCESS.getCode()) {
-            log.warn("向{}请求创建表格成功", receiver);
-            return true;
+            log.warn("向{}创建表格请求成功", caller);
+            return res;
         }
         else {
-            log.warn("向{}请求创建表格失败", receiver);
-            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求创建表格失败");
+            log.warn("向{}创建表格请求失败", caller);
+            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "创建表格请求失败");
         }
     }
 
-    public boolean dropTable(Table newTable, String receiver) throws TException {
+    public QueryTableMetaInfoResponse dropTable(Table oldTable, String caller) throws TException {
         List<String> list = new ArrayList();
-        list.add(newTable.getMeta().getName());
+        list.add(oldTable.getMeta().getName());
         QueryTableMetaInfoRequest req = new QueryTableMetaInfoRequest()
                 .setName(list)
                 .setBase(new Base()
-                        .setCaller(MasterConstant.MASTER_HOST_NAME)
-                        .setReceiver(receiver));
+                        .setCaller(caller)
+                        .setReceiver(MasterConstant.MASTER_HOST_NAME));
         QueryTableMetaInfoResponse res = client.queryTableMeta(req);
 
         if (res.getBaseResp().getCode() == RpcResultCodeEnum.NOT_FOUND.getCode()) {
-            log.warn("向{}请求删除表格不存在", receiver);
-            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求删除表格不存在");
+            log.warn("向{}请求删除的表格不存在", caller);
+            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求删除的表格不存在");
         }
         else if (res.getBaseResp().getCode() == RpcResultCodeEnum.SUCCESS.getCode()) {
-            log.warn("向{}请求删除表格成功", receiver);
-            return true;
+            log.warn("向{}删除表格请求成功", caller);
+            return res;
         }
         else {
-            log.warn("向{}请求删除表格失败", receiver);
-            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求删除表格失败");
+            log.warn("向{}删除表格请求失败", caller);
+            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "删除表格请求失败");
         }
     }
 }
