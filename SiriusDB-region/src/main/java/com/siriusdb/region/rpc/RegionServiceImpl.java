@@ -13,6 +13,10 @@ import org.apache.thrift.TException;
 import java.io.*;
 import java.util.List;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.List;
+
 public class RegionServiceImpl implements RegionService.Iface {
     //返回一系列特定的表格数据
     @Override

@@ -1,16 +1,9 @@
 package com.siriusdb.client;
 
 import com.siriusdb.client.db.manager.IndexManager;
-import com.siriusdb.client.rpc.client.UserServiceClient;
 import com.siriusdb.client.db.api.ServiceImpl;
-import com.siriusdb.enums.DataTypeEnum;
-import com.siriusdb.model.db.Element;
-import com.siriusdb.model.db.Row;
 import com.siriusdb.thrift.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @Description: 分布式数据库客户端入口
@@ -25,14 +18,5 @@ public class ClientRunner {
 
         IndexManager im = new IndexManager();
         im.hello();
-
-        // 像这样注册一个客户端
-        UserServiceClient client = new UserServiceClient(UserService.Client.class);
-        try {
-            log.warn("getName 调用成功，得到结果 {}", client.getClient().getName(1));
-            log.warn("isExist 调用成功，得到结果 {}", client.getClient().isExist("LIUXUANMING"));
-        } catch (Exception e) {
-            log.warn(e.getMessage(), e);
-        }
     }
 }
