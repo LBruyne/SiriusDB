@@ -18,15 +18,7 @@ public class RegionServerClient extends DynamicThriftClient<RegionService.Client
         super(ts);
     }
 
-    public QueryTableDataResponse execTableCopy(QueryTableDataRequest queryTableDataRequest) throws TException {
-        return client.queryTableData(queryTableDataRequest);
-    }
-
     public void notifyTableChange(NotifyTableChangeRequest notifyTableChangeRequest) throws TException{
         NotifyTableChangeResponse notifyTableChangeResponse = client.notifyTableChange(notifyTableChangeRequest);
-    }
-
-    public QueryTableDataResponse queryTableData(QueryTableDataRequest req) throws TException {
-        return client.queryTableData(req);
     }
 }
