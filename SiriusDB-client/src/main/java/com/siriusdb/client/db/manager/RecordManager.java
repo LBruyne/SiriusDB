@@ -323,11 +323,11 @@ public class RecordManager implements IRecordManager {
                 AttrVSAttrCondition workCon = (AttrVSAttrCondition) eachCon;
                 int firstColID = table.fetchColID(workCon.getFormerAttribute());
                 int secondColID = table.fetchColID(workCon.getLatterAttribute());
-                thisLine.replaceElements(firstColID,thisLine.getElements(secondColID));
+                thisLine.replaceElements(firstColID, thisLine.getElements(secondColID));
             } else if (eachCon instanceof AttrVSValueCondition) {
                 AttrVSValueCondition workCon = (AttrVSValueCondition) eachCon;
                 int firstColID = table.fetchColID(workCon.getFormerAttribute());
-                thisLine.replaceElements(firstColID,workCon.getLatterDataElement());
+                thisLine.replaceElements(firstColID, workCon.getLatterDataElement());
             } else {
                 // impossible to reach here!
             }
@@ -390,12 +390,27 @@ public class RecordManager implements IRecordManager {
     }
 
     public RecordManagerResult insert(Table table, List<Element> values) {
+
+        List<Row> rows = table.getData();
+        Row thisLine = new Row();
+        if (values.size() == table.getMeta().getAttributes().size()) {
+            // sth wrong
+        } else {
+            for (Element each : values)
+                thisLine.addElement(each);
+            rows.add(thisLine);
+        }
         return null;
     }
 
-    public RecordManagerResult update(Table table, List<AttrVSValueCondition> setCondition, List<ICondition> whereConditions, boolean isAnd) {
+    public RecordManagerResult update(Table table, List<ICondition> setCondition, List<ICondition> whereConditions, boolean isAnd) {
         RecordManagerTable workTable = convertFrom(table);
-
+        List<Row> rows = workTable.getData();
+        for (int i = 0; i < rows.size(); i++) {
+            if (judgeRow(workTable, whereConditions, isAnd, rows.get(i)) != null) {
+                rows.set(i, setRow(workTable, setCondition, rows.get(i)));
+            }
+        }
         return null;
     }
 
