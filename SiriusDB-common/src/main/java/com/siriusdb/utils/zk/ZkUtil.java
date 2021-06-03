@@ -21,7 +21,7 @@ public class ZkUtil {
      * @author: liuxuanming
      */
     public static String getRegisterPath() {
-        return ZkConstant.ZNODE + "/" + ZkConstant.HOST_NAME_PREFIX + MasterConstant.MASTER_HOST_NAME;
+        return ZkConstant.ZNODE + "/" + ZkConstant.HOST_NAME_PREFIX + UtilConstant.HOST_NAME;
     }
 
     /**
