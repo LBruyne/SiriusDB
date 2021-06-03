@@ -62,36 +62,80 @@ public class RecordManager implements IRecordManager {
 
     }
 
-    private RecordManagerRow filter(RecordManagerRow row, List<ICondition> cons) {
-
-    }
 
     private Row Merge2Row(RecordManagerTable table1, RecordManagerTable table2, Row line_1, Row line_2, List<AttrVSAttrCondition> joinConditions) {
 //        Called only during inner join
         int firstTableColID, secondTableColID;
         List<Element> ls = new LinkedList<>();
+        boolean select = true;
+        List<TableAttribute> skipSecond = new LinkedList<>();
         for (AttrVSAttrCondition con : joinConditions) {
+            skipSecond.add(con.getLatterAttribute());
             firstTableColID = table1.fetchColID(con.getFormerAttribute());
             secondTableColID = table2.fetchColID(con.getLatterAttribute());
             if (firstTableColID != -1 && secondTableColID != -1) {
-
+                Object value1 = line_1.getElements(firstTableColID).getData();
+                String type1 = line_1.getElements(firstTableColID).getType();
+                Object value2 = line_2.getElements(secondTableColID).getData();
+                String type2 = line_2.getElements(secondTableColID).getType();
+                if (type1.equals(type2)) {
+                    switch (type1) {
+                        case "String":
+                            select = select && judge((String) value1, (String) value2, con.getOperator());
+                            break;
+                        case "Integer":
+                            select = select && judge(Integer.parseInt((String) value1), Integer.parseInt((String) value2), con.getOperator());
+                            break;
+                        case "Float":
+                            select = select && judge(Float.parseFloat((String) value1), Float.parseFloat((String) value2), con.getOperator());
+                            break;
+                    }
+                } else
+                    select = false;
             } else {
-                return null;
+                // attr doesn't exist at all!
+                select = false;
             }
         }
+
+        if (select) {
+            // this line is to be merged and returned.
+            Row newRow = new Row(line_1.getElements());
+            for (int i = 0; i < table2.getAttr().size(); i++) {
+                if (!skipSecond.contains(table2.getAttr().get(i)))
+                    newRow.addElement(line_2.getElements(i));
+            }
+            return newRow;
+        } else {
+            return null;
+        }
+
     }
 
-    private <T extends Comparable<T>> Boolean judge (T first, T second, PredicateEnum op){
+    private <T extends Comparable<T>> Boolean judge(T first, T second, PredicateEnum op) {
         int res = first.compareTo(second);
         boolean ret = false;
-        switch (op.getCode()){
-            case 1: break;
-            case 2: break;
-            case 3: break;
-            case 4: break;
-            case 5: break;
-            case 6: break;
+        switch (op.getCode()) {
+            case 1:
+                ret = res > 0;
+                break;
+            case 2:
+                ret = res < 0;
+                break;
+            case 3:
+                ret = !(res < 0);
+                break;
+            case 4:
+                ret = !(res > 0);
+                break;
+            case 5:
+                ret = res == 0;
+                break;
+            case 6:
+                ret = res != 0;
+                break;
         }
+        return ret;
     }
 
     private List<TableAttribute> getMergedAttributeOf2Table(RecordManagerTable table1, RecordManagerTable table2, List<AttrVSAttrCondition> joinConditions) {
@@ -157,15 +201,153 @@ public class RecordManager implements IRecordManager {
 
     }
 
-    private RecordManagerTable filterRows(RecordManagerTable targetTable, List<ICondition> whereConditions, boolean isAnd) {
-
+    private Row judgeRow(RecordManagerTable targetTable, List<ICondition> whereConditions, boolean isAnd, Row thisLine) {
+        int firstColID, secondColID;
+        boolean decide = true;
+        for (ICondition each : whereConditions) {
+            if (each instanceof AttrVSAttrCondition) {
+                AttrVSAttrCondition thisCon = (AttrVSAttrCondition) each;
+                firstColID = targetTable.fetchColID(thisCon.getFormerAttribute());
+                secondColID = targetTable.fetchColID(thisCon.getLatterAttribute());
+                Element first = thisLine.getElements(firstColID);
+                Element second = thisLine.getElements(secondColID);
+                if (first.getType().equals(second.getType())) {
+                    switch (first.getType()) {
+                        case "String":
+                            decide = decide && (judge((String) (first.getData()), (String) (second.getData()), thisCon.getOperator()));
+                            break;
+                        case "Integer":
+                            decide = decide && (judge((Integer) (first.getData()), (Integer) (second.getData()), thisCon.getOperator()));
+                            break;
+                        case "Float":
+                            decide = decide && (judge((Float) (first.getData()), (Float) (second.getData()), thisCon.getOperator()));
+                            break;
+                    }
+                }
+            } else if (each instanceof AttrVSValueCondition) {
+                AttrVSValueCondition thisCon = (AttrVSValueCondition) each;
+                firstColID = targetTable.fetchColID(thisCon.getFormerAttribute());
+                Element first = thisLine.getElements(firstColID);
+                Element second = thisCon.getLatterDataElement();
+                if (first.getType().equals(second.getType())) {
+                    switch (first.getType()) {
+                        case "String":
+                            decide = decide && (judge((String) (first.getData()), (String) (second.getData()), thisCon.getCondition()));
+                            break;
+                        case "Integer":
+                            decide = decide && (judge((Integer) (first.getData()), (Integer) (second.getData()), thisCon.getCondition()));
+                            break;
+                        case "Float":
+                            decide = decide && (judge((Float) (first.getData()), (Float) (second.getData()), thisCon.getCondition()));
+                            break;
+                    }
+                }
+            } else {
+                // impossible
+            }
+        }
+        if (isAnd) {
+            if (decide)
+                return thisLine;
+            else return null;
+        } else {
+            if (decide)
+                return null;
+            else
+                return thisLine;
+        }
     }
 
+    private void inverseCondition(AttrVSAttrCondition con) {
+        switch (con.getOperator().getCode()) {
+            case 1:
+                con.setOperator(PredicateEnum.SMALLERorEQUAL);
+                break;
+            case 2:
+                con.setOperator(PredicateEnum.LARGERorEQUAL);
+                break;
+            case 3:
+                con.setOperator(PredicateEnum.SMALLER);
+                break;
+            case 4:
+                con.setOperator(PredicateEnum.LARGER);
+                break;
+            case 5:
+                con.setOperator(PredicateEnum.notEQUAL);
+                break;
+            case 6:
+                con.setOperator(PredicateEnum.EQUAL);
+                break;
+        }
+    }
 
-    public RecordManagerResult<RecordManagerTable> select(List<TableAttribute> selectedAttributes, List<Table> tables, List<AttrVSAttrCondition> joinCondition, int JoinType, List<ICondition> whereCondition, boolean isAnd) {
+    private void inverseCondition(AttrVSValueCondition con) {
+        switch (con.getCondition().getCode()) {
+            case 1:
+                con.setCondition(PredicateEnum.SMALLERorEQUAL);
+                break;
+            case 2:
+                con.setCondition(PredicateEnum.LARGERorEQUAL);
+                break;
+            case 3:
+                con.setCondition(PredicateEnum.SMALLER);
+                break;
+            case 4:
+                con.setCondition(PredicateEnum.LARGER);
+                break;
+            case 5:
+                con.setCondition(PredicateEnum.notEQUAL);
+                break;
+            case 6:
+                con.setCondition(PredicateEnum.EQUAL);
+                break;
+        }
+    }
 
+    private RecordManagerTable filterRows(RecordManagerTable targetTable, List<ICondition> whereConditions, boolean isAnd) {
+        List<Row> resRows = new LinkedList<>();
+        for (Row each : targetTable.getData()) {
+            Row temp = judgeRow(targetTable, whereConditions, isAnd, each);
+            if (temp != null)
+                resRows.add(temp);
+        }
+        RecordManagerTable ret = new RecordManagerTable();
+        ret.setAttr(targetTable.getAttr());
+        ret.setTable(targetTable.getTable());
+        ret.setData(resRows);
+    }
+
+    private Row setRow(RecordManagerTable table, List<ICondition> setCon, Row thisLine) {
+        for (ICondition eachCon : setCon) {
+            if (eachCon instanceof AttrVSAttrCondition) {
+                AttrVSAttrCondition workCon = (AttrVSAttrCondition) eachCon;
+                int firstColID = table.fetchColID(workCon.getFormerAttribute());
+                int secondColID = table.fetchColID(workCon.getLatterAttribute());
+                thisLine.replaceElements(firstColID,thisLine.getElements(secondColID));
+            } else if (eachCon instanceof AttrVSValueCondition) {
+                AttrVSValueCondition workCon = (AttrVSValueCondition) eachCon;
+                int firstColID = table.fetchColID(workCon.getFormerAttribute());
+                thisLine.replaceElements(firstColID,workCon.getLatterDataElement());
+            } else {
+                // impossible to reach here!
+            }
+        }
+    }
+
+    public RecordManagerResult<RecordManagerTable> select(List<TableAttribute> selectedAttributes, List<Table> tables, List<AttrVSAttrCondition> joinCondition, List<ICondition> whereCondition, boolean isAnd) {
+//
+        // preCondition:
+        // joinCondition 里面的都只能是 =
         RecordManagerTable targetTable = joinTables(tables, joinCondition);
 //        do joins first, a derived table is generated
+        if (!isAnd) {
+            for (ICondition con : whereCondition) {
+                if (con instanceof AttrVSValueCondition)
+                    inverseCondition((AttrVSValueCondition) con);
+                if (con instanceof AttrVSAttrCondition)
+                    inverseCondition((AttrVSAttrCondition) con);
+            }
+        }
         RecordManagerTable res = filterRows(targetTable, whereCondition, isAnd);
 //        filter Rows one by one , collect selected rows
         RecordManagerResult<RecordManagerTable> ret = new RecordManagerResult<>();
@@ -189,23 +371,35 @@ public class RecordManager implements IRecordManager {
      * joinCondition: List<ICondition> (len = 1) JoinCondition类内部有两个TableAttribute，每个TableAttribute内部需要设置好这个属性的表是哪个，不然找不到啊qwq
      * whereCondition: List<ICondition> (len = 2) whereCondition类内部还是需要将它的Element中的Table设置好，不然不知道是哪个表了
      * isAnd = true 表示where 后面的每个condition中间用and连接，如果是or就传入false | 不支持and和or混合
+     * 没有任何条件麻烦也传一个true
      * */
 
 
-    public RecordManagerResult delete(Table table, List<AttrVSValueCondition<?>> cons, boolean isAnd) {
+    public RecordManagerResult delete(Table table, List<ICondition> cons, boolean isAnd) {
+        // 可能 delete .. from tableA where tableA.attrA != tableA.attrB
+        RecordManagerTable workTable = convertFrom(table);
+        Set<Integer> st = new HashSet<>();
+        for (int i = 0; i < workTable.getData().size(); i++) {
+            if (judgeRow(workTable, cons, isAnd, workTable.getData().get(i)) != null) {
+                st.add(i);
+            }
+        }
+        for (Integer each : st)
+            workTable.getData().remove(each.intValue());
         return null;
     }
 
-    public RecordManagerResult insert(Table table, List<Element<?>> values) {
+    public RecordManagerResult insert(Table table, List<Element> values) {
         return null;
     }
 
-    public RecordManagerResult update(Table table, List<AttrVSValueCondition<?>> setCondition, List<AttrVSValueCondition<?>> attrVSValueCondition) {
+    public RecordManagerResult update(Table table, List<AttrVSValueCondition> setCondition, List<ICondition> whereConditions, boolean isAnd) {
+        RecordManagerTable workTable = convertFrom(table);
+
         return null;
     }
 
 }
-
 
 
 // from a join b on .... join c on ... where a.sss = 123 and b.cc = aa

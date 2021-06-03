@@ -21,6 +21,11 @@ public class Row {
         return elements.get(index);
     }; // 得到对应下标的属性值
 
+    public void replaceElements(int indexToBeReplaced, Element newEle){
+        elements.remove(indexToBeReplaced);
+        elements.add(indexToBeReplaced,newEle);
+    }
+
 /*    Row row = new Row();
     Element<String> element = new Element<String>();
         element.setType(DataTypeEnum.STRING.getType());

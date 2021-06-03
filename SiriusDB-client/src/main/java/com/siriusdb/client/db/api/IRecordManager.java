@@ -23,7 +23,7 @@ public interface IRecordManager {
     RecordManagerResult<?> insert(Table table, List<Attribute<?>> values);
     */
 
-    RecordManagerResult<RecordManagerTable> select(List<TableAttribute> selectedAttributes, List<Table> tables, List<ICondition> joinCondition, List<ICondition> whereCondition, boolean isAnd);
+    RecordManagerResult<RecordManagerTable> select(List<TableAttribute> selectedAttributes, List<Table> tables, List<AttrVSAttrCondition> joinCondition, List<ICondition> whereCondition, boolean isAnd);
     /*
      * 举例：
      * select student.studentID, grades.studentGrade from student join grades on student.studentID = grades.studentID where student.studentID = 123 and grades.courseName = "NLP";
@@ -35,11 +35,11 @@ public interface IRecordManager {
      * */
 
 
-    RecordManagerResult delete(Table table, List<AttrVSValueCondition<?>> cons);
+    RecordManagerResult delete(Table table, List<ICondition> cons, boolean isAnd);
 
-    RecordManagerResult insert(Table table, List<Element<?>> values);
+    RecordManagerResult insert(Table table, List<Element> values);
 
-    RecordManagerResult update(Table table, List<AttrVSValueCondition<?>> setCondition, List<AttrVSValueCondition<?>> attrVSValueCondition);
+    RecordManagerResult update(Table table, List<AttrVSValueCondition> setCondition, List<ICondition> whereCondition, boolean isAnd);
 
 }
 
