@@ -1,6 +1,8 @@
 package com.siriusdb.region.rpc;
 
 
+import com.siriusdb.common.UtilConstant;
+import com.siriusdb.enums.RpcOperationEnum;
 import com.siriusdb.model.db.Table;
 import com.siriusdb.model.master.DataServer;
 import com.siriusdb.thrift.model.*;
@@ -11,6 +13,7 @@ import org.apache.thrift.TException;
 
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import java.io.File;
@@ -25,12 +28,27 @@ public class RegionServiceImpl implements RegionService.Iface {
         List<VTable> vtables = null;
         //获取表名称
         List<String> tableName= req.getTableNames();
+        List<String> tableName1 = new ArrayList<String>();
+        if(tableName.get(0) == "ALL_TABLE"){
+            File file = new File(this.getClass().getResource("").getPath());
+            File[] tempList = file.listFiles();
+            for (int i = 0; i < tempList.length; i++) {
+                if (tempList[i].isFile()) {
+                    tableName1.add(tempList[i].toString());
+                }
+                if (tempList[i].isDirectory()) {
+                }
+            }
+        }
+        else{
+            tableName1.addAll(tableName);
+        }
         //建立循环
-        for(int i=0;i<tableName.size();i++){
+        for(int i=0;i<tableName1.size();i++){
             //先读取到
             Table tableTmp = null;
             VTable vtableTmp = null;
-            File file = new File(tableName.get(i) + ".dat");
+            File file = new File(tableName1.get(i) + ".dat");
             FileInputStream in;
             try {
                 in = new FileInputStream(file);
@@ -39,6 +57,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                 objIn.close();
             }
             catch (Exception e){
+                return new QueryTableDataResponse().setBaseResp(RpcResult.failResp());
             }
             //将table的值赋值给vtable
             vtableTmp = CopyUtils.tableToVTable(tableTmp);
@@ -94,7 +113,10 @@ public class RegionServiceImpl implements RegionService.Iface {
             fr.close();
             br.close();
         }
-        catch (Exception e){ }
+        catch (Exception e){
+            return new NotifyTableChangeResponse()
+                    .setBaseResp(RpcResult.failResp());
+        }
         DataServer dataServer = DataServer.builder().hostUrl(dualServerUrl).hostName(dualServerName).build();
         String dualIp = dataServer.getIp();
         Integer dualPort = dataServer.getPort();
@@ -104,14 +126,14 @@ public class RegionServiceImpl implements RegionService.Iface {
             /*读取文件状态文件，如果是主机要调用副机的，如果是副机直接执行*/
             regionServerClient.notifyTableChange(req);
         }
-            if (operationCode == 2) {
+            if (operationCode == RpcOperationEnum.DELETE.getCode()) {
                 for (int i = 0; i < tableNames.size(); i++) {
                     File file = new File(tableNames.get(i) + ".dat");
                     if (file.exists()) {
                         file.delete();
                     }
                 }
-            } else if (operationCode == 1) {
+            } else if (operationCode == RpcOperationEnum.UPDATE.getCode()) {
                 for (int i = 0; i < tableNames.size(); i++) {
                     File file = new File(tableNames.get(i) + ".dat");
                     if (file.exists()) {
@@ -128,10 +150,13 @@ public class RegionServiceImpl implements RegionService.Iface {
                         objOut.flush();
                         objOut.close();
                     }
-                    catch (Exception e){}
+                    catch (Exception e){
+                        return new NotifyTableChangeResponse()
+                                .setBaseResp(RpcResult.failResp());
+                    }
                 }
                 /*更新文件*/
-            } else if (operationCode == 0) {
+            } else if (operationCode == RpcOperationEnum.CREATE.getCode()) {
                 for (int i = 0; i < vTableList.size(); i++) {
                     VTable vTableTmp = vTableList.get(i);
                     File file = new File(vTableTmp.getMeta().getName() + ".dat");
@@ -144,7 +169,10 @@ public class RegionServiceImpl implements RegionService.Iface {
                         objOut.flush();
                         objOut.close();
                     }
-                    catch (Exception e){}
+                    catch (Exception e){
+                        return new NotifyTableChangeResponse()
+                                .setBaseResp(RpcResult.failResp());
+                    }
                 }
             }
         return new NotifyTableChangeResponse()
@@ -165,10 +193,10 @@ public class RegionServiceImpl implements RegionService.Iface {
                 .setTables(queryTableData(new QueryTableDataRequest()
                         .setTableNames(req.getTableNames())
                         .setBase(new Base()
-                                .setCaller("127.0.0.1")//怎么得到自己的ip
+                                .setCaller(UtilConstant.getHostname())//怎么得到自己的ip
                                 .setReceiver(targetIp))).getTables())
                 .setBase(new Base()
-                        .setCaller("127.0.0.1")//怎么得到自己的ip
+                        .setCaller(UtilConstant.getHostname())//怎么得到自己的ip
                         .setReceiver(targetIp));
 
         regionServerClient.notifyTableChange(notifyTableChangeRequest);
