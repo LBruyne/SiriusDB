@@ -11,6 +11,11 @@ import org.apache.thrift.TException;
 
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
 
 public class RegionServiceImpl implements RegionService.Iface {
@@ -21,12 +26,27 @@ public class RegionServiceImpl implements RegionService.Iface {
         List<VTable> vtables = null;
         //获取表名称
         List<String> tableName= req.getTableNames();
+        List<String> tableName1 = new ArrayList<String>();
+        if(tableName.get(0) == "ALL_TABLE"){
+            File file = new File(this.getClass().getResource("").getPath());
+            File[] tempList = file.listFiles();
+            for (int i = 0; i < tempList.length; i++) {
+                if (tempList[i].isFile()) {
+                    tableName1.add(tempList[i].toString());
+                }
+                if (tempList[i].isDirectory()) {
+                }
+            }
+        }
+        else{
+            tableName1.addAll(tableName);
+        }
         //建立循环
-        for(int i=0;i<tableName.size();i++){
+        for(int i=0;i<tableName1.size();i++){
             //先读取到
             Table tableTmp = null;
             VTable vtableTmp = null;
-            File file = new File(tableName.get(i) + ".dat");
+            File file = new File(tableName1.get(i) + ".dat");
             FileInputStream in;
             try {
                 in = new FileInputStream(file);
