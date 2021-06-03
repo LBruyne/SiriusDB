@@ -39,7 +39,7 @@ public interface IRecordManager {
 
     RecordManagerResult insert(Table table, List<Element> values);
 
-    RecordManagerResult update(Table table, List<AttrVSValueCondition> setCondition, List<ICondition> whereCondition, boolean isAnd);
+    RecordManagerResult update(Table table, List<ICondition> setCondition, List<ICondition> whereCondition, boolean isAnd);
 
 }
 
