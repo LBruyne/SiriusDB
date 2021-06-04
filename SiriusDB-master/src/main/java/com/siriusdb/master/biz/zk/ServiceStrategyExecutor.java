@@ -89,11 +89,11 @@ public class ServiceStrategyExecutor {
                 server.serverInvalid();
             } else {
                 server.serverInvalid();
-                log.warn("空闲机数量不足，系统非正常状态");
+                throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "空闲机数量不足，系统非正常状态");
             }
         } else {
             server.serverInvalid();
-            log.warn("失效的服务器原本的状态不合法");
+            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "失效的服务器原本的状态不合法");
         }
     }
 
@@ -122,7 +122,7 @@ public class ServiceStrategyExecutor {
         } else {
             // 服务器数量足够
             // 如果目前数据服务器不成对存在，与不成对的那一台服务器结对
-            log.warn("当前服务器数量充足，有{}台", DataHolder.dataServers.size());
+            log.warn("当前服务器数量充足，有{}台，其中有效的服务器有{}台", DataHolder.dataServers.size(), DataHolder.getValidServerNum());
             DataServer serverNotInPair = DataHolder.getServerNotInPair();
             if (serverNotInPair != null) {
                 // 发现有服务器不成对存在，与未结对的机器进行结对
@@ -285,15 +285,16 @@ public class ServiceStrategyExecutor {
             // 建立一个目标是server服务器的客户端
             RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, server.getIp(), server.getPort());
             // 通知机器状态变化
-            client.notifyStateChange(serverNotInPair, serverNotInPair.getHostName());
+            client.notifyStateChange(server, server.getHostName());
 
             // 建立一个目标是serverNotInPair服务器的客户端
             client = new RegionServiceClient(RegionService.Client.class, serverNotInPair.getIp(), serverNotInPair.getPort());
             // 通知机器状态变化
             client.notifyStateChange(serverNotInPair, serverNotInPair.getHostName());
+            log.warn("一台闲置服务器和一台孤单的机器完成结对：{}，{}", server.getHostName(), serverNotInPair.getHostName());
             // 通知机器数据复制
             client.execTableCopy(Stream.of(UtilConstant.ALL_TABLE).collect(Collectors.toList()), server, serverNotInPair.getHostName());
-            log.warn("一台闲置服务器和一台孤单的机器完成结对：{}，{}", server.getHostName(), serverNotInPair.getHostName());
+            log.warn("从服务器{}向服务器{}完成数据复制", serverNotInPair.getHostName(), server.getHostName());
         }
 
         public static TableMeta findTable(String name) {

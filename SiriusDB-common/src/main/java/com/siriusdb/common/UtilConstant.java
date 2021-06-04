@@ -34,12 +34,12 @@ public class UtilConstant {
     /**
      * 表格数据请求中，代表请求所有表格数据
      */
-    public static final String ALL_TABLE = "ALL";
+    public static final String ALL_TABLE = "ALL_TABLE";
 
     /**
      * 表格数据请求中，代表所有列数据
      */
-    public static final String ALL_COLUMN = "ALL";
+    public static final String ALL_COLUMN = "ALL_TABLE";
 
     /**
      * 找不到
