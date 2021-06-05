@@ -59,7 +59,7 @@ public class RecordManager implements IRecordManager {
     }
 
     private Table convertTo(RecordManagerTable table) {
-
+        return null;
     }
 
 
@@ -315,6 +315,7 @@ public class RecordManager implements IRecordManager {
         ret.setAttr(targetTable.getAttr());
         ret.setTable(targetTable.getTable());
         ret.setData(resRows);
+        return ret;
     }
 
     private Row setRow(RecordManagerTable table, List<ICondition> setCon, Row thisLine) {
@@ -332,6 +333,7 @@ public class RecordManager implements IRecordManager {
                 // impossible to reach here!
             }
         }
+        return thisLine;
     }
 
     public RecordManagerResult<RecordManagerTable> select(List<TableAttribute> selectedAttributes, List<Table> tables, List<AttrVSAttrCondition> joinCondition, List<ICondition> whereCondition, boolean isAnd) {
