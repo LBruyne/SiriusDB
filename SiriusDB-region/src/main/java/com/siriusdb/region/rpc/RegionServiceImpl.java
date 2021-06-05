@@ -10,9 +10,10 @@ import com.siriusdb.thrift.service.MasterService;
 import com.siriusdb.thrift.service.RegionService;
 import com.siriusdb.utils.copy.CopyUtils;
 import com.siriusdb.utils.rpc.RpcResult;
+import org.apache.log4j.LogMF;
 import org.apache.thrift.TException;
 import com.siriusdb.model.region.FileServer;
-
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 
+@Slf4j
 public class RegionServiceImpl implements RegionService.Iface {
     //返回一系列特定的表格数据
     @Override
@@ -58,6 +60,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                 objIn.close();
             }
             catch (Exception e){
+                log.warn("Query指令查询失败");
                 return new QueryTableDataResponse().setBaseResp(RpcResult.failResp());
             }
             //将table的值赋值给vtable
@@ -88,6 +91,7 @@ public class RegionServiceImpl implements RegionService.Iface {
             bw.close();
         }
         catch (Exception e){
+            log.warn("Region状态变更失败");
             return new NotifyStateResponse().setBaseResp(RpcResult.failResp());
         }
         
@@ -101,7 +105,7 @@ public class RegionServiceImpl implements RegionService.Iface {
         int operationCode = req.getOperationCode();
         List<String> tableNames = req.getTableNames();
         List<VTable> vTableList = req.getTables();
-        File stateFile = new File("dualmachine.txt");
+        File stateFile = new File(UtilConstant.getHostname() + "dualmachine.txt");
         String stateCode = "";
         String dualServerName = "";
         String dualServerUrl = "";
@@ -115,6 +119,7 @@ public class RegionServiceImpl implements RegionService.Iface {
             br.close();
         }
         catch (Exception e){
+            log.warn("Notifytablechange读取文件失败");
             return new NotifyTableChangeResponse()
                     .setBaseResp(RpcResult.failResp());
         }
