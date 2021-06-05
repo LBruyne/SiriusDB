@@ -11,6 +11,7 @@ import com.siriusdb.thrift.service.RegionService;
 import com.siriusdb.utils.copy.CopyUtils;
 import com.siriusdb.utils.rpc.RpcResult;
 import org.apache.thrift.TException;
+import com.siriusdb.model.region.FileServer;
 
 
 import java.io.*;
@@ -73,7 +74,7 @@ public class RegionServiceImpl implements RegionService.Iface {
     @Override
     public NotifyStateResponse notifyStateChange(NotifyStateRequest req) throws TException {
         try{
-            BufferedWriter bw = new BufferedWriter(new FileWriter("dualmachine.txt"));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(UtilConstant.getHostname() + "dualmachine.txt"));
             String stateCode = Integer.toString(req.getStateCode());
             String dualServerUrl = req.getDualServerUrl();
             String dulServerName = req.getDualServerName();
@@ -195,17 +196,13 @@ public class RegionServiceImpl implements RegionService.Iface {
         String targetIp = dataServer.getIp();
         Integer targetPort = dataServer.getPort();
         RegionServerClient regionServerClient = new RegionServerClient(RegionService.Client.class,targetIp,targetPort);
-
+        FileServer fileServer = FileServer.builder().fileList(req.getTableNames()).build();
         NotifyTableChangeRequest notifyTableChangeRequest = new NotifyTableChangeRequest()
                 .setTableNames(req.getTableNames())
                 .setOperationCode(1)
-                .setTables(queryTableData(new QueryTableDataRequest()
-                        .setTableNames(req.getTableNames())
-                        .setBase(new Base()
-                                .setCaller(UtilConstant.getHostname())//怎么得到自己的ip
-                                .setReceiver(targetIp))).getTables())
+                .setTables(fileServer.readFile())
                 .setBase(new Base()
-                        .setCaller(UtilConstant.getHostname())//怎么得到自己的ip
+                        .setCaller(UtilConstant.getHostname())
                         .setReceiver(targetIp));
 
         regionServerClient.notifyTableChange(notifyTableChangeRequest);
