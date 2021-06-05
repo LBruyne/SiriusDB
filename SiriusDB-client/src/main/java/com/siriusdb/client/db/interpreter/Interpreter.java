@@ -8,15 +8,17 @@ package com.siriusdb.client.db.interpreter;
  */
 
 import com.siriusdb.client.db.manager.DataLoader;
+import com.siriusdb.client.db.manager.RecordManager;
+import com.siriusdb.enums.PredicateEnum;
 import com.siriusdb.exception.BasicBusinessException;
 import com.siriusdb.model.db.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+
+import static com.siriusdb.enums.PredicateEnum.*;
 
 @Slf4j
 public class Interpreter {
@@ -320,15 +322,24 @@ public class Interpreter {
             if (!qaq[3].equals("where"))
                 throw new BasicBusinessException("delete error: Please enter 'where' behind the conditions!");
             String[] conditions = Arrays.asList(qaq).subList(4, qaq.length).toArray(new String[]{});
-            int index=0;
+            int index=-1;
+            int count = 0; //判断condition符不符合格式
             for (int i = 0; i < conditions.length; i++) {
                 System.out.println(conditions[i]);
-                if (conditions[i].equals("and"))
+                count += 1;
+                if (conditions[i].equals("and")){
                     index = i;
-                if(index == i){
+                    if (count !=4)
+                        throw new BasicBusinessException("delete error: Conditions misformat1!");
+                    count = 0;
+                }
+                if (index == i) {
                     // TODO: 生成条件condition
                 }
             }
+            if (count != 3)
+                throw new BasicBusinessException("delete error: Conditions misformat2!");
+
             // TODO: delete from tableName where conditions 的接口
 
         }
@@ -336,10 +347,180 @@ public class Interpreter {
             // TODO: delete from tableName 的接口
         }
     }
-    public static void select(String query) throws BasicBusinessException{
+    public static void select(String query) throws BasicBusinessException {
         System.out.println("Selecting ...");
+        query = query.replaceAll(" *\\( *", " (").replaceAll(" *\\) *", ") ");
+        query = query.replaceAll(" *, *", ",");
+        query = query.trim();
+        String[] qaq = query.split(" ");
+
+        List<TableAttribute> selectedAttributes = new ArrayList<>();
+        List<Table> tables = new ArrayList<>();
+        List<AttrVSAttrCondition> joinCondition = new ArrayList<>();
+        List<ICondition> whereCondition = new ArrayList<>();
+        boolean isAnd = true;
+        boolean isJoin = false;
+
+        if (qaq.length<4)
+            throw new BasicBusinessException("select error: Invalid query!");
+        if (!qaq[2].equals("from"))
+            throw new BasicBusinessException("select error: Please enter 'from' before the tableName!");
+
+        //判断是不是join
+        if(qaq.length>=11){
+            if (qaq[1].contains(",")&&(!qaq[4].equals("inner")||!qaq[5].equals("join")||!qaq[7].equals("on")))
+                throw new BasicBusinessException("select error: Invalid inner join select!");
+            if (qaq[1].contains(",")&&qaq[4].equals("inner")&&qaq[5].equals("join")&&qaq[7].equals("on"))
+                isJoin = true;
+        }
+
+        String label = qaq[1];
+        String tableName = qaq[3];
+        if (isJoin){
+            //TODO: join on
+        }
+        else//不是join
+        {
+
+            Table tempT = DataLoader.getTable(tableName);
+            List<Attribute> tempA = tempT.getMeta().getAttributes();
+            if (tempT == null || tempA == null)
+                throw new BasicBusinessException("select error: No such table!");
+            //不是join就只有一个table
+            tables.add(tempT);
+
+            if (qaq.length>4){
+                //有where
+                if (!qaq[4].equals("where"))
+                    throw new BasicBusinessException("select error: Please enter 'where' before the conditions!");
+                String[] conditions = Arrays.asList(qaq).subList(5, qaq.length).toArray(new String[]{});
+                int index=-1;
+                int count = 0; //判断condition符不符合格式
+                for (int i = 0; i < conditions.length; i++) {
+                    System.out.println(conditions[i]);
+                    count += 1;
+                    if (conditions[i].equals("and")){//and分割
+                        index = i;
+                        if (count !=4)
+                            throw new BasicBusinessException("select error: Conditions misformat1!");
+                        count = 0;
+                    }
+                    if (index == i) {//相等的时候说明现在是and，那么之前三个就是一个condition
+                        int attrIndex = index-3, symbolIndex = index-2, valueIndex = index-1;
+                        int flag = 0;
+                        AttrVSValueCondition avvc = new AttrVSValueCondition();
+                        for (int j = 0; j < tempA.size(); j++) {
+                            if(conditions[attrIndex].equals(tempA.get(j))){
+                                //在tableMeta的Attributes里面找到了对应的属性
+                                flag =1;
+                                Set<Table> t = new HashSet<>();
+                                t.add(tempT);
+                                TableAttribute ta = new TableAttribute(t, tempA.get(j));
+                                avvc.setFormerAttribute(ta);
+                                break;
+                            }
+                        }
+                        if (flag == 0)//找不到
+                            throw new BasicBusinessException("select error: Not existed attribute!");
+
+                        //TODO: avvc 的setTable 和 setElement
+
+                        avvc.setCondition(Utils.judgeSymbol(conditions[symbolIndex]));
+                        whereCondition.add(avvc);
+                    }
+                }
+                if (count != 3)
+                    throw new BasicBusinessException("select error: Conditions misformat2!");
+                else {//and之后的那个condition
+                    int attrIndex = conditions.length-3, symbolIndex = conditions.length-2, valueIndex = conditions.length-1;
+                    int flag = 0;
+                    AttrVSValueCondition avvc = new AttrVSValueCondition();
+                    for (int i = 0; i < tempA.size(); i++) {
+                        if(conditions[attrIndex].equals(tempA.get(i))){
+                            flag =1;
+                            Set<Table> t = new HashSet<>();
+                            t.add(tempT);
+                            TableAttribute ta = new TableAttribute(t, tempA.get(i));
+                            avvc.setFormerAttribute(ta);
+                            break;
+                        }
+                    }
+                    if (flag == 0)
+                        throw new BasicBusinessException("select error: Not existed attribute1!");
+
+                    //TODO: avvc 的setTable 和 setElement
+
+                    avvc.setCondition(Utils.judgeSymbol(conditions[symbolIndex]));
+                    whereCondition.add(avvc);
+                }
+            }
+
+            //后面就不用管有没有where了
+            if (label.equals("*")){// select * from ...
+                for (int i = 0; i < tempA.size(); i++) {
+                    Set<Table> t = new HashSet<>();
+                    t.add(tempT);
+                    TableAttribute ta = new TableAttribute(t, tempA.get(i));
+                    selectedAttributes.add(ta);
+                }
+            }
+            else if (label.equals("count(*)"))
+                throw new BasicBusinessException("select error: Not support 'count' !");
+            else{// select ... from ...
+                String[] selectAttrs = label.split(",");
+                for (int i = 0; i < selectAttrs.length; i++) {
+                    if (selectAttrs[i].contains("."))
+                        throw new BasicBusinessException("select error: Invalid format!");
+                    int flag = 0;
+                    for (int j = 0; j < tempA.size(); j++) {
+                        if (selectAttrs[i].equals(tempA.get(j))){
+                            flag =1;
+                            Set<Table> t = new HashSet<>();
+                            t.add(tempT);
+                            TableAttribute ta = new TableAttribute(t, tempA.get(j));
+                            selectedAttributes.add(ta);
+                            break;
+                        }
+                    }
+                    if (flag == 0)
+                        throw new BasicBusinessException("select error: Not existed attribute2!");
+                }
+            }
+        }
+        RecordManager rm = new RecordManager();
+        for (int i = 0; i < selectedAttributes.size(); i++) {
+            System.out.println(selectedAttributes.get(i));
+        }
+        for (int i = 0; i < tables.size(); i++) {
+            System.out.println(tables.get(i));
+        }
+        for (int i = 0; i < joinCondition.size(); i++) {
+            System.out.println(joinCondition.get(i));
+        }
+        for (int i = 0; i < whereCondition.size(); i++) {
+            System.out.println(whereCondition.get(i));
+        }
+        rm.select(selectedAttributes,tables,joinCondition,whereCondition,isAnd);
     }
     public static void update(String query) throws BasicBusinessException{
         System.out.println("Updating ...");
+    }
+}
+
+
+class Utils{
+    public static PredicateEnum judgeSymbol(String s){
+        if (s.equals(">"))
+            return LARGER;
+        else if (s.equals("<"))
+            return SMALLER;
+        else if (s.equals(">="))
+            return LARGERorEQUAL;
+        else if (s.equals("<="))
+            return SMALLERorEQUAL;
+        else if (s.equals("=="))
+            return EQUAL;
+        else
+            return notEQUAL;
     }
 }
