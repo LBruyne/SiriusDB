@@ -8,16 +8,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Builder
-public class FileServer {
+public class FileServer implements Serializable {
 
     private List<String> fileList;
 
