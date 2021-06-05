@@ -108,6 +108,7 @@ public class RegionServiceImpl implements RegionService.Iface {
         String stateCode = "";
         String dualServerName = "";
         String dualServerUrl = "";
+        log.warn("接收到{}的请求，操作码为{}，操作的表格为{}", req.getBase().getCaller(), operationCode, tableNames);
         try {
             FileReader fr = new FileReader(stateFile);
             BufferedReader br = new BufferedReader(fr);
@@ -126,13 +127,13 @@ public class RegionServiceImpl implements RegionService.Iface {
         Integer dualPort = dataServer.getPort();
         RegionServerClient regionServerClient = new RegionServerClient(RegionService.Client.class, dualIp, dualPort);
         MasterServerClient masterServerClient = new MasterServerClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
-        if (stateCode == DataServerStateEnum.PRIMARY.toString()) {
+        if (stateCode.equals(DataServerStateEnum.PRIMARY.toString())) {
             /*读取文件状态文件，如果是主机要调用副机的，如果是副机直接执行*/
             regionServerClient.notifyTableChange(req);
         }
         if (operationCode == RpcOperationEnum.DELETE.getCode()) {
             for (int i = 0; i < tableNames.size(); i++) {
-                if(stateCode == DataServerStateEnum.PRIMARY.toString()) {
+                if (stateCode.equals(DataServerStateEnum.PRIMARY.toString())) {
                     masterServerClient.notifyTableMetaChange(tableNames.get(i), RpcOperationEnum.DELETE.getCode(), vTableList.get(i).getMeta(), new Base()
                             .setCaller(UtilConstant.getHostname())
                             .setReceiver(MasterConstant.MASTER_HOST_NAME));
@@ -144,7 +145,7 @@ public class RegionServiceImpl implements RegionService.Iface {
             }
         } else if (operationCode == RpcOperationEnum.UPDATE.getCode()) {
             for (int i = 0; i < tableNames.size(); i++) {
-                if(stateCode == DataServerStateEnum.PRIMARY.toString()) {
+                if (stateCode.equals(DataServerStateEnum.PRIMARY.toString())) {
                     masterServerClient.notifyTableMetaChange(tableNames.get(i), RpcOperationEnum.UPDATE.getCode(), vTableList.get(i).getMeta(), new Base()
                             .setCaller(UtilConstant.getHostname())
                             .setReceiver(MasterConstant.MASTER_HOST_NAME));
@@ -171,7 +172,7 @@ public class RegionServiceImpl implements RegionService.Iface {
             /*更新文件*/
         } else if (operationCode == RpcOperationEnum.CREATE.getCode()) {
             for (int i = 0; i < vTableList.size(); i++) {
-                if(stateCode == DataServerStateEnum.PRIMARY.toString()) {
+                if (stateCode.equals(DataServerStateEnum.PRIMARY.toString())) {
                     masterServerClient.notifyTableMetaChange(tableNames.get(i), RpcOperationEnum.CREATE.getCode(), vTableList.get(i).getMeta(), new Base()
                             .setCaller(UtilConstant.getHostname())
                             .setReceiver(MasterConstant.MASTER_HOST_NAME));

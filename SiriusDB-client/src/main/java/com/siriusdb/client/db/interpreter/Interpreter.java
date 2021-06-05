@@ -205,13 +205,15 @@ public class Interpreter {
         tableMeta.setPrimaryKey(primaryKey);
         tableMeta.setAttributes(attributes);
         Table table = new Table();
+        table.setData(new ArrayList<>());
+        table.setIndexes(new ArrayList<>());
         table.setMeta(tableMeta);
 
-//        try {
-//            DataLoader.createTable(table);
-//        } catch (TException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            DataLoader.createTable(table);
+        } catch (TException e) {
+            e.printStackTrace();
+        }
 
         System.out.println("Success: Table " + tableName + " has been created!");
     }

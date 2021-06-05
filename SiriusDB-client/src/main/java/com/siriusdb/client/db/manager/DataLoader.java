@@ -25,7 +25,7 @@ public class DataLoader {
 
     public static void createTable(Table newTable) throws TException {
 
-        MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, "127.0.0.1", 2345);
+        MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
         QueryCreateTableResponse res = client1.createTable(newTable, UtilConstant.HOST_NAME);
 
         if(res.locatedServerName.length()!=0){
