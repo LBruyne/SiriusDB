@@ -1,5 +1,6 @@
 package com.siriusdb.model.region;
 
+import com.siriusdb.common.UtilConstant;
 import com.siriusdb.exception.BasicBusinessException;
 import com.siriusdb.model.db.Table;
 import com.siriusdb.thrift.model.VTable;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Data
 @Builder
+@Slf4j
 public class FileServer implements Serializable {
 
     private List<String> fileList;
@@ -21,7 +23,7 @@ public class FileServer implements Serializable {
     public List<VTable> readFile(){
         List<VTable> tableList = new ArrayList<>();
         List<String> tableName1 = new ArrayList<String>();
-        if(fileList.get(0) == "ALL_TABLE"){
+        if(fileList.get(0).equals(UtilConstant.ALL_TABLE)){
             File file = new File(this.getClass().getResource("").getPath());
             File[] tempList = file.listFiles();
             for (int i = 0; i < tempList.length; i++) {
@@ -46,6 +48,7 @@ public class FileServer implements Serializable {
                 tableTmp = (Table) objIn.readObject();
                 objIn.close();
             } catch (Exception e) {
+                log.warn(e.getMessage(), e);
             }
             vtableTmp = CopyUtils.tableToVTable(tableTmp);
             tableList.add(vtableTmp);
