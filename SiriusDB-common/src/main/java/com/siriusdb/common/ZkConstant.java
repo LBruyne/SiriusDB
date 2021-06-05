@@ -25,17 +25,17 @@ public class ZkConstant {
     /**
      * ZooKeeper会话超时时间
      */
-    public static final Integer ZK_SESSION_TIMEOUT = 3000;
+    public static final Integer ZK_SESSION_TIMEOUT = 10000;
 
     /**
      * ZooKeeper连接超时时间
      */
-    public static final Integer ZK_CONNECTION_TIMEOUT = 3000;
+    public static final Integer ZK_CONNECTION_TIMEOUT = 10000;
 
     /**
      * ZooKeeper最多重新尝试连接次数
      */
-    public static final int ZK_MAX_RETRIES = 1;
+    public static final int ZK_MAX_RETRIES = 5;
 
     /**
      * ZooKeeper尝试连接间隔时间
