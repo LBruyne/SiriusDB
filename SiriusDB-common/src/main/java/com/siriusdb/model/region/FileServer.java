@@ -37,10 +37,14 @@ public class FileServer implements Serializable {
         else{
             tableName1.addAll(fileList);
         }
+        log.warn("tablenames:{}",tableName1);
         for(int i=0;i<tableName1.size();i++) {
             Table tableTmp = null;
             VTable vtableTmp = null;
             File file = new File(tableName1.get(i) + ".dat");
+            if (!file.exists()) {
+                continue;
+            }
             FileInputStream in;
             try {
                 in = new FileInputStream(file);
