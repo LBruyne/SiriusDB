@@ -2,6 +2,7 @@ package com.siriusdb.region.rpc;
 
 import com.siriusdb.common.MasterConstant;
 import com.siriusdb.common.UtilConstant;
+import com.siriusdb.enums.DataServerStateEnum;
 import com.siriusdb.enums.RpcOperationEnum;
 import com.siriusdb.model.db.Table;
 import com.siriusdb.model.master.DataServer;
@@ -125,15 +126,17 @@ public class RegionServiceImpl implements RegionService.Iface {
         Integer dualPort = dataServer.getPort();
         RegionServerClient regionServerClient = new RegionServerClient(RegionService.Client.class, dualIp, dualPort);
         MasterServerClient masterServerClient = new MasterServerClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
-        if (stateCode == "0") {
+        if (stateCode == DataServerStateEnum.PRIMARY.toString()) {
             /*读取文件状态文件，如果是主机要调用副机的，如果是副机直接执行*/
             regionServerClient.notifyTableChange(req);
         }
         if (operationCode == RpcOperationEnum.DELETE.getCode()) {
             for (int i = 0; i < tableNames.size(); i++) {
-                masterServerClient.notifyTableMetaChange(tableNames.get(i), RpcOperationEnum.DELETE.getCode(), vTableList.get(i).getMeta(), new Base()
-                        .setCaller(UtilConstant.getHostname())
-                        .setReceiver(MasterConstant.MASTER_HOST_NAME));
+                if(stateCode == DataServerStateEnum.PRIMARY.toString()) {
+                    masterServerClient.notifyTableMetaChange(tableNames.get(i), RpcOperationEnum.DELETE.getCode(), vTableList.get(i).getMeta(), new Base()
+                            .setCaller(UtilConstant.getHostname())
+                            .setReceiver(MasterConstant.MASTER_HOST_NAME));
+                }
                 File file = new File(tableNames.get(i) + ".dat");
                 if (file.exists()) {
                     file.delete();
@@ -141,9 +144,11 @@ public class RegionServiceImpl implements RegionService.Iface {
             }
         } else if (operationCode == RpcOperationEnum.UPDATE.getCode()) {
             for (int i = 0; i < tableNames.size(); i++) {
-                masterServerClient.notifyTableMetaChange(tableNames.get(i), RpcOperationEnum.UPDATE.getCode(), vTableList.get(i).getMeta(), new Base()
-                        .setCaller(UtilConstant.getHostname())
-                        .setReceiver(MasterConstant.MASTER_HOST_NAME));
+                if(stateCode == DataServerStateEnum.PRIMARY.toString()) {
+                    masterServerClient.notifyTableMetaChange(tableNames.get(i), RpcOperationEnum.UPDATE.getCode(), vTableList.get(i).getMeta(), new Base()
+                            .setCaller(UtilConstant.getHostname())
+                            .setReceiver(MasterConstant.MASTER_HOST_NAME));
+                }
                 File file = new File(tableNames.get(i) + ".dat");
                 if (file.exists()) {
                     file.delete();
@@ -166,9 +171,11 @@ public class RegionServiceImpl implements RegionService.Iface {
             /*更新文件*/
         } else if (operationCode == RpcOperationEnum.CREATE.getCode()) {
             for (int i = 0; i < vTableList.size(); i++) {
-                masterServerClient.notifyTableMetaChange(tableNames.get(i), RpcOperationEnum.CREATE.getCode(), vTableList.get(i).getMeta(), new Base()
-                        .setCaller(UtilConstant.getHostname())
-                        .setReceiver(MasterConstant.MASTER_HOST_NAME));
+                if(stateCode == DataServerStateEnum.PRIMARY.toString()) {
+                    masterServerClient.notifyTableMetaChange(tableNames.get(i), RpcOperationEnum.CREATE.getCode(), vTableList.get(i).getMeta(), new Base()
+                            .setCaller(UtilConstant.getHostname())
+                            .setReceiver(MasterConstant.MASTER_HOST_NAME));
+                }
                 VTable vTableTmp = vTableList.get(i);
                 File file = new File(vTableTmp.getMeta().getName() + ".dat");
                 Table tableTmp = CopyUtils.vTableToTable(vTableTmp);
