@@ -28,10 +28,14 @@ public class DataLoader {
         MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
         QueryCreateTableResponse res = client1.createTable(newTable, UtilConstant.HOST_NAME);
 
+        DataServer target = new DataServer();
+        target.setHostName(res.getLocatedServerName());
+        target.setHostUrl(res.getLocatedServerUrl());
+        target.parseHostUrl();
         if(res.locatedServerName.length()!=0){
             newTable.getMeta().setLocatedServerName(res.locatedServerName);
             newTable.getMeta().setLocatedServerUrl(res.locatedServerUrl);
-            RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class);
+            RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
             client2.trueCreateTable(newTable, res.locatedServerName);
         }
 
