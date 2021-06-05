@@ -111,8 +111,8 @@ public class DataServer implements Serializable {
         } else {
             this.setState(DataServerStateEnum.PRIMARY);
             server.setState(DataServerStateEnum.COPY);
-            this.setDualServerId(server.getDualServerId());
-            server.setDualServerId(this.getDualServerId());
+            this.setDualServerId(server.getId());
+            server.setDualServerId(this.getId());
             log.warn("{}的配偶是{}", this.getHostName(), server.getHostName());
         }
     }

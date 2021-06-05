@@ -15,7 +15,7 @@ service MasterService {
     Operation.NotifyTableMetaChangeResponse notifyTableMetaChange(1: Operation.NotifyTableMetaChangeRequest req),
 
     /**
-     * 请求创建一个表格，根据负载均衡返回位置
+     * 请求创建一个表格，根据负载均衡返回位置A
      */
     Operation.QueryCreateTableResponse queryCreateTable(1: Operation.QueryCreateTableRequest req)
 
