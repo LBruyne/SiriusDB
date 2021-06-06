@@ -72,7 +72,6 @@ public class MasterServiceImpl implements MasterService.Iface {
     private Boolean verifyBase(Base base) {
         // 对请求头进行验证
         // 这里简单的对hostname进行验证
-        // TODO: 添加更多验证，如caller是否在Client列表中等
         String receiver = base.getReceiver();
         if(!receiver.equals(MasterConstant.MASTER_HOST_NAME)) {
             return false;
