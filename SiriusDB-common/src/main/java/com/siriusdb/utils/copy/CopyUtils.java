@@ -3,7 +3,7 @@ package com.siriusdb.utils.copy;
 import com.siriusdb.model.db.*;
 import com.siriusdb.thrift.model.*;
 import org.springframework.beans.BeanUtils;
-
+import lombok.extern.slf4j.Slf4j;
 import java.util.stream.Collectors;
 
 /**
@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
  * @author: liuxuanming
  * @date: 2021/05/24 6:38 下午
  */
+@Slf4j
 public class CopyUtils {
 
     /**
@@ -45,6 +46,7 @@ public class CopyUtils {
         BeanUtils.copyProperties(table, vtable);
         // 复制attributes属性
         vtable.setAttributes(table.getAttributes().stream().map(attribute -> attrToVAttr(attribute)).collect(Collectors.toList()));
+        log.warn("此次将tablemeta{}赋值给vtblemeta{}",table,vtable);
         return vtable;
     }
 
@@ -59,6 +61,7 @@ public class CopyUtils {
         tableMeta.setAttributes(vTableMeta.getAttributes()
                 .stream()
                 .map(vAttr -> vAttrToAttr(vAttr)).collect(Collectors.toList()));
+        log.warn("此次将vtablemeta:{}赋值给tablemeta:{}",vTableMeta,tableMeta);
         return tableMeta;
     }
 
@@ -77,6 +80,7 @@ public class CopyUtils {
         table.setData(vTable.getData()
                 .stream()
                 .map(vRow -> vRowToRow(vRow)).collect(Collectors.toList()));
+        log.warn("此次将vtable:{}赋值给table:{}",vTable,table);
         return table;
     }
 
@@ -95,6 +99,7 @@ public class CopyUtils {
         vTable.setData(table.getData()
                 .stream()
                 .map(row -> rowToVRow(row)).collect(Collectors.toList()));
+        log.warn("此次将table{}赋值给vtble{}",table,vTable);
         return vTable;
     }
 

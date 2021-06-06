@@ -27,8 +27,8 @@ public class FileServer implements Serializable {
             File file = new File(this.getClass().getResource("").getPath());
             File[] tempList = file.listFiles();
             for (int i = 0; i < tempList.length; i++) {
-                if (tempList[i].isFile()) {
-                    tableName1.add(tempList[i].toString());
+                if (tempList[i].isFile() && tempList[i].getName().contains(UtilConstant.getHostname())) {
+                    tableName1.add(tempList[i].getName());
                 }
                 if (tempList[i].isDirectory()) {
                 }
