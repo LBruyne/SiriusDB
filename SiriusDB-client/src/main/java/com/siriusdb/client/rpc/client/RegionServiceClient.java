@@ -1,5 +1,6 @@
 package com.siriusdb.client.rpc.client;
 
+import com.siriusdb.common.ClientConstant;
 import com.siriusdb.common.MasterConstant;
 import com.siriusdb.common.UtilConstant;
 import com.siriusdb.enums.ErrorCodeEnum;
@@ -46,7 +47,7 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
                 .setTableNames(list1)
                 .setOperationCode(RpcOperationEnum.CREATE.getCode())
                 .setBase(new Base()
-                        .setCaller(UtilConstant.HOST_NAME)
+                        .setCaller(ClientConstant.CLIENT_HOST_NAME_PREFIX + UtilConstant.HOST_NAME)
                         .setReceiver(receiver));
         log.warn("将向服务器{}传递创建表格数据，创建表格{}，操作码{}", receiver, list1, RpcOperationEnum.CREATE.getCode());
 
@@ -71,7 +72,7 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
                 .setTableNames(list1)
                 .setOperationCode(RpcOperationEnum.DELETE.getCode())
                 .setBase(new Base()
-                        .setCaller(UtilConstant.HOST_NAME)
+                        .setCaller(ClientConstant.CLIENT_HOST_NAME_PREFIX + UtilConstant.HOST_NAME)
                         .setReceiver(receiver));
         NotifyTableChangeResponse res = client.notifyTableChange(req);
 
@@ -92,7 +93,7 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
         QueryTableDataRequest req = new QueryTableDataRequest()
                 .setTableNames(list1)
                 .setBase(new Base()
-                        .setCaller(UtilConstant.HOST_NAME)
+                        .setCaller(ClientConstant.CLIENT_HOST_NAME_PREFIX + UtilConstant.HOST_NAME)
                         .setReceiver(receiver));
         log.warn("将向服务器{}传递GET表格请求，GET表格{}", receiver, list1);
 
@@ -131,7 +132,7 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
                 .setTableNames(list1)
                 .setOperationCode(RpcOperationEnum.UPDATE.getCode())
                 .setBase(new Base()
-                        .setCaller(UtilConstant.HOST_NAME)
+                        .setCaller(ClientConstant.CLIENT_HOST_NAME_PREFIX + UtilConstant.HOST_NAME)
                         .setReceiver(receiver));
         log.warn("Alter table: 将向服务器{}传递更新的表格数据，更新表格{}，操作码{}", receiver, list1, RpcOperationEnum.UPDATE.getCode());
 

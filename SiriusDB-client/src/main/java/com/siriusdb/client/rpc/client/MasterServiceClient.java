@@ -23,7 +23,9 @@ import java.util.List;
 @Slf4j
 public class MasterServiceClient extends DynamicThriftClient<MasterService.Client> {
 
-    public MasterServiceClient(Class<MasterService.Client> ts) { super(ts); }
+    public MasterServiceClient(Class<MasterService.Client> ts) {
+        super(ts);
+    }
 
     public MasterServiceClient(Class<MasterService.Client> ts, String ip, Integer port) {
         super(ts, ip, port);
@@ -40,12 +42,10 @@ public class MasterServiceClient extends DynamicThriftClient<MasterService.Clien
         if (res.getBaseResp().getCode() == RpcResultCodeEnum.HAS_EXISTED.getCode()) {
             log.warn("向{}请求创建表格已存在", caller);
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求创建表格已存在");
-        }
-        else if (res.getBaseResp().getCode() == RpcResultCodeEnum.SUCCESS.getCode()) {
+        } else if (res.getBaseResp().getCode() == RpcResultCodeEnum.SUCCESS.getCode()) {
             log.warn("向{}创建表格请求成功", caller);
             return res;
-        }
-        else {
+        } else {
             log.warn("向{}创建表格请求失败", caller);
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "创建表格请求失败");
         }
@@ -64,37 +64,33 @@ public class MasterServiceClient extends DynamicThriftClient<MasterService.Clien
         if (res.getBaseResp().getCode() == RpcResultCodeEnum.NOT_FOUND.getCode()) {
             log.warn("向{}请求删除的表格不存在", caller);
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求删除的表格不存在");
-        }
-        else if (res.getBaseResp().getCode() == RpcResultCodeEnum.SUCCESS.getCode()) {
+        } else if (res.getBaseResp().getCode() == RpcResultCodeEnum.SUCCESS.getCode()) {
             log.warn("向{}删除表格请求成功", caller);
             return res;
-        }
-        else {
+        } else {
             log.warn("向{}删除表格请求失败", caller);
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "删除表格请求失败");
         }
     }
 
-    public QueryTableMetaInfoResponse getTable(String tableName, String caller) throws TException{
+    public QueryTableMetaInfoResponse getTable(String tableName, String caller) throws TException {
         List<String> tableNames = new LinkedList<>();
         tableNames.add(tableName);
         QueryTableMetaInfoRequest req = new QueryTableMetaInfoRequest()
                 .setName(tableNames)
                 .setBase(new Base()
-                .setCaller(caller)
-                .setReceiver(MasterConstant.MASTER_HOST_NAME)
+                        .setCaller(caller)
+                        .setReceiver(MasterConstant.MASTER_HOST_NAME)
                 );
 
         QueryTableMetaInfoResponse res = client.queryTableMeta(req);
         if (res.getBaseResp().getCode() == RpcResultCodeEnum.NOT_FOUND.getCode()) {
             log.warn("向{}请求GET的表格不存在", caller);
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求GET的表格不存在");
-        }
-        else if (res.getBaseResp().getCode() == RpcResultCodeEnum.SUCCESS.getCode()) {
+        } else if (res.getBaseResp().getCode() == RpcResultCodeEnum.SUCCESS.getCode()) {
             log.warn("向{}GET表格请求成功", caller);
             return res;
-        }
-        else {
+        } else {
             log.warn("向{}GET表格请求失败", caller);
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "GET表格请求失败");
         }

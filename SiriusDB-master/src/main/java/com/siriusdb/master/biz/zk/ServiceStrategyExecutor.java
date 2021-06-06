@@ -70,10 +70,14 @@ public class ServiceStrategyExecutor {
             // 该机器为主件机或者副本机
             if (DataHolder.getIdleServerNum() == 0) {
                 // 没有备用机器，非正常状态
-                DataHolder.getDataServerById(server.getDualServerId()).setDualServerId(MasterConstant.NO_DUAL_SERVER);
-                server.serverInvalid();
-                log.warn("服务器数量不足");
-                log.warn("服务器失效后没有备用机器，系统非正常状态");
+                if(DataHolder.getDataServerById(server.getDualServerId()) == null) {
+                    throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "主件机或副件机没有配偶");
+                } else {
+                    DataHolder.getDataServerById(server.getDualServerId()).setDualServerId(MasterConstant.NO_DUAL_SERVER);
+                    server.serverInvalid();
+                    log.warn("服务器数量不足");
+                    log.warn("服务器失效后没有备用机器，系统非正常状态");
+                }
             } else {
                 // 有备用机器，进行一次结对
                 DataServer serverNotInPair = DataHolder.getDataServerById(server.getDualServerId()); // 孤单的服务器
