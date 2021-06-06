@@ -66,7 +66,7 @@ public class Interpreter {
             if (reset == 1)
                 continue;
 
-            String query = input.toString().toString().trim().replaceAll("\\s+", " ");
+            String query = input.toString().toString().trim().replaceAll("\\s+", " ").replaceAll("’","'");
             System.out.println("Your input: " + query + ";");
             String[] qaq = query.split(" ");
 
@@ -217,6 +217,7 @@ public class Interpreter {
 
         System.out.println("Success: Table " + tableName + " has been created!");
     }
+
     public static void createIndex(String query) throws BasicBusinessException{
         System.out.println("Creating index ...");
         query = query.replaceAll("\\s+", " ");
@@ -246,6 +247,7 @@ public class Interpreter {
 
         System.out.println("Success: Index " + indexName + " has been created!");
     }
+
     public static void dropTable(String query) throws BasicBusinessException{
         System.out.println("Dropping table ...");
         String[] qaq = query.split(" ");
@@ -259,6 +261,7 @@ public class Interpreter {
 
         System.out.println("Success: Table " + tableName + " has been dropped!");
     }
+
     public static void dropIndex(String query) throws BasicBusinessException{
         System.out.println("Dropping index ...");
         String[] qaq = query.split(" ");
@@ -272,6 +275,7 @@ public class Interpreter {
 
         System.out.println("Success: Index " + indexName + " has been dropped!");
     }
+
     public static void insert(String query) throws BasicBusinessException{
         System.out.println("Inserting values ...");
         query = query.replaceAll(" *\\( *", " (").replaceAll(" *\\) *", ") ");
@@ -308,6 +312,7 @@ public class Interpreter {
 
         System.out.println(query + ";");
     }
+
     public static void delete(String query) throws BasicBusinessException{
         System.out.println("Deleting values ...");
         query = query.replaceAll(" *\\( *", " (").replaceAll(" *\\) *", ") ");
@@ -349,6 +354,7 @@ public class Interpreter {
             // TODO: delete from tableName 的接口
         }
     }
+
     public static void select(String query) throws BasicBusinessException {
         System.out.println("Selecting ...");
         query = query.replaceAll(" *\\( *", " (").replaceAll(" *\\) *", ") ");
@@ -384,7 +390,9 @@ public class Interpreter {
         else//不是join
         {
 
-            Table tempT = DataLoader.getTable(tableName);
+            Table tempT = null;
+                tempT = DataLoader.getTable(tableName);
+
             List<Attribute> tempA = tempT.getMeta().getAttributes();
             if (tempT == null || tempA == null)
                 throw new BasicBusinessException("select error: No such table!");
@@ -398,8 +406,8 @@ public class Interpreter {
                 String[] conditions = Arrays.asList(qaq).subList(5, qaq.length).toArray(new String[]{});
                 int index=-1;
                 int count = 0; //判断condition符不符合格式
+
                 for (int i = 0; i < conditions.length; i++) {
-                    System.out.println(conditions[i]);
                     count += 1;
                     if (conditions[i].equals("and")){//and分割
                         index = i;
@@ -412,7 +420,7 @@ public class Interpreter {
                         int flag = 0;
                         AttrVSValueCondition avvc = new AttrVSValueCondition();
                         for (int j = 0; j < tempA.size(); j++) {
-                            if(conditions[attrIndex].equals(tempA.get(j))){
+                            if(conditions[attrIndex].equals(tempA.get(j).getName())){
                                 //在tableMeta的Attributes里面找到了对应的属性
                                 flag =1;
                                 Set<Table> t = new HashSet<>();
@@ -425,7 +433,20 @@ public class Interpreter {
                         if (flag == 0)//找不到
                             throw new BasicBusinessException("select error: Not existed attribute!");
 
-                        //TODO: avvc 的setTable 和 setElement
+                        avvc.setFormerTable(tempT);
+                        Element e = new Element();
+                        e.setData(qaq[valueIndex]);
+                        if (conditions[valueIndex].contains("'")||conditions[valueIndex].contains("‘"))
+                            e.setType("string");
+                        else {
+                            if (conditions[valueIndex].contains("."))
+                                e.setType("float");
+                            else
+                                e.setType("int");
+                        }
+                        avvc.setLatterDataElement(e);
+                        if (e.getType() != avvc.getFormerAttribute().getAttribute().getType())
+                            throw new BasicBusinessException("select error: The type of set-con value is not match!");
 
                         avvc.setCondition(Utils.judgeSymbol(conditions[symbolIndex]));
                         whereCondition.add(avvc);
@@ -437,20 +458,34 @@ public class Interpreter {
                     int attrIndex = conditions.length-3, symbolIndex = conditions.length-2, valueIndex = conditions.length-1;
                     int flag = 0;
                     AttrVSValueCondition avvc = new AttrVSValueCondition();
-                    for (int i = 0; i < tempA.size(); i++) {
-                        if(conditions[attrIndex].equals(tempA.get(i))){
+                    for (int j = 0; j < tempA.size(); j++) {
+                        if(conditions[attrIndex].equals(tempA.get(j).getName())){
+                            //在tableMeta的Attributes里面找到了对应的属性
                             flag =1;
                             Set<Table> t = new HashSet<>();
                             t.add(tempT);
-                            TableAttribute ta = new TableAttribute(t, tempA.get(i));
+                            TableAttribute ta = new TableAttribute(t, tempA.get(j));
                             avvc.setFormerAttribute(ta);
                             break;
                         }
                     }
-                    if (flag == 0)
-                        throw new BasicBusinessException("select error: Not existed attribute1!");
+                    if (flag == 0)//找不到
+                        throw new BasicBusinessException("select error: Not existed attribute!");
 
-                    //TODO: avvc 的setTable 和 setElement
+                    avvc.setFormerTable(tempT);
+                    Element e = new Element();
+                    e.setData(conditions[valueIndex]);
+                    if (conditions[valueIndex].contains("'")||conditions[valueIndex].contains("‘"))
+                        e.setType("string");
+                    else {
+                        if (conditions[valueIndex].contains("."))
+                            e.setType("float");
+                        else
+                            e.setType("int");
+                    }
+                    avvc.setLatterDataElement(e);
+                    if (e.getType() != avvc.getFormerAttribute().getAttribute().getType())
+                        throw new BasicBusinessException("select error: The type of condition value is not match!");
 
                     avvc.setCondition(Utils.judgeSymbol(conditions[symbolIndex]));
                     whereCondition.add(avvc);
@@ -475,7 +510,7 @@ public class Interpreter {
                         throw new BasicBusinessException("select error: Invalid format!");
                     int flag = 0;
                     for (int j = 0; j < tempA.size(); j++) {
-                        if (selectAttrs[i].equals(tempA.get(j))){
+                        if (selectAttrs[i].equals(tempA.get(j).getName())){
                             flag =1;
                             Set<Table> t = new HashSet<>();
                             t.add(tempT);
@@ -504,8 +539,108 @@ public class Interpreter {
         }
         rm.select(selectedAttributes,tables,joinCondition,whereCondition,isAnd);
     }
+
     public static void update(String query) throws BasicBusinessException{
+        // 只支持set条件和where条件只有一个
         System.out.println("Updating ...");
+        query = query.replaceAll(" *\\( *", " (").replaceAll(" *\\) *", ") ");
+        query = query.replaceAll(" *, *", ",");
+        query = query.trim();
+        String[] qaq = query.split(" ");
+
+        if (qaq.length<10)
+            throw new BasicBusinessException("update error: Invalid query!");
+        if (!qaq[0].equals("update"))
+            throw new BasicBusinessException("update error: Please enter 'update' first!");
+        if (!qaq[2].equals("set"))
+            throw new BasicBusinessException("update error: Please enter 'set' after the tableName!");
+        if (!qaq[6].equals("where"))
+            throw new BasicBusinessException("update error: Incorrect format! (Prompt: 'where' or the set-condition)");
+
+        Table table = new Table();
+        List<ICondition> setCondition = new ArrayList<>();
+        List<ICondition> whereCondition = new ArrayList<>();
+        boolean isAnd = true;
+
+        String tableName = qaq[1];
+            table = DataLoader.getTable(tableName);
+
+        List<Attribute> tempA = table.getMeta().getAttributes();
+
+
+        //setCondition
+        int attrIndex = 3, symbolIndex = 4, valueIndex = 5;
+        int flagSet = 0;
+        AttrVSValueCondition setCon = new AttrVSValueCondition();
+        for (int i = 0; i < tempA.size(); i++) {
+            if(qaq[attrIndex].equals(tempA.get(i).getName())){
+                flagSet =1;
+                Set<Table> t = new HashSet<>();
+                t.add(table);
+                TableAttribute ta = new TableAttribute(t, tempA.get(i));
+                setCon.setFormerAttribute(ta);
+                break;
+            }
+        }
+        if (flagSet == 0)
+            throw new BasicBusinessException("select error: Not existed attribute1!");
+        setCon.setFormerTable(table);
+        Element e = new Element();
+        e.setData(qaq[valueIndex]);
+        if (qaq[valueIndex].contains("'")||qaq[valueIndex].contains("‘"))
+            e.setType("string");
+        else {
+            if(qaq[valueIndex].contains("."))
+                e.setType("float");
+            else
+                e.setType("int");
+        }
+        setCon.setLatterDataElement(e);
+        if (e.getType() != setCon.getFormerAttribute().getAttribute().getType())
+            throw new BasicBusinessException("select error: The type of set-con value is not match!");
+
+        setCon.setCondition(Utils.judgeSymbol(qaq[symbolIndex]));
+        setCondition.add(setCon);
+
+        //whereCondition
+        attrIndex = 7; symbolIndex = 8; valueIndex = 9;
+        int flagWhere = 0;
+        AttrVSValueCondition whereCon = new AttrVSValueCondition();
+        for (int i = 0; i < tempA.size(); i++) {
+            if(qaq[attrIndex].equals(tempA.get(i).getName())){
+                flagWhere =1;
+                Set<Table> t = new HashSet<>();
+                t.add(table);
+                TableAttribute ta = new TableAttribute(t, tempA.get(i));
+                whereCon.setFormerAttribute(ta);
+                break;
+            }
+        }
+        if (flagWhere == 0)
+            throw new BasicBusinessException("select error: Not existed attribute1!");
+
+        whereCon.setFormerTable(table);
+        Element el = new Element();
+        el.setData(qaq[valueIndex]);
+
+        if (qaq[valueIndex].contains("'")||qaq[valueIndex].contains("‘"))
+            el.setType("string");
+        else {
+            if(qaq[valueIndex].contains("."))
+                el.setType("float");
+            else
+                el.setType("int");
+        }
+        if (el.getType() != whereCon.getFormerAttribute().getAttribute().getType())
+            throw new BasicBusinessException("select error: The type of where-con value is not match!");
+
+        whereCon.setLatterDataElement(el);
+
+        whereCon.setCondition(Utils.judgeSymbol(qaq[symbolIndex]));
+        whereCondition.add(whereCon);
+
+        RecordManager rm = new RecordManager();
+        rm.update(table,setCondition,whereCondition,isAnd);
     }
 }
 
@@ -520,7 +655,7 @@ class Utils{
             return LARGERorEQUAL;
         else if (s.equals("<="))
             return SMALLERorEQUAL;
-        else if (s.equals("=="))
+        else if (s.equals("="))
             return EQUAL;
         else
             return notEQUAL;

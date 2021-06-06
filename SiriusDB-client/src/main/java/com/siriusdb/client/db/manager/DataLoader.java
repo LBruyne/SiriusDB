@@ -27,19 +27,19 @@ public class DataLoader {
         TableMeta meta = new TableMeta();
         meta.setName("student");
         meta.setPrimaryKey("sno");
-        attr.add(new Attribute(1, "sno", "string"));
-        attr.add(new Attribute(2, "sname", "string"));
-        attr.add(new Attribute(3, "sage", "int"));
-        attr.add(new Attribute(4, "sgender", "float"));
+        attr.add(new Attribute(0, "sno", "string"));
+        attr.add(new Attribute(1, "sname", "string"));
+        attr.add(new Attribute(2, "sage", "int"));
+        attr.add(new Attribute(3, "sgender", "float"));
         meta.setAttributes(attr);
         student.setMeta(meta);
 
         for (int i = 0; i < 5; i++) {
             List<Element> thisRow = new LinkedList<>();
-            thisRow.add(new Element("318010001" + i, 1, "string"));
-            thisRow.add(new Element("cb_" + i, 2, "string"));
-            thisRow.add(new Element(20 + i, 3, "int"));
-            thisRow.add(new Element(1.0 + i, 4, "float"));
+            thisRow.add(new Element("318010001" + i, 0, "string"));
+            thisRow.add(new Element("cb_" + i, 1, "string"));
+            thisRow.add(new Element(20 + i, 2, "int"));
+            thisRow.add(new Element(1.0 + i, 3, "float"));
             data.add(new Row(thisRow));
         }
         student.setData(data);
