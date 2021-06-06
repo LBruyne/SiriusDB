@@ -20,10 +20,10 @@ public class FileServer implements Serializable {
 
     private List<String> fileList;
 
-    public List<VTable> readFile(){
+    public List<VTable> readFile() {
         List<VTable> tableList = new ArrayList<>();
         List<String> tableName1 = new ArrayList<String>();
-        if(fileList.get(0).equals(UtilConstant.ALL_TABLE)){
+        if (fileList.get(0).equals(UtilConstant.ALL_TABLE)) {
             File file = new File(this.getClass().getResource("").getPath());
             File[] tempList = file.listFiles();
             for (int i = 0; i < tempList.length; i++) {
@@ -33,12 +33,11 @@ public class FileServer implements Serializable {
                 if (tempList[i].isDirectory()) {
                 }
             }
-        }
-        else{
+        } else {
             tableName1.addAll(fileList);
         }
         log.warn("tablenames:{}",tableName1);
-        for(int i=0;i<tableName1.size();i++) {
+        for (int i = 0; i < tableName1.size(); i++) {
             Table tableTmp = null;
             VTable vtableTmp = null;
             File file = new File(tableName1.get(i) + ".dat");
