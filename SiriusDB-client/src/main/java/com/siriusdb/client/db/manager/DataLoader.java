@@ -4,7 +4,7 @@ import com.siriusdb.client.rpc.client.MasterServiceClient;
 import com.siriusdb.client.rpc.client.RegionServiceClient;
 import com.siriusdb.common.MasterConstant;
 import com.siriusdb.common.UtilConstant;
-import com.siriusdb.model.db.Table;
+import com.siriusdb.model.db.*;
 
 
 import com.siriusdb.model.master.DataServer;
@@ -15,12 +15,36 @@ import com.siriusdb.thrift.service.RegionService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 
+import java.util.*;
+
 
 @Slf4j
 public class DataLoader {
 
     public static Table getTable(String tableName) {
-        return null;
+        Table student = new Table();
+        List<Attribute> attr = new LinkedList<>();
+        List<Row> data = new LinkedList<>();
+        TableMeta meta = new TableMeta();
+        meta.setName("student");
+        meta.setPrimaryKey("sno");
+        attr.add(new Attribute(1,"sno","string"));
+        attr.add(new Attribute(2,"sname","string"));
+        attr.add(new Attribute(3,"sage","int"));
+        attr.add(new Attribute(4,"sgender","float") );
+        meta.setAttributes(attr);
+        student.setMeta(meta);
+
+        for(int i=0;i<5;i++){
+            List<Element> thisRow = new LinkedList<>();
+            thisRow.add(new Element("318010001"+i,1,"string"));
+            thisRow.add(new Element("cb_"+i,2,"string"));
+            thisRow.add(new Element(20+i,3,"int"));
+            thisRow.add(new Element(1.0+i,4,"float"));
+            data.add(new Row(thisRow));
+        }
+        student.setData(data);
+        return student;
     }
 
     public static void createTable(Table newTable) throws TException {
@@ -54,6 +78,12 @@ public class DataLoader {
             RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class);
             client2.trueDropTable(oldTable, res.meta.get(0).locatedServerName);
         }
+
+    }
+
+
+    public static void getTestTable() {
+        Table student = new Table();
 
     }
 }
