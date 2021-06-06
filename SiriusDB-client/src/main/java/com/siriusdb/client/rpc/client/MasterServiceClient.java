@@ -1,5 +1,6 @@
 package com.siriusdb.client.rpc.client;
 
+import com.siriusdb.common.ClientConstant;
 import com.siriusdb.common.MasterConstant;
 import com.siriusdb.enums.ErrorCodeEnum;
 import com.siriusdb.enums.RpcResultCodeEnum;
@@ -35,7 +36,7 @@ public class MasterServiceClient extends DynamicThriftClient<MasterService.Clien
         QueryCreateTableRequest req = new QueryCreateTableRequest()
                 .setName(newTable.getMeta().getName())
                 .setBase(new Base()
-                        .setCaller(caller)
+                        .setCaller(ClientConstant.CLIENT_HOST_NAME_PREFIX + caller)
                         .setReceiver(MasterConstant.MASTER_HOST_NAME));
         QueryCreateTableResponse res = client.queryCreateTable(req);
 
@@ -57,9 +58,10 @@ public class MasterServiceClient extends DynamicThriftClient<MasterService.Clien
         QueryTableMetaInfoRequest req = new QueryTableMetaInfoRequest()
                 .setName(list)
                 .setBase(new Base()
-                        .setCaller(caller)
+                        .setCaller(ClientConstant.CLIENT_HOST_NAME_PREFIX + caller)
                         .setReceiver(MasterConstant.MASTER_HOST_NAME));
         QueryTableMetaInfoResponse res = client.queryTableMeta(req);
+
 
         if (res.getBaseResp().getCode() == RpcResultCodeEnum.NOT_FOUND.getCode()) {
             log.warn("向{}请求删除的表格不存在", caller);
@@ -79,7 +81,7 @@ public class MasterServiceClient extends DynamicThriftClient<MasterService.Clien
         QueryTableMetaInfoRequest req = new QueryTableMetaInfoRequest()
                 .setName(tableNames)
                 .setBase(new Base()
-                        .setCaller(caller)
+                        .setCaller(ClientConstant.CLIENT_HOST_NAME_PREFIX + caller)
                         .setReceiver(MasterConstant.MASTER_HOST_NAME)
                 );
 
