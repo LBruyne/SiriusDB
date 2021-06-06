@@ -22,6 +22,11 @@ public class UtilConstant {
     public static String HOST_URL = getHostAddress() + ":" + RegionConstant.port.toString();
 
     /**
+     * 主机IP
+     */
+    public static String HOST_IP = getHostAddress();
+
+    /**
      * 随机的本机主机名
      */
     public static String HOST_NAME = getHostname();
@@ -29,7 +34,7 @@ public class UtilConstant {
     /**
      * RPC超时时间
      */
-    public static final Integer RPC_TIMEOUT = 3000;
+    public static final Integer RPC_TIMEOUT = 10000;
 
     /**
      * 表格数据请求中，代表请求所有表格数据

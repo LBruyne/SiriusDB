@@ -76,6 +76,7 @@ public class RegionServiceImpl implements RegionService.Iface {
     @Override
     public NotifyStateResponse notifyStateChange(NotifyStateRequest req) throws TException {
         DataServer dataServer = DataServer.builder().hostUrl(req.getDualServerUrl()).hostName(req.getDualServerName()).state(DataServerStateEnum.PRIMARY).build();
+        dataServer.parseHostUrl();
         String stateCode = Integer.toString(req.getStateCode());
         switch (stateCode){
             case "1":dataServer.setState(DataServerStateEnum.PRIMARY);
@@ -83,6 +84,8 @@ public class RegionServiceImpl implements RegionService.Iface {
             case "0":dataServer.setState(DataServerStateEnum.IDLE);
             case "-1":dataServer.setState(DataServerStateEnum.INVAILID);
         }
+        log.warn("接收到Master通知，状态变更为{}，对偶机为{}:{}", stateCode, dataServer.getHostName(), dataServer.getHostUrl());
+
         File file = new File(UtilConstant.getHostname() + "dualMachine.dat");
         FileOutputStream out;
         try {
@@ -125,23 +128,6 @@ public class RegionServiceImpl implements RegionService.Iface {
         int operationCode = req.getOperationCode();
         List<String> tableNames = req.getTableNames();
         List<VTable> vTableList = req.getTables();
-        /*File stateFile = new File(UtilConstant.getHostname() + "-dualmachine.txt");
-        String stateCode = "";
-        String dualServerName = "";
-        String dualServerUrl = "";
-        try {
-            FileReader fr = new FileReader(stateFile);
-            BufferedReader br = new BufferedReader(fr);
-            stateCode = br.readLine();
-            dualServerName = br.readLine();
-            dualServerUrl = br.readLine();
-            fr.close();
-            br.close();
-        } catch (Exception e) {
-            log.warn("Notifytablechange读取文件失败");
-            return new NotifyTableChangeResponse()
-                    .setBaseResp(RpcResult.failResp());
-        }*/
         File fileState = new File(UtilConstant.getHostname() + "dualmachine.dat");
         FileInputStream in;
         DataServer dataServerDual = null;
@@ -154,6 +140,7 @@ public class RegionServiceImpl implements RegionService.Iface {
             log.warn("没有副机文件");
         }
         DataServer dataServer = DataServer.builder().hostUrl(dataServerDual.getHostUrl()).hostName(dataServerDual.getHostName()).build();
+        dataServer.parseHostUrl();
         String dualIp = dataServer.getIp();
         Integer dualPort = dataServer.getPort();
         RegionServerClient regionServerClient = new RegionServerClient(RegionService.Client.class, dualIp, dualPort);
