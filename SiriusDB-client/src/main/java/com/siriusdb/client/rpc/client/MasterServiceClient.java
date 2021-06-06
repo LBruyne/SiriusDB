@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -51,7 +52,7 @@ public class MasterServiceClient extends DynamicThriftClient<MasterService.Clien
     }
 
     public QueryTableMetaInfoResponse dropTable(Table oldTable, String caller) throws TException {
-        List<String> list = new ArrayList();
+        List<String> list = new ArrayList<>();
         list.add(oldTable.getMeta().getName());
         QueryTableMetaInfoRequest req = new QueryTableMetaInfoRequest()
                 .setName(list)
@@ -73,4 +74,30 @@ public class MasterServiceClient extends DynamicThriftClient<MasterService.Clien
             throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "删除表格请求失败");
         }
     }
+
+    public QueryTableMetaInfoResponse getTable(String tableName, String caller) throws TException{
+        List<String> tableNames = new LinkedList<>();
+        tableNames.add(tableName);
+        QueryTableMetaInfoRequest req = new QueryTableMetaInfoRequest()
+                .setName(tableNames)
+                .setBase(new Base()
+                .setCaller(caller)
+                .setReceiver(MasterConstant.MASTER_HOST_NAME)
+                );
+
+        QueryTableMetaInfoResponse res = client.queryTableMeta(req);
+        if (res.getBaseResp().getCode() == RpcResultCodeEnum.NOT_FOUND.getCode()) {
+            log.warn("向{}请求GET的表格不存在", caller);
+            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "请求GET的表格不存在");
+        }
+        else if (res.getBaseResp().getCode() == RpcResultCodeEnum.SUCCESS.getCode()) {
+            log.warn("向{}GET表格请求成功", caller);
+            return res;
+        }
+        else {
+            log.warn("向{}GET表格请求失败", caller);
+            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "GET表格请求失败");
+        }
+    }
+
 }

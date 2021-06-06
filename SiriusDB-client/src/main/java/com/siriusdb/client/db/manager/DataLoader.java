@@ -8,8 +8,7 @@ import com.siriusdb.model.db.*;
 
 
 import com.siriusdb.model.master.DataServer;
-import com.siriusdb.thrift.model.QueryCreateTableResponse;
-import com.siriusdb.thrift.model.QueryTableMetaInfoResponse;
+import com.siriusdb.thrift.model.*;
 import com.siriusdb.thrift.service.MasterService;
 import com.siriusdb.thrift.service.RegionService;
 import lombok.extern.slf4j.Slf4j;
@@ -28,19 +27,19 @@ public class DataLoader {
         TableMeta meta = new TableMeta();
         meta.setName("student");
         meta.setPrimaryKey("sno");
-        attr.add(new Attribute(1,"sno","string"));
-        attr.add(new Attribute(2,"sname","string"));
-        attr.add(new Attribute(3,"sage","int"));
-        attr.add(new Attribute(4,"sgender","float") );
+        attr.add(new Attribute(1, "sno", "string"));
+        attr.add(new Attribute(2, "sname", "string"));
+        attr.add(new Attribute(3, "sage", "int"));
+        attr.add(new Attribute(4, "sgender", "float"));
         meta.setAttributes(attr);
         student.setMeta(meta);
 
-        for(int i=0;i<5;i++){
+        for (int i = 0; i < 5; i++) {
             List<Element> thisRow = new LinkedList<>();
-            thisRow.add(new Element("318010001"+i,1,"string"));
-            thisRow.add(new Element("cb_"+i,2,"string"));
-            thisRow.add(new Element(20+i,3,"int"));
-            thisRow.add(new Element(1.0+i,4,"float"));
+            thisRow.add(new Element("318010001" + i, 1, "string"));
+            thisRow.add(new Element("cb_" + i, 2, "string"));
+            thisRow.add(new Element(20 + i, 3, "int"));
+            thisRow.add(new Element(1.0 + i, 4, "float"));
             data.add(new Row(thisRow));
         }
         student.setData(data);
@@ -82,8 +81,55 @@ public class DataLoader {
     }
 
 
-    public static void getTestTable() {
-        Table student = new Table();
+    //real get table function, a is any integer
+    public static Table getTable(int a, String tableName) throws TException {
+        MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
+        QueryTableMetaInfoResponse res = client1.getTable(tableName, UtilConstant.HOST_NAME);
+        Table ret = null;
+        DataServer target = new DataServer();
+        if (res.getMeta() == null || res.getMeta().size() == 0) {
+            log.warn("向Master请求{}表格失败，表格不存在", tableName);
+        } else {
+            VTableMeta thisTableMeta = res.getMeta().get(0);
+            target.setHostName(thisTableMeta.getLocatedServerName());
+            target.setHostUrl(thisTableMeta.getLocatedServerUrl());
+            target.parseHostUrl();
 
+            log.warn("向Master请求GET表格成功，表格现在被存储在主机{}:{}:{}", target.getHostName(), target.getIp(), target.getPort());
+
+            if (thisTableMeta.getLocatedServerName().length() != 0) {
+//                newTable.getMeta().setLocatedServerName(res.locatedServerName);
+//                newTable.getMeta().setLocatedServerUrl(res.locatedServerUrl);
+//                RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
+//                client2.trueCreateTable(newTable, res.locatedServerName);
+
+                RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
+                ret = client2.trueGetTable(tableName, thisTableMeta.getLocatedServerName());
+            }
+        }
+        return ret;
+    }
+
+    public static void alterTable(Table table) throws TException {
+        String tableName = table.getMeta().getName();
+        MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
+        QueryTableMetaInfoResponse res = client1.getTable(tableName, UtilConstant.HOST_NAME);
+        Table ret = null;
+        DataServer target = new DataServer();
+        if (res.getMeta() == null || res.getMeta().size() == 0) {
+            log.warn("Alter Table: 向Master请求{}表格失败，表格不存在", tableName);
+        } else {
+            VTableMeta thisTableMeta = res.getMeta().get(0);
+            target.setHostName(thisTableMeta.getLocatedServerName());
+            target.setHostUrl(thisTableMeta.getLocatedServerUrl());
+            target.parseHostUrl();
+
+            log.warn("Alter Table: 向Master请求GET表格成功，表格现在被存储在主机{}:{}:{}", target.getHostName(), target.getIp(), target.getPort());
+
+            if (thisTableMeta.getLocatedServerName().length() != 0) {
+                RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
+                client2.trueRetransmitTable(table, thisTableMeta.getLocatedServerName());
+            }
+        }
     }
 }
