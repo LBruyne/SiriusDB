@@ -368,7 +368,7 @@ public class ServiceStrategyExecutor {
             }).collect(Collectors.toList());
 
             // 查找最小值对应的ID
-            return counts.indexOf(Collections.min(counts));
+            return primaryServers.get(counts.indexOf(Collections.min(counts))).getId();
         }
 
         public static void read() throws IOException, ClassNotFoundException {
