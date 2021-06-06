@@ -11,7 +11,6 @@ import com.siriusdb.thrift.service.MasterService;
 import com.siriusdb.thrift.service.RegionService;
 import com.siriusdb.utils.copy.CopyUtils;
 import com.siriusdb.utils.rpc.RpcResult;
-import org.apache.log4j.LogMF;
 import org.apache.thrift.TException;
 import com.siriusdb.model.region.FileServer;
 import lombok.extern.slf4j.Slf4j;
@@ -190,6 +189,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                 VTable vTableTmp = vTableList.get(i);
                 Table tableTmp = CopyUtils.vTableToTable(vTableTmp);
                 FileOutputStream out;
+                log.warn("notify:table:{},vtable:{}",tableTmp,vTableTmp);
                 try {
                     out = new FileOutputStream(file);
                     ObjectOutputStream objOut = new ObjectOutputStream(out);
@@ -212,6 +212,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                 VTable vTableTmp = vTableList.get(i);
                 File file = new File(UtilConstant.getHostname() + vTableTmp.getMeta().getName() + ".dat");
                 Table tableTmp = CopyUtils.vTableToTable(vTableTmp);
+                log.warn("notify:table:{},vtable:{}",tableTmp,vTableTmp);
                 FileOutputStream out;
                 try {
                     out = new FileOutputStream(file);
