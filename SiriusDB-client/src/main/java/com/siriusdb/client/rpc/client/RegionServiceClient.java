@@ -44,6 +44,8 @@ public class RegionServiceClient extends DynamicThriftClient<RegionService.Clien
                 .setBase(new Base()
                         .setCaller(UtilConstant.HOST_NAME)
                         .setReceiver(receiver));
+        log.warn("将向服务器{}传递创建表格数据，创建表格{}，操作码{}", receiver, list1, RpcOperationEnum.CREATE.getCode());
+
         NotifyTableChangeResponse res = client.notifyTableChange(req);
 
         if (res.getBaseResp().getCode() == RpcResultCodeEnum.SUCCESS.getCode()) {

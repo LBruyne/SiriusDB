@@ -19,7 +19,7 @@ import org.apache.thrift.TException;
 @Slf4j
 public class DataLoader {
 
-    public static Table getTable(String tableName){
+    public static Table getTable(String tableName) {
         return null;
     }
 
@@ -32,7 +32,9 @@ public class DataLoader {
         target.setHostName(res.getLocatedServerName());
         target.setHostUrl(res.getLocatedServerUrl());
         target.parseHostUrl();
-        if(res.locatedServerName.length()!=0){
+        log.warn("向Master请求创建表格成功，表格将被存储在主机{}:{}:{}", target.getHostName(), target.getIp(), target.getPort());
+
+        if (res.locatedServerName.length() != 0) {
             newTable.getMeta().setLocatedServerName(res.locatedServerName);
             newTable.getMeta().setLocatedServerUrl(res.locatedServerUrl);
             RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
@@ -46,7 +48,7 @@ public class DataLoader {
         MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, "127.0.0.1", 2345);
         QueryTableMetaInfoResponse res = client1.dropTable(oldTable, UtilConstant.HOST_NAME);
 
-        if(res.meta.get(0).locatedServerName.length()!=0){
+        if (res.meta.get(0).locatedServerName.length() != 0) {
             oldTable.getMeta().setLocatedServerName(res.meta.get(0).locatedServerName);
             oldTable.getMeta().setLocatedServerUrl(res.meta.get(0).locatedServerUrl);
             RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class);
