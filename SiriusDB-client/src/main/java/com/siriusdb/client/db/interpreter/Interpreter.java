@@ -242,7 +242,22 @@ public class Interpreter {
             throw new BasicBusinessException("createIndex error: Invalid attribute name!");
         attrName = attrName.substring(1, attrName.length() - 1);
 
-        // TODO: attrName and tableName valid or not
+        Table tempT = null;
+        tempT = DataLoader.getTable(tableName);
+
+        List<Attribute> tempA = tempT.getMeta().getAttributes();
+        if (tempT == null || tempA == null)
+            throw new BasicBusinessException("select error: No such table!");
+        int  flag = 0;
+        for (int i = 0; i < tempA.size(); i++) {
+            if (attrName.equals(tempA.get(i).getName())) {
+                flag =1;
+                break;
+            }
+        }
+        if (flag == 0)
+            throw new BasicBusinessException("createIndex error: Not existed attribute!");
+
 
         // TODO: API for createIndex
 
@@ -258,7 +273,16 @@ public class Interpreter {
             throw new BasicBusinessException("dropTable error: Invalid query!");
 
         String tableName = qaq[2];
-        // TODO: API for dropTable
+        Table tempT = null;
+        tempT = DataLoader.getTable(tableName);
+        if (tempT == null )
+            throw new BasicBusinessException("dropTable error: No such table!");
+
+        try {
+            DataLoader.dropTable(tempT);
+        } catch (TException e) {
+            e.printStackTrace();
+        }
 
         System.out.println("Success: Table " + tableName + " has been dropped!");
     }
@@ -301,17 +325,38 @@ public class Interpreter {
         if(!qaq[4].matches("^\\(.*\\)$"))
             throw new BasicBusinessException(("insert error: Format mismatch!"));
 
-
+        qaq[4]=qaq[4].replace("(","").replace(")","");
         String[] values = qaq[4].split(",");
-        for (int i = 0; i < values.length ; i++) {
-//            System.out.println(values[i]);
-        }
 
-        // TODO: 判断tableName
+        Table tempT = null;
+        tempT = DataLoader.getTable(tableName);
+        List<Attribute> tempA = tempT.getMeta().getAttributes();
+        List<Element> elementList = new ArrayList<>();
+        if (tempT == null || tempA == null)
+            throw new BasicBusinessException("insert error: No such table!");
 
         // TODO: 判断数量并插入
+        if (values.length != tempA.size())
+            throw new BasicBusinessException("insert error: Values not match!");
+        for (int i = 0; i < values.length; i++) {
+            Element e = new Element();
+            e.setData(values[i]);
+            if (values[i].contains("'")||values[i].contains("‘"))
+                e.setType(DataTypeEnum.STRING.getType());
+            else {
+                if (values[i].contains("."))
+                    e.setType(DataTypeEnum.FLOAT.getType());
+                else
+                    e.setType(DataTypeEnum.INTEGER.getType());
+            }
+            String a = tempA.get(i).getType();
+            if (e.getType() != tempA.get(i).getType())
+                throw new BasicBusinessException("insert error: The type of value is not match!");
+            elementList.add(e);
+        }
 
-        System.out.println(query + ";");
+        RecordManager rm = new RecordManager();
+        rm.insert(tempT,elementList);
     }
 
     public static void delete(String query) throws BasicBusinessException{
@@ -326,6 +371,17 @@ public class Interpreter {
         if (!qaq[1].equals("from"))
             throw new BasicBusinessException("delete error: Please enter 'from' after 'delete' !");
         String tableName = qaq[2];
+
+        Table tempT = null;
+        tempT = DataLoader.getTable(tableName);
+
+        List<Attribute> tempA = tempT.getMeta().getAttributes();
+        if (tempT == null || tempA == null)
+            throw new BasicBusinessException("delete error: No such table!");
+
+        List<ICondition> cons = new ArrayList<>();
+        boolean isAnd = true;
+
         if(qaq.length > 3){
             if (!qaq[3].equals("where"))
                 throw new BasicBusinessException("delete error: Please enter 'where' behind the conditions!");
@@ -333,27 +389,94 @@ public class Interpreter {
             int index=-1;
             int count = 0; //判断condition符不符合格式
             for (int i = 0; i < conditions.length; i++) {
-                System.out.println(conditions[i]);
                 count += 1;
-                if (conditions[i].equals("and")){
+                if (conditions[i].equals("and")){//and分割
                     index = i;
                     if (count !=4)
                         throw new BasicBusinessException("delete error: Conditions misformat1!");
                     count = 0;
                 }
-                if (index == i) {
-                    // TODO: 生成条件condition
+                if (index == i) {//相等的时候说明现在是and，那么之前三个就是一个condition
+                    int attrIndex = index-3, symbolIndex = index-2, valueIndex = index-1;
+                    int flag = 0;
+                    AttrVSValueCondition avvc = new AttrVSValueCondition();
+                    for (int j = 0; j < tempA.size(); j++) {
+                        if(conditions[attrIndex].equals(tempA.get(j).getName())){
+                            //在tableMeta的Attributes里面找到了对应的属性
+                            flag =1;
+                            Set<Table> t = new HashSet<>();
+                            t.add(tempT);
+                            TableAttribute ta = new TableAttribute(t, tempA.get(j));
+                            avvc.setFormerAttribute(ta);
+                            break;
+                        }
+                    }
+                    if (flag == 0)//找不到
+                        throw new BasicBusinessException("select error: Not existed attribute!");
+
+                    avvc.setFormerTable(tempT);
+                    Element e = new Element();
+                    e.setData(conditions[valueIndex]);
+                    if (conditions[valueIndex].contains("'")||conditions[valueIndex].contains("‘"))
+                        e.setType(DataTypeEnum.STRING.getType());
+                    else {
+                        if (conditions[valueIndex].contains("."))
+                            e.setType(DataTypeEnum.FLOAT.getType());
+                        else
+                            e.setType(DataTypeEnum.INTEGER.getType());
+                    }
+                    avvc.setLatterDataElement(e);
+                    if (e.getType() != avvc.getFormerAttribute().getAttribute().getType())
+                        throw new BasicBusinessException("select error: The type of set-con value is not match!");
+
+                    avvc.setCondition(Utils.judgeSymbol(conditions[symbolIndex]));
+                    cons.add(avvc);
                 }
             }
             if (count != 3)
                 throw new BasicBusinessException("delete error: Conditions misformat2!");
 
-            // TODO: delete from tableName where conditions 的接口
+            else {//and之后的那个condition
+                int attrIndex = conditions.length-3, symbolIndex = conditions.length-2, valueIndex = conditions.length-1;
+                int flag = 0;
+                AttrVSValueCondition avvc = new AttrVSValueCondition();
+                for (int j = 0; j < tempA.size(); j++) {
+                    if(conditions[attrIndex].equals(tempA.get(j).getName())){
+                        //在tableMeta的Attributes里面找到了对应的属性
+                        flag =1;
+                        Set<Table> t = new HashSet<>();
+                        t.add(tempT);
+                        TableAttribute ta = new TableAttribute(t, tempA.get(j));
+                        avvc.setFormerAttribute(ta);
+                        break;
+                    }
+                }
+                if (flag == 0)//找不到
+                    throw new BasicBusinessException("delete error: Not existed attribute!");
 
+                avvc.setFormerTable(tempT);
+                Element e = new Element();
+                e.setData(conditions[valueIndex]);
+                if (conditions[valueIndex].contains("'")||conditions[valueIndex].contains("‘"))
+                    e.setType(DataTypeEnum.STRING.getType());
+                else {
+                    if (conditions[valueIndex].contains("."))
+                        e.setType(DataTypeEnum.FLOAT.getType());
+                    else
+                        e.setType(DataTypeEnum.INTEGER.getType());
+                }
+                avvc.setLatterDataElement(e);
+                if (e.getType() != avvc.getFormerAttribute().getAttribute().getType())
+                    throw new BasicBusinessException("delete error: The type of condition value is not match!");
+
+                avvc.setCondition(Utils.judgeSymbol(conditions[symbolIndex]));
+                cons.add(avvc);
+            }
         }
         else if (qaq.length == 3){
-            // TODO: delete from tableName 的接口
         }
+        RecordManager rm = new RecordManager();
+        rm.delete(tempT, cons, isAnd);
     }
 
     public static void select(String query) throws BasicBusinessException {
@@ -392,7 +515,7 @@ public class Interpreter {
         {
 
             Table tempT = null;
-                tempT = DataLoader.getTable(tableName);
+            tempT = DataLoader.getTable(tableName);
 
             List<Attribute> tempA = tempT.getMeta().getAttributes();
             if (tempT == null || tempA == null)
@@ -436,7 +559,7 @@ public class Interpreter {
 
                         avvc.setFormerTable(tempT);
                         Element e = new Element();
-                        e.setData(qaq[valueIndex]);
+                        e.setData(conditions[valueIndex]);
                         if (conditions[valueIndex].contains("'")||conditions[valueIndex].contains("‘"))
                             e.setType(DataTypeEnum.STRING.getType());
                         else {
