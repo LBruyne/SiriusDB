@@ -4,6 +4,7 @@ import com.siriusdb.common.UtilConstant;
 import com.siriusdb.exception.BasicBusinessException;
 import com.siriusdb.model.db.Table;
 import com.siriusdb.thrift.model.VTable;
+import com.siriusdb.thrift.model.VTableMeta;
 import com.siriusdb.utils.copy.CopyUtils;
 import lombok.Builder;
 import lombok.Data;
@@ -24,10 +25,14 @@ public class FileServer implements Serializable {
         List<VTable> tableList = new ArrayList<>();
         List<String> tableName1 = new ArrayList<String>();
         if (fileList.get(0).equals(UtilConstant.ALL_TABLE)) {
-            File file = new File(this.getClass().getResource("").getPath());
+            File file1 = new File(this.getClass().getResource("/").getPath());
+            File file2 = new File(file1.getParent());
+            File file3 = new File(file2.getParent());
+            File file = new File(file3.getParent());
             File[] tempList = file.listFiles();
             for (int i = 0; i < tempList.length; i++) {
-                if (tempList[i].isFile() && tempList[i].getName().contains(UtilConstant.getHostname())) {
+                log.warn(tempList[i].getName());
+                if (tempList[i].isFile() && tempList[i].getName().contains(UtilConstant.getHostname()) && !tempList[i].getName().contains("dualMachine")) {
                     tableName1.add(tempList[i].getName());
                 }
                 if (tempList[i].isDirectory()) {
@@ -36,11 +41,11 @@ public class FileServer implements Serializable {
         } else {
             tableName1.addAll(fileList);
         }
-        log.warn("tablenames:{}",tableName1);
+        log.warn("Fileserver:此次添加的表名tablenames:{}",tableName1);
         for (int i = 0; i < tableName1.size(); i++) {
             Table tableTmp = null;
             VTable vtableTmp = null;
-            File file = new File(tableName1.get(i) + ".dat");
+            File file = new File(tableName1.get(i));
             if (!file.exists()) {
                 continue;
             }
@@ -54,6 +59,14 @@ public class FileServer implements Serializable {
                 log.warn(e.getMessage(), e);
             }
             vtableTmp = CopyUtils.tableToVTable(tableTmp);
+            VTableMeta vTableMeta = vtableTmp.getMeta();
+            vtableTmp.setMeta(new VTableMeta()
+                    .setAttributes(vTableMeta.getAttributes())
+                    .setLocatedServerName(UtilConstant.getHostname())
+                    .setLocatedServerUrl(UtilConstant.HOST_URL)
+                    .setName(vTableMeta.getName())
+                    .setPrimaryKey(vTableMeta.getPrimaryKey()));
+            log.warn("Fileserver:此次添加的表为:{}",vtableTmp);
             tableList.add(vtableTmp);
         }
         return tableList;

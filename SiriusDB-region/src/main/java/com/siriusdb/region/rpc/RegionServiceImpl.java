@@ -35,7 +35,12 @@ public class RegionServiceImpl implements RegionService.Iface {
         List<String> tableName = req.getTableNames();
         List<String> tableName1 = new ArrayList<String>();
         if (tableName.get(0).equals(UtilConstant.ALL_TABLE)) {
-            File file = new File(this.getClass().getResource("").getPath());
+            File file1 = new File(this.getClass().getResource("/").getPath());
+            File file2 = new File(file1.getParent());
+            File file3 = new File(file2.getParent());
+            File file = new File(file3.getParent());
+            log.warn("此时的项目地址为:");
+            System.out.println(file);
             File[] tempList = file.listFiles();
             for (int i = 0; i < tempList.length; i++) {
                 if (tempList[i].isFile()) {
@@ -62,6 +67,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                 VTable vtableTmp = CopyUtils.tableToVTable(tableTmp);
                 //将新的添加到末尾
                 vtables.add(vtableTmp);
+                log.warn("queryTableData中此次添加的表名为:{}",vtableTmp);
             } catch (Exception e) {
                 log.warn("Query指令查询失败");
                 return new QueryTableDataResponse().setBaseResp(RpcResult.failResp());
@@ -79,10 +85,10 @@ public class RegionServiceImpl implements RegionService.Iface {
         dataServer.parseHostUrl();
         String stateCode = Integer.toString(req.getStateCode());
         switch (stateCode){
-            case "1":dataServer.setState(DataServerStateEnum.PRIMARY);
-            case "2":dataServer.setState(DataServerStateEnum.COPY);
-            case "0":dataServer.setState(DataServerStateEnum.IDLE);
-            case "-1":dataServer.setState(DataServerStateEnum.INVAILID);
+            case "1":dataServer.setState(DataServerStateEnum.PRIMARY);break;
+            case "2":dataServer.setState(DataServerStateEnum.COPY);break;
+            case "0":dataServer.setState(DataServerStateEnum.IDLE);break;
+            case "-1":dataServer.setState(DataServerStateEnum.INVAILID);break;
         }
         log.warn("接收到Master通知，状态变更为{}，对偶机为{}:{}", stateCode, dataServer.getHostName(), dataServer.getHostUrl());
 
@@ -126,15 +132,25 @@ public class RegionServiceImpl implements RegionService.Iface {
     @Override
     public NotifyTableChangeResponse notifyTableChange(NotifyTableChangeRequest req) throws TException {
         int operationCode = req.getOperationCode();
-        List<String> tableNames = req.getTableNames();
+        List<String> tableNames1 = req.getTableNames();
+        List<String> tableNames = new ArrayList<>();
         List<VTable> vTableList = req.getTables();
-        File fileState = new File(UtilConstant.getHostname() + "dualmachine.dat");
+        if(tableNames1.get(0).equals(UtilConstant.ALL_TABLE)){
+            for(int i = 0;i < vTableList.size();i++){
+                tableNames.add(vTableList.get(i).getMeta().getName());
+            }
+        }
+        else{
+            tableNames.addAll(tableNames1);
+        }
+        File fileState = new File(UtilConstant.getHostname() + "dualMachine.dat");
         FileInputStream in;
         DataServer dataServerDual = null;
         try {
             in = new FileInputStream(fileState);
             ObjectInputStream objIn = new ObjectInputStream(in);
             dataServerDual = (DataServer) objIn.readObject();
+            log.warn("notifyTableChange中接收到Master通知，状态变更为{}，对偶机为{}:{}", dataServerDual.getState().getCode(), dataServerDual.getHostName(), dataServerDual.getHostUrl());
             objIn.close();
         } catch (Exception e) {
             log.warn("没有副机文件");
@@ -145,9 +161,14 @@ public class RegionServiceImpl implements RegionService.Iface {
         Integer dualPort = dataServer.getPort();
         RegionServerClient regionServerClient = new RegionServerClient(RegionService.Client.class, dualIp, dualPort);
         MasterServerClient masterServerClient = new MasterServerClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
-        if (dataServerDual.getState() == DataServerStateEnum.PRIMARY) {
+        log.warn("notifyTableChange中数据表格有{}，操作为{},table为{}", req.getTableNames(), req.getOperationCode(),tableNames); //TODO
+        if (dataServerDual.getState() == DataServerStateEnum.PRIMARY && !req.getBase().getCaller().contains("SERVER")) {
             /*读取文件状态文件，如果是主机要调用副机的，如果是副机直接执行*/
-            regionServerClient.notifyTableChange(req);
+            regionServerClient.notifyTableChange(new NotifyTableChangeRequest()
+                    .setBase(new Base().setReceiver(dataServerDual.getHostName()).setCaller("SERVER"+UtilConstant.getHostname()))
+                    .setTableNames(req.getTableNames())
+                    .setTables(req.getTables())
+                    .setOperationCode(req.getOperationCode()));
         }
         if (operationCode == RpcOperationEnum.DELETE.getCode()) {
             for (int i = 0; i < tableNames.size(); i++) {
@@ -160,6 +181,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                 if (file.exists()) {
                     file.delete();
                 }
+                log.warn("notifyTableChange删除操作，删除的表为:{}",UtilConstant.getHostname() + tableNames.get(i));
             }
         } else if (operationCode == RpcOperationEnum.UPDATE.getCode()) {
             for (int i = 0; i < tableNames.size(); i++) {
@@ -176,7 +198,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                 VTable vTableTmp = vTableList.get(i);
                 Table tableTmp = CopyUtils.vTableToTable(vTableTmp);
                 FileOutputStream out;
-                log.warn("notify:table:{},vtable:{}",tableTmp,vTableTmp);
+                log.warn("notifyTableChange更新操作，需要更新的表为:{}",tableTmp);
                 try {
                     out = new FileOutputStream(file);
                     ObjectOutputStream objOut = new ObjectOutputStream(out);
@@ -199,7 +221,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                 VTable vTableTmp = vTableList.get(i);
                 File file = new File(UtilConstant.getHostname() + vTableTmp.getMeta().getName() + ".dat");
                 Table tableTmp = CopyUtils.vTableToTable(vTableTmp);
-                log.warn("notify:table:{},vtable:{}",tableTmp,vTableTmp);
+                log.warn("notifyTableChange创建操作，需要创建的表为:{}",tableTmp);
                 FileOutputStream out;
                 try {
                     out = new FileOutputStream(file);
@@ -232,10 +254,11 @@ public class RegionServiceImpl implements RegionService.Iface {
                 .setOperationCode(RpcOperationEnum.CREATE.getCode())
                 .setTables(fileServer.readFile())
                 .setBase(new Base()
-                        .setCaller(UtilConstant.getHostname())
+                        .setCaller("SERVER"+UtilConstant.getHostname())
                         .setReceiver(req.getTargetName()));
-
-        log.warn("向{}传递数据变更请求，数据表格有{}，操作为{}", req.getTargetName(), req.getTableNames(), RpcOperationEnum.CREATE.getCode()); //TODO
+        //遍历一下
+        //todo:table的local要改
+        log.warn("向{}传递数据变更请求，数据表格有{}，操作为{},table为{}", req.getTargetName(), req.getTableNames(), RpcOperationEnum.CREATE.getCode(),fileServer.readFile()); //TODO
         regionServerClient.notifyTableChange(notifyTableChangeRequest);
         return new ExecTableCopyResponse()
                 .setBaseResp(RpcResult.successResp());
