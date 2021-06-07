@@ -12,10 +12,13 @@ public class RecordManagerTable {
     private List<TableAttribute> attr;
     private List<Row> data;
 
+
+//  given a TableAttribute object
+//  need to find the index of the attribute in this.attr
     public int fetchColID(TableAttribute tosearch) {
         int ret = -1;
         for (int i = 0; i < attr.size(); i++) {
-            if(tosearch.getTable().containsAll(attr.get(i).getTable())){
+            if(tosearch.getTable().containsAll(attr.get(i).getTable()) && tosearch.getAttribute().getType().equals(attr.get(i).getAttribute().getType()) && tosearch.getAttribute().getName().equals(attr.get(i).getAttribute().getName())){
                 ret = i;
             }
         }

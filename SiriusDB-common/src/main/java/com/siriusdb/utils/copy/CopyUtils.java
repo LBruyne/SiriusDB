@@ -1,5 +1,6 @@
 package com.siriusdb.utils.copy;
 
+import com.siriusdb.enums.DataTypeEnum;
 import com.siriusdb.model.db.*;
 import com.siriusdb.thrift.model.*;
 import org.springframework.beans.BeanUtils;
@@ -167,6 +168,12 @@ public class CopyUtils {
     public static Element vElementToElement(VElement vElement) {
         Element element = new Element();
         BeanUtils.copyProperties(vElement, element);
+        if(vElement.getType().equals(DataTypeEnum.INTEGER.getType())){
+            element.setData(Integer.parseInt(vElement.getData()));
+        }
+        if(vElement.getType().equals(DataTypeEnum.FLOAT.getType())){
+            element.setData(Float.parseFloat(vElement.getData()));
+        }
         return element;
     }
 

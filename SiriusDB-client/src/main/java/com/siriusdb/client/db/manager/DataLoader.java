@@ -4,6 +4,7 @@ import com.siriusdb.client.rpc.client.MasterServiceClient;
 import com.siriusdb.client.rpc.client.RegionServiceClient;
 import com.siriusdb.common.MasterConstant;
 import com.siriusdb.common.UtilConstant;
+import com.siriusdb.enums.DataTypeEnum;
 import com.siriusdb.model.db.*;
 
 
@@ -27,19 +28,19 @@ public class DataLoader {
         TableMeta meta = new TableMeta();
         meta.setName("student");
         meta.setPrimaryKey("sno");
-        attr.add(new Attribute(0, "sno", "string"));
-        attr.add(new Attribute(1, "sname", "string"));
-        attr.add(new Attribute(2, "sage", "int"));
-        attr.add(new Attribute(3, "sgender", "float"));
+        attr.add(new Attribute(0, "sno", DataTypeEnum.STRING.getType()));
+        attr.add(new Attribute(1, "sname", DataTypeEnum.STRING.getType()));
+        attr.add(new Attribute(2, "sage", DataTypeEnum.INTEGER.getType()));
+        attr.add(new Attribute(3, "sgender", DataTypeEnum.FLOAT.getType()));
         meta.setAttributes(attr);
         student.setMeta(meta);
 
         for (int i = 0; i < 5; i++) {
             List<Element> thisRow = new LinkedList<>();
-            thisRow.add(new Element("318010001" + i, 0, "string"));
-            thisRow.add(new Element("cb_" + i, 1, "string"));
-            thisRow.add(new Element(20 + i, 2, "int"));
-            thisRow.add(new Element(1.0 + i, 3, "float"));
+            thisRow.add(new Element("318010001" + i, 0, DataTypeEnum.STRING.getType()));
+            thisRow.add(new Element("cb_" + i, 1, DataTypeEnum.STRING.getType()));
+            thisRow.add(new Element(20 + i, 2, DataTypeEnum.INTEGER.getType()));
+            thisRow.add(new Element(1.0 + i, 3, DataTypeEnum.FLOAT.getType()));
             data.add(new Row(thisRow));
         }
         student.setData(data);

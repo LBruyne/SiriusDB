@@ -12,6 +12,7 @@ import com.siriusdb.client.db.manager.RecordManager;
 import com.siriusdb.enums.PredicateEnum;
 import com.siriusdb.exception.BasicBusinessException;
 import com.siriusdb.model.db.*;
+import com.siriusdb.enums.DataTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 
@@ -42,21 +43,21 @@ public class Interpreter {
         while (true) {
             int index;
             int reset = 0;
-            String line = "";
+            String line ;
             StringBuilder input = new StringBuilder();
             // 处理输入
             while (true) {
                 line = reader.readLine();
-                if (line.toString().equals("quit")) {
+                if (line.equals("quit")) {
                     System.out.println("See You Again.");
                     return;
-                } else if (line.toString().equals("reset")) {
+                } else if (line.equals("reset")) {
                     System.out.println("Reset Already.");
                     input.setLength(0);
                     reset = 1;
                     break;
                 }
-                if (line.toString().contains(";")) {
+                if (line.contains(";")) {
                     index = line.indexOf(";");
                     input.append(line, 0, index);
                     break;
@@ -66,7 +67,7 @@ public class Interpreter {
             if (reset == 1)
                 continue;
 
-            String query = input.toString().toString().trim().replaceAll("\\s+", " ").replaceAll("’","'");
+            String query = input.toString().trim().replaceAll("\\s+", " ").replaceAll("’","'");
             System.out.println("Your input: " + query + ";");
             String[] qaq = query.split(" ");
 
@@ -179,7 +180,7 @@ public class Interpreter {
                         throw new BasicBusinessException("createTable error: The attribute name "+attrName+" has existed!");
                 }
                 attr.setName(attrName);
-                if (!attrType.equals("int") && !attrType.equals("float") && !attrType.equals("string"))
+                if (!attrType.equals(DataTypeEnum.INTEGER.getType()) && !attrType.equals(DataTypeEnum.FLOAT.getType()) && !attrType.equals(DataTypeEnum.STRING.getType()))
                     throw new BasicBusinessException("createTable error: Only support 'int' 'float' and 'string' !");
                 attr.setType(attrType);
                 attr.setId(id);
@@ -437,15 +438,15 @@ public class Interpreter {
                         Element e = new Element();
                         e.setData(qaq[valueIndex]);
                         if (conditions[valueIndex].contains("'")||conditions[valueIndex].contains("‘"))
-                            e.setType("string");
+                            e.setType(DataTypeEnum.STRING.getType());
                         else {
                             if (conditions[valueIndex].contains("."))
-                                e.setType("float");
+                                e.setType(DataTypeEnum.FLOAT.getType());
                             else
-                                e.setType("int");
+                                e.setType(DataTypeEnum.INTEGER.getType());
                         }
                         avvc.setLatterDataElement(e);
-                        if (e.getType() != avvc.getFormerAttribute().getAttribute().getType())
+                        if (!e.getType().equals(avvc.getFormerAttribute().getAttribute().getType()))
                             throw new BasicBusinessException("select error: The type of set-con value is not match!");
 
                         avvc.setCondition(Utils.judgeSymbol(conditions[symbolIndex]));
@@ -476,15 +477,15 @@ public class Interpreter {
                     Element e = new Element();
                     e.setData(conditions[valueIndex]);
                     if (conditions[valueIndex].contains("'")||conditions[valueIndex].contains("‘"))
-                        e.setType("string");
+                        e.setType(DataTypeEnum.STRING.getType());
                     else {
                         if (conditions[valueIndex].contains("."))
-                            e.setType("float");
+                            e.setType(DataTypeEnum.FLOAT.getType());
                         else
-                            e.setType("int");
+                            e.setType(DataTypeEnum.INTEGER.getType());
                     }
                     avvc.setLatterDataElement(e);
-                    if (e.getType() != avvc.getFormerAttribute().getAttribute().getType())
+                    if (!e.getType().equals(avvc.getFormerAttribute().getAttribute().getType()))
                         throw new BasicBusinessException("select error: The type of condition value is not match!");
 
                     avvc.setCondition(Utils.judgeSymbol(conditions[symbolIndex]));
@@ -588,15 +589,15 @@ public class Interpreter {
         Element e = new Element();
         e.setData(qaq[valueIndex]);
         if (qaq[valueIndex].contains("'")||qaq[valueIndex].contains("‘"))
-            e.setType("string");
+            e.setType(DataTypeEnum.STRING.getType());
         else {
             if(qaq[valueIndex].contains("."))
-                e.setType("float");
+                e.setType(DataTypeEnum.FLOAT.getType());
             else
-                e.setType("int");
+                e.setType(DataTypeEnum.INTEGER.getType());
         }
         setCon.setLatterDataElement(e);
-        if (e.getType() != setCon.getFormerAttribute().getAttribute().getType())
+        if (!e.getType().equals(setCon.getFormerAttribute().getAttribute().getType()))
             throw new BasicBusinessException("select error: The type of set-con value is not match!");
 
         setCon.setCondition(Utils.judgeSymbol(qaq[symbolIndex]));
@@ -624,14 +625,14 @@ public class Interpreter {
         el.setData(qaq[valueIndex]);
 
         if (qaq[valueIndex].contains("'")||qaq[valueIndex].contains("‘"))
-            el.setType("string");
+            el.setType(DataTypeEnum.STRING.getType());
         else {
             if(qaq[valueIndex].contains("."))
-                el.setType("float");
+                el.setType(DataTypeEnum.FLOAT.getType());
             else
-                el.setType("int");
+                el.setType(DataTypeEnum.INTEGER.getType());
         }
-        if (el.getType() != whereCon.getFormerAttribute().getAttribute().getType())
+        if (!el.getType().equals(whereCon.getFormerAttribute().getAttribute().getType()))
             throw new BasicBusinessException("select error: The type of where-con value is not match!");
 
         whereCon.setLatterDataElement(el);

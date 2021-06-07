@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Set;
-
+import com.siriusdb.enums.DataTypeEnum;
 /**
  * @Description: module for record management.
  * @author: Hu Yangfan
@@ -42,6 +42,8 @@ public class RecordManager implements IRecordManager {
 
      */
 
+
+//  √√√√√√√√
     private RecordManagerTable convertFrom(Table table) {
         if (table == null)
             return null;
@@ -79,17 +81,12 @@ public class RecordManager implements IRecordManager {
                 Object value2 = line_2.getElements(secondTableColID).getData();
                 String type2 = line_2.getElements(secondTableColID).getType();
                 if (type1.equals(type2)) {
-                    switch (type1) {
-                        case "String":
+                    if(type1.equals(DataTypeEnum.STRING.getType()))
                             select = select && judge((String) value1, (String) value2, con.getOperator());
-                            break;
-                        case "Integer":
+                    if(type1.equals(DataTypeEnum.INTEGER.getType()))
                             select = select && judge(Integer.parseInt((String) value1), Integer.parseInt((String) value2), con.getOperator());
-                            break;
-                        case "Float":
+                    if(type1.equals(DataTypeEnum.FLOAT.getType()))
                             select = select && judge(Float.parseFloat((String) value1), Float.parseFloat((String) value2), con.getOperator());
-                            break;
-                    }
                 } else
                     select = false;
             } else {
@@ -160,7 +157,7 @@ public class RecordManager implements IRecordManager {
                 workTables.add(temp);
         }
         RecordManagerTable firstTable = workTables.remove(0);
-        RecordManagerTable ret = new RecordManagerTable();
+        RecordManagerTable ret = firstTable;
         RecordManagerTable workTable = new RecordManagerTable();
 
         if (workTables.size() != 0) {
@@ -190,13 +187,14 @@ public class RecordManager implements IRecordManager {
                 // in the next iteration, we join first table with the second again.
                 // previous workTable is deprecated
             }
-            return ret;
+//            return ret;
         } else {
             // actually executing selection from a single table
-            return convertFrom(tables.get(0));
+//            return convertFrom(tables.get(0));
 
             // do sth
         }
+        return ret;
 
 
     }
@@ -212,17 +210,13 @@ public class RecordManager implements IRecordManager {
                 Element first = thisLine.getElements(firstColID);
                 Element second = thisLine.getElements(secondColID);
                 if (first.getType().equals(second.getType())) {
-                    switch (first.getType()) {
-                        case "String":
+                    if (first.getType().equals(DataTypeEnum.STRING.getType()))
                             decide = decide && (judge((String) (first.getData()), (String) (second.getData()), thisCon.getOperator()));
-                            break;
-                        case "Integer":
+                    if (first.getType().equals(DataTypeEnum.INTEGER.getType()))
                             decide = decide && (judge((Integer) (first.getData()), (Integer) (second.getData()), thisCon.getOperator()));
-                            break;
-                        case "Float":
+                    if (first.getType().equals(DataTypeEnum.FLOAT.getType()))
                             decide = decide && (judge((Float) (first.getData()), (Float) (second.getData()), thisCon.getOperator()));
-                            break;
-                    }
+
                 }
             } else if (each instanceof AttrVSValueCondition) {
                 AttrVSValueCondition thisCon = (AttrVSValueCondition) each;
@@ -230,17 +224,16 @@ public class RecordManager implements IRecordManager {
                 Element first = thisLine.getElements(firstColID);
                 Element second = thisCon.getLatterDataElement();
                 if (first.getType().equals(second.getType())) {
-                    switch (first.getType()) {
-                        case "String":
+                    if (first.getType().equals(DataTypeEnum.STRING.getType()))
                             decide = decide && (judge((String) (first.getData()), (String) (second.getData()), thisCon.getCondition()));
-                            break;
-                        case "Integer":
-                            decide = decide && (judge((Integer) (first.getData()), (Integer) (second.getData()), thisCon.getCondition()));
-                            break;
-                        case "Float":
-                            decide = decide && (judge((Float) (first.getData()), (Float) (second.getData()), thisCon.getCondition()));
-                            break;
-                    }
+                    if (first.getType().equals(DataTypeEnum.INTEGER.getType()))
+                            decide = decide && (judge((Integer) (first.getData()), Integer.parseInt ((String)second.getData()), thisCon.getCondition()));
+                    if (first.getType().equals(DataTypeEnum.FLOAT.getType()))
+                            decide = decide && (judge((Float) (first.getData()), Float.parseFloat ((String) second.getData()), thisCon.getCondition()));
+//
+
+
+//                    decide = decide && judge(first,second,thisCon.getCondition());
                 }
             } else {
                 // impossible
