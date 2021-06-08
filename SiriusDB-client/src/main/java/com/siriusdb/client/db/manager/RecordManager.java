@@ -412,6 +412,11 @@ public class RecordManager {
             table.setData(new LinkedList<>());
             ret.setMessage("成功删除"+workTable.getData().size()+"条记录.");
             ret.setStatus(true);
+            try {
+                DataLoader.alterTable(table);
+            } catch (TException e) {
+                e.printStackTrace();
+            }
         } else {
             List<Integer> st = new LinkedList<>();
             for (int i = 0; i < workTable.getData().size(); i++) {
@@ -436,10 +441,12 @@ public class RecordManager {
 
     public RecordManagerResult insert(Table table, List<Element> values) {
         RecordManagerResult ret = new RecordManagerResult();
+        int k=0;
         for (Element each : values) {
             if (each.getType().equals(DataTypeEnum.STRING.getType())) {
                 each.setData(each.getData().toString().replaceAll("'", ""));
             }
+            each.setColumnId(k++);
         }
 
 

@@ -356,6 +356,7 @@ public class Interpreter {
 
         RecordManager rm = new RecordManager();
         rm.insert(tempT, elementList);
+        // TODO 显示结果
     }
 
     public static void delete(String query) throws BasicBusinessException {
@@ -658,6 +659,8 @@ public class Interpreter {
             System.out.println(whereCondition.get(i));
         }
         rm.select(selectedAttributes, tables, joinCondition, whereCondition, isAnd);
+
+        // TODO 显示结果
     }
 
     public static void update(String query) throws BasicBusinessException {
