@@ -473,10 +473,10 @@ public class RecordManager implements IRecordManager {
             }
             List<Row> rows = table.getData();
             Row thisLine = new Row();
-//        to be modified :
-//        what if primary key already existed?
+
             if (values.size() != table.getMeta().getAttributes().size()) {
-                // sth wrong
+                ret.setStatus(false);
+                ret.setMessage("输入属性数量和表格不匹配！");
             } else {
                 thisLine.setElements(new LinkedList<Element>());
                 thisLine.getElements().addAll(values);
