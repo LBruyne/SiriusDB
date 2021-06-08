@@ -105,27 +105,6 @@ public class RegionServiceImpl implements RegionService.Iface {
         }
         return new NotifyStateResponse()
                 .setBaseResp(RpcResult.successResp());
-        /*try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(UtilConstant.getHostname() + "-dualmachine.txt"));
-            String stateCode = Integer.toString(req.getStateCode());
-            String dualServerUrl = req.getDualServerUrl();
-            String dualServerName = req.getDualServerName();
-            /*要先判断是否是否存在那个文件，如果存在就要更新，否则就直接写入*/
-            /*bw.write(stateCode);
-            bw.newLine();
-            bw.write(dualServerName);
-            bw.newLine();
-            bw.write(dualServerUrl);
-            bw.newLine();
-            bw.close();
-            log.warn("接收到master的提示，本机{}状态切换为{}, 对偶机为{}:{}", UtilConstant.getHostname(), stateCode, dualServerName, dualServerUrl);
-        } catch (Exception e) {
-            log.warn("Region状态变更失败");
-            return new NotifyStateResponse().setBaseResp(RpcResult.failResp());
-        }
-
-        return new NotifyStateResponse()
-                .setBaseResp(RpcResult.successResp());*/
     }
 
     //要给副机也复制一份
@@ -257,26 +236,9 @@ public class RegionServiceImpl implements RegionService.Iface {
                         .setCaller("SERVER"+UtilConstant.getHostname())
                         .setReceiver(req.getTargetName()));
         //遍历一下
-        //todo:table的local要改
         log.warn("向{}传递数据变更请求，数据表格有{}，操作为{},table为{}", req.getTargetName(), req.getTableNames(), RpcOperationEnum.CREATE.getCode(),fileServer.readFile()); //TODO
         regionServerClient.notifyTableChange(notifyTableChangeRequest);
         return new ExecTableCopyResponse()
                 .setBaseResp(RpcResult.successResp());
-        /*regionServerClient.notifyTableChange(notifyTableChangeRequest);
-        QueryTableDataRequest queryTableDataRequest = new QueryTableDataRequest().setTables(req.getTableNames()).setBaseResp(RpcResult.successResp());
-        RegionServerClient regionServerClient = new RegionServerClient(RegionService.Client.class,targetIp,targetPort);
-        QueryTableDataResponse queryTableDataResponse = regionServerClient.execTableCopy(queryTableDataRequest);
-        /*存文件*/
-        /*List<VTable> vTableList = queryTableDataResponse.getTables();
-        for(int i = 0;i < vTableList.size(); i++){
-            Table tableTmp = CopyUtils.vTableToTable(vTableList.get(i));
-            File file = new File(tableTmp.getMeta().getName() + ".dat");
-            FileOutputStream out;
-            out = new FileOutputStream(file);
-            ObjectOutputStream objOut = new ObjectOutputStream(out);
-            objOut.writeObject(tableTmp);
-            objOut.flush();
-            objOut.close();
-        }*/
     }
 }

@@ -1,6 +1,5 @@
 package com.siriusdb.client.db.manager;
 
-import com.siriusdb.client.db.api.IRecordManager;
 import com.siriusdb.enums.PredicateEnum;
 import com.siriusdb.model.RecordManagerResult;
 import com.siriusdb.model.db.*;
@@ -17,7 +16,7 @@ import org.apache.thrift.TException;
  * @author: Hu Yangfan
  * @date: 2021/05/16 8:37 下午
  */
-public class RecordManager implements IRecordManager {
+public class RecordManager {
     /*
     private Object data;
 

@@ -43,7 +43,7 @@ public class Interpreter {
         while (true) {
             int index;
             int reset = 0;
-            String line ;
+            String line;
             StringBuilder input = new StringBuilder();
             // 处理输入
             while (true) {
@@ -67,7 +67,7 @@ public class Interpreter {
             if (reset == 1)
                 continue;
 
-            String query = input.toString().trim().replaceAll("\\s+", " ").replaceAll("’","'");
+            String query = input.toString().trim().replaceAll("\\s+", " ").replaceAll("’", "'");
             System.out.println("Your input: " + query + ";");
             String[] qaq = query.split(" ");
 
@@ -130,23 +130,23 @@ public class Interpreter {
         query = query.trim();
         query = query.replaceAll("^create table", "").trim();
 
-        if(query.equals(""))
+        if (query.equals(""))
             throw new BasicBusinessException("createTable error: Empty query!");
 
         int index;
         index = query.indexOf(" ");
-        if(index == -1)
+        if (index == -1)
             throw new BasicBusinessException("createTable error: No attribute values!");
-        String tableName = query.substring(0,index);
+        String tableName = query.substring(0, index);
 
-        if (!query.substring(index+1).matches("^\\(.*\\)$"))
+        if (!query.substring(index + 1).matches("^\\(.*\\)$"))
             throw new BasicBusinessException("createTable error: Format mismatch!");
 
 
         String[] attrDefines;
         String primaryKey = "";
         List<Attribute> attributes = new ArrayList<>();
-        attrDefines = query.substring(index+2).split(",");
+        attrDefines = query.substring(index + 2).split(",");
         int id = 0;
         for (int i = 0; i < attrDefines.length; i++) {
             String[] attrDefine;
@@ -160,24 +160,23 @@ public class Interpreter {
 
             if (attrDefine[0].equals(""))
                 throw new BasicBusinessException("createTable error: No attributes in your table!");
-            if(attrDefine[0].equals("primary")){
+            if (attrDefine[0].equals("primary")) {
                 if (attrDefine.length != 3 || !attrDefine[1].equals("key"))
                     throw new BasicBusinessException("createTable error: Primary key set error!");
                 if (!attrDefine[2].matches("^\\(.*\\)$"))
                     throw new BasicBusinessException("createTable error: Please enter the primary key in brackets'()' !");
                 if (!primaryKey.equals(""))
                     throw new BasicBusinessException("createTable error: Have already set primary key!");
-                primaryKey = attrDefine[2].substring(1,attrDefine[2].length()-1);
-            }
-            else{
-                if (attrDefine.length ==1)
+                primaryKey = attrDefine[2].substring(1, attrDefine[2].length() - 1);
+            } else {
+                if (attrDefine.length == 1)
                     throw new BasicBusinessException("createTable error: Only define the attribute name!");
                 attrName = attrDefine[0];
                 attrType = attrDefine[1];
 
                 for (int j = 0; j < attributes.size(); j++) {
                     if (attrName.equals(attributes.get(j).getName()))
-                        throw new BasicBusinessException("createTable error: The attribute name "+attrName+" has existed!");
+                        throw new BasicBusinessException("createTable error: The attribute name " + attrName + " has existed!");
                 }
                 attr.setName(attrName);
                 if (!attrType.equals(DataTypeEnum.INTEGER.getType()) && !attrType.equals(DataTypeEnum.FLOAT.getType()) && !attrType.equals(DataTypeEnum.STRING.getType()))
@@ -189,7 +188,7 @@ public class Interpreter {
                     throw new BasicBusinessException("createTable error: Invalid attribute!");
 
                 attributes.add(attr);
-                id +=1;
+                id += 1;
             }
         }
 
@@ -219,26 +218,26 @@ public class Interpreter {
         System.out.println("Success: Table " + tableName + " has been created!");
     }
 
-    public static void createIndex(String query) throws BasicBusinessException{
+    public static void createIndex(String query) throws BasicBusinessException {
         System.out.println("Creating index ...");
         query = query.replaceAll("\\s+", " ");
         query = query.replaceAll(" *\\( *", " (").replaceAll(" *\\) *", ") ");
         query = query.trim();
         String[] qaq = query.split(" ");
 
-        if(qaq.length == 2)
+        if (qaq.length == 2)
             throw new BasicBusinessException("createIndex error: No index name!");
-        if(qaq.length == 3 || !qaq[3].equals("on") || qaq.length == 4)
+        if (qaq.length == 3 || !qaq[3].equals("on") || qaq.length == 4)
             throw new BasicBusinessException("createIndex error: Please enter tableName after keyword 'on'!");
-        if(qaq.length == 5)
+        if (qaq.length == 5)
             throw new BasicBusinessException("createIndex error: Please enter attribute name!");
-        if(qaq.length != 6)
+        if (qaq.length != 6)
             throw new BasicBusinessException("createIndex error: Extra input!");
 
         String indexName = qaq[2];
         String tableName = qaq[4];
         String attrName = qaq[5];
-        if(!attrName.matches("^\\(.*\\)$"))
+        if (!attrName.matches("^\\(.*\\)$"))
             throw new BasicBusinessException("createIndex error: Invalid attribute name!");
         attrName = attrName.substring(1, attrName.length() - 1);
 
@@ -248,10 +247,10 @@ public class Interpreter {
         List<Attribute> tempA = tempT.getMeta().getAttributes();
         if (tempT == null || tempA == null)
             throw new BasicBusinessException("select error: No such table!");
-        int  flag = 0;
+        int flag = 0;
         for (int i = 0; i < tempA.size(); i++) {
             if (attrName.equals(tempA.get(i).getName())) {
-                flag =1;
+                flag = 1;
                 break;
             }
         }
@@ -264,7 +263,7 @@ public class Interpreter {
         System.out.println("Success: Index " + indexName + " has been created!");
     }
 
-    public static void dropTable(String query) throws BasicBusinessException{
+    public static void dropTable(String query) throws BasicBusinessException {
         System.out.println("Dropping table ...");
         String[] qaq = query.split(" ");
         if (qaq.length == 2)
@@ -275,7 +274,7 @@ public class Interpreter {
         String tableName = qaq[2];
         Table tempT = null;
         tempT = DataLoader.getTable(tableName);
-        if (tempT == null )
+        if (tempT == null)
             throw new BasicBusinessException("dropTable error: No such table!");
 
         try {
@@ -287,7 +286,7 @@ public class Interpreter {
         System.out.println("Success: Table " + tableName + " has been dropped!");
     }
 
-    public static void dropIndex(String query) throws BasicBusinessException{
+    public static void dropIndex(String query) throws BasicBusinessException {
         System.out.println("Dropping index ...");
         String[] qaq = query.split(" ");
         if (qaq.length == 2)
@@ -301,7 +300,7 @@ public class Interpreter {
         System.out.println("Success: Index " + indexName + " has been dropped!");
     }
 
-    public static void insert(String query) throws BasicBusinessException{
+    public static void insert(String query) throws BasicBusinessException {
         System.out.println("Inserting values ...");
         query = query.replaceAll(" *\\( *", " (").replaceAll(" *\\) *", ") ");
         query = query.replaceAll(" *, *", ",");
@@ -309,23 +308,23 @@ public class Interpreter {
 
         String[] qaq = query.split(" ");
 
-        if(!qaq[1].equals("into"))
+        if (!qaq[1].equals("into"))
             throw new BasicBusinessException("insert error: Please enter 'into' after 'insert' !");
-        if(qaq.length == 2)
+        if (qaq.length == 2)
             throw new BasicBusinessException("insert error: No table name!");
-        if(qaq.length == 3)
+        if (qaq.length == 3)
             throw new BasicBusinessException("insert error: Please enter 'values' and the value!");
-        if(qaq.length == 4)
+        if (qaq.length == 4)
             throw new BasicBusinessException("insert error: Please enter the value!");
-        if(!qaq[3].equals("values"))
+        if (!qaq[3].equals("values"))
             throw new BasicBusinessException("insert error: Please enter 'values' after the table name !");
 
         String tableName = qaq[2];
 
-        if(!qaq[4].matches("^\\(.*\\)$"))
+        if (!qaq[4].matches("^\\(.*\\)$"))
             throw new BasicBusinessException(("insert error: Format mismatch!"));
 
-        qaq[4]=qaq[4].replace("(","").replace(")","");
+        qaq[4] = qaq[4].replace("(", "").replace(")", "");
         String[] values = qaq[4].split(",");
 
         Table tempT = null;
@@ -341,7 +340,7 @@ public class Interpreter {
         for (int i = 0; i < values.length; i++) {
             Element e = new Element();
             e.setData(values[i]);
-            if (values[i].contains("'")||values[i].contains("‘"))
+            if (values[i].contains("'") || values[i].contains("‘"))
                 e.setType(DataTypeEnum.STRING.getType());
             else {
                 if (values[i].contains("."))
@@ -350,23 +349,23 @@ public class Interpreter {
                     e.setType(DataTypeEnum.INTEGER.getType());
             }
             String a = tempA.get(i).getType();
-            if (e.getType() != tempA.get(i).getType())
+            if (!e.getType().equals(tempA.get(i).getType()))
                 throw new BasicBusinessException("insert error: The type of value is not match!");
             elementList.add(e);
         }
 
         RecordManager rm = new RecordManager();
-        rm.insert(tempT,elementList);
+        rm.insert(tempT, elementList);
     }
 
-    public static void delete(String query) throws BasicBusinessException{
+    public static void delete(String query) throws BasicBusinessException {
         System.out.println("Deleting values ...");
         query = query.replaceAll(" *\\( *", " (").replaceAll(" *\\) *", ") ");
         query = query.replaceAll(" *, *", ",");
         query = query.trim();
 
         String[] qaq = query.split(" ");
-        if(qaq.length<3)
+        if (qaq.length < 3)
             throw new BasicBusinessException("delete error: Invalid query!");
         if (!qaq[1].equals("from"))
             throw new BasicBusinessException("delete error: Please enter 'from' after 'delete' !");
@@ -382,28 +381,28 @@ public class Interpreter {
         List<ICondition> cons = new ArrayList<>();
         boolean isAnd = true;
 
-        if(qaq.length > 3){
+        if (qaq.length > 3) {
             if (!qaq[3].equals("where"))
                 throw new BasicBusinessException("delete error: Please enter 'where' behind the conditions!");
             String[] conditions = Arrays.asList(qaq).subList(4, qaq.length).toArray(new String[]{});
-            int index=-1;
+            int index = -1;
             int count = 0; //判断condition符不符合格式
             for (int i = 0; i < conditions.length; i++) {
                 count += 1;
-                if (conditions[i].equals("and")){//and分割
+                if (conditions[i].equals("and")) {//and分割
                     index = i;
-                    if (count !=4)
+                    if (count != 4)
                         throw new BasicBusinessException("delete error: Conditions misformat1!");
                     count = 0;
                 }
                 if (index == i) {//相等的时候说明现在是and，那么之前三个就是一个condition
-                    int attrIndex = index-3, symbolIndex = index-2, valueIndex = index-1;
+                    int attrIndex = index - 3, symbolIndex = index - 2, valueIndex = index - 1;
                     int flag = 0;
                     AttrVSValueCondition avvc = new AttrVSValueCondition();
                     for (int j = 0; j < tempA.size(); j++) {
-                        if(conditions[attrIndex].equals(tempA.get(j).getName())){
+                        if (conditions[attrIndex].equals(tempA.get(j).getName())) {
                             //在tableMeta的Attributes里面找到了对应的属性
-                            flag =1;
+                            flag = 1;
                             Set<Table> t = new HashSet<>();
                             t.add(tempT);
                             TableAttribute ta = new TableAttribute(t, tempA.get(j));
@@ -417,7 +416,7 @@ public class Interpreter {
                     avvc.setFormerTable(tempT);
                     Element e = new Element();
                     e.setData(conditions[valueIndex]);
-                    if (conditions[valueIndex].contains("'")||conditions[valueIndex].contains("‘"))
+                    if (conditions[valueIndex].contains("'") || conditions[valueIndex].contains("‘"))
                         e.setType(DataTypeEnum.STRING.getType());
                     else {
                         if (conditions[valueIndex].contains("."))
@@ -426,7 +425,7 @@ public class Interpreter {
                             e.setType(DataTypeEnum.INTEGER.getType());
                     }
                     avvc.setLatterDataElement(e);
-                    if (e.getType() != avvc.getFormerAttribute().getAttribute().getType())
+                    if (!e.getType().equals(avvc.getFormerAttribute().getAttribute().getType()))
                         throw new BasicBusinessException("select error: The type of set-con value is not match!");
 
                     avvc.setCondition(Utils.judgeSymbol(conditions[symbolIndex]));
@@ -437,13 +436,13 @@ public class Interpreter {
                 throw new BasicBusinessException("delete error: Conditions misformat2!");
 
             else {//and之后的那个condition
-                int attrIndex = conditions.length-3, symbolIndex = conditions.length-2, valueIndex = conditions.length-1;
+                int attrIndex = conditions.length - 3, symbolIndex = conditions.length - 2, valueIndex = conditions.length - 1;
                 int flag = 0;
                 AttrVSValueCondition avvc = new AttrVSValueCondition();
                 for (int j = 0; j < tempA.size(); j++) {
-                    if(conditions[attrIndex].equals(tempA.get(j).getName())){
+                    if (conditions[attrIndex].equals(tempA.get(j).getName())) {
                         //在tableMeta的Attributes里面找到了对应的属性
-                        flag =1;
+                        flag = 1;
                         Set<Table> t = new HashSet<>();
                         t.add(tempT);
                         TableAttribute ta = new TableAttribute(t, tempA.get(j));
@@ -457,7 +456,7 @@ public class Interpreter {
                 avvc.setFormerTable(tempT);
                 Element e = new Element();
                 e.setData(conditions[valueIndex]);
-                if (conditions[valueIndex].contains("'")||conditions[valueIndex].contains("‘"))
+                if (conditions[valueIndex].contains("'") || conditions[valueIndex].contains("‘"))
                     e.setType(DataTypeEnum.STRING.getType());
                 else {
                     if (conditions[valueIndex].contains("."))
@@ -466,14 +465,13 @@ public class Interpreter {
                         e.setType(DataTypeEnum.INTEGER.getType());
                 }
                 avvc.setLatterDataElement(e);
-                if (e.getType() != avvc.getFormerAttribute().getAttribute().getType())
+                if (!e.getType().equals(avvc.getFormerAttribute().getAttribute().getType()))
                     throw new BasicBusinessException("delete error: The type of condition value is not match!");
 
                 avvc.setCondition(Utils.judgeSymbol(conditions[symbolIndex]));
                 cons.add(avvc);
             }
-        }
-        else if (qaq.length == 3){
+        } else if (qaq.length == 3) {
         }
         RecordManager rm = new RecordManager();
         rm.delete(tempT, cons, isAnd);
@@ -493,25 +491,24 @@ public class Interpreter {
         boolean isAnd = true;
         boolean isJoin = false;
 
-        if (qaq.length<4)
+        if (qaq.length < 4)
             throw new BasicBusinessException("select error: Invalid query!");
         if (!qaq[2].equals("from"))
             throw new BasicBusinessException("select error: Please enter 'from' before the tableName!");
 
         //判断是不是join
-        if(qaq.length>=11){
-            if (qaq[1].contains(",")&&(!qaq[4].equals("inner")||!qaq[5].equals("join")||!qaq[7].equals("on")))
+        if (qaq.length >= 11) {
+            if (qaq[1].contains(",") && (!qaq[4].equals("inner") || !qaq[5].equals("join") || !qaq[7].equals("on")))
                 throw new BasicBusinessException("select error: Invalid inner join select!");
-            if (qaq[1].contains(",")&&qaq[4].equals("inner")&&qaq[5].equals("join")&&qaq[7].equals("on"))
+            if (qaq[1].contains(",") && qaq[4].equals("inner") && qaq[5].equals("join") && qaq[7].equals("on"))
                 isJoin = true;
         }
 
         String label = qaq[1];
         String tableName = qaq[3];
-        if (isJoin){
+        if (isJoin) {
             //TODO: join on
-        }
-        else//不是join
+        } else//不是join
         {
 
             Table tempT = null;
@@ -523,30 +520,30 @@ public class Interpreter {
             //不是join就只有一个table
             tables.add(tempT);
 
-            if (qaq.length>4){
+            if (qaq.length > 4) {
                 //有where
                 if (!qaq[4].equals("where"))
                     throw new BasicBusinessException("select error: Please enter 'where' before the conditions!");
                 String[] conditions = Arrays.asList(qaq).subList(5, qaq.length).toArray(new String[]{});
-                int index=-1;
+                int index = -1;
                 int count = 0; //判断condition符不符合格式
 
                 for (int i = 0; i < conditions.length; i++) {
                     count += 1;
-                    if (conditions[i].equals("and")){//and分割
+                    if (conditions[i].equals("and")) {//and分割
                         index = i;
-                        if (count !=4)
+                        if (count != 4)
                             throw new BasicBusinessException("select error: Conditions misformat1!");
                         count = 0;
                     }
                     if (index == i) {//相等的时候说明现在是and，那么之前三个就是一个condition
-                        int attrIndex = index-3, symbolIndex = index-2, valueIndex = index-1;
+                        int attrIndex = index - 3, symbolIndex = index - 2, valueIndex = index - 1;
                         int flag = 0;
                         AttrVSValueCondition avvc = new AttrVSValueCondition();
                         for (int j = 0; j < tempA.size(); j++) {
-                            if(conditions[attrIndex].equals(tempA.get(j).getName())){
+                            if (conditions[attrIndex].equals(tempA.get(j).getName())) {
                                 //在tableMeta的Attributes里面找到了对应的属性
-                                flag =1;
+                                flag = 1;
                                 Set<Table> t = new HashSet<>();
                                 t.add(tempT);
                                 TableAttribute ta = new TableAttribute(t, tempA.get(j));
@@ -560,7 +557,7 @@ public class Interpreter {
                         avvc.setFormerTable(tempT);
                         Element e = new Element();
                         e.setData(conditions[valueIndex]);
-                        if (conditions[valueIndex].contains("'")||conditions[valueIndex].contains("‘"))
+                        if (conditions[valueIndex].contains("'") || conditions[valueIndex].contains("‘"))
                             e.setType(DataTypeEnum.STRING.getType());
                         else {
                             if (conditions[valueIndex].contains("."))
@@ -579,13 +576,13 @@ public class Interpreter {
                 if (count != 3)
                     throw new BasicBusinessException("select error: Conditions misformat2!");
                 else {//and之后的那个condition
-                    int attrIndex = conditions.length-3, symbolIndex = conditions.length-2, valueIndex = conditions.length-1;
+                    int attrIndex = conditions.length - 3, symbolIndex = conditions.length - 2, valueIndex = conditions.length - 1;
                     int flag = 0;
                     AttrVSValueCondition avvc = new AttrVSValueCondition();
                     for (int j = 0; j < tempA.size(); j++) {
-                        if(conditions[attrIndex].equals(tempA.get(j).getName())){
+                        if (conditions[attrIndex].equals(tempA.get(j).getName())) {
                             //在tableMeta的Attributes里面找到了对应的属性
-                            flag =1;
+                            flag = 1;
                             Set<Table> t = new HashSet<>();
                             t.add(tempT);
                             TableAttribute ta = new TableAttribute(t, tempA.get(j));
@@ -599,7 +596,7 @@ public class Interpreter {
                     avvc.setFormerTable(tempT);
                     Element e = new Element();
                     e.setData(conditions[valueIndex]);
-                    if (conditions[valueIndex].contains("'")||conditions[valueIndex].contains("‘"))
+                    if (conditions[valueIndex].contains("'") || conditions[valueIndex].contains("‘"))
                         e.setType(DataTypeEnum.STRING.getType());
                     else {
                         if (conditions[valueIndex].contains("."))
@@ -617,25 +614,24 @@ public class Interpreter {
             }
 
             //后面就不用管有没有where了
-            if (label.equals("*")){// select * from ...
+            if (label.equals("*")) {// select * from ...
                 for (int i = 0; i < tempA.size(); i++) {
                     Set<Table> t = new HashSet<>();
                     t.add(tempT);
                     TableAttribute ta = new TableAttribute(t, tempA.get(i));
                     selectedAttributes.add(ta);
                 }
-            }
-            else if (label.equals("count(*)"))
+            } else if (label.equals("count(*)"))
                 throw new BasicBusinessException("select error: Not support 'count' !");
-            else{// select ... from ...
+            else {// select ... from ...
                 String[] selectAttrs = label.split(",");
                 for (int i = 0; i < selectAttrs.length; i++) {
                     if (selectAttrs[i].contains("."))
                         throw new BasicBusinessException("select error: Invalid format!");
                     int flag = 0;
                     for (int j = 0; j < tempA.size(); j++) {
-                        if (selectAttrs[i].equals(tempA.get(j).getName())){
-                            flag =1;
+                        if (selectAttrs[i].equals(tempA.get(j).getName())) {
+                            flag = 1;
                             Set<Table> t = new HashSet<>();
                             t.add(tempT);
                             TableAttribute ta = new TableAttribute(t, tempA.get(j));
@@ -661,10 +657,10 @@ public class Interpreter {
         for (int i = 0; i < whereCondition.size(); i++) {
             System.out.println(whereCondition.get(i));
         }
-        rm.select(selectedAttributes,tables,joinCondition,whereCondition,isAnd);
+        rm.select(selectedAttributes, tables, joinCondition, whereCondition, isAnd);
     }
 
-    public static void update(String query) throws BasicBusinessException{
+    public static void update(String query) throws BasicBusinessException {
         // 只支持set条件和where条件只有一个
         System.out.println("Updating ...");
         query = query.replaceAll(" *\\( *", " (").replaceAll(" *\\) *", ") ");
@@ -672,7 +668,7 @@ public class Interpreter {
         query = query.trim();
         String[] qaq = query.split(" ");
 
-        if (qaq.length<10)
+        if (qaq.length < 10)
             throw new BasicBusinessException("update error: Invalid query!");
         if (!qaq[0].equals("update"))
             throw new BasicBusinessException("update error: Please enter 'update' first!");
@@ -687,7 +683,7 @@ public class Interpreter {
         boolean isAnd = true;
 
         String tableName = qaq[1];
-            table = DataLoader.getTable(tableName);
+        table = DataLoader.getTable(tableName);
 
         List<Attribute> tempA = table.getMeta().getAttributes();
 
@@ -697,8 +693,8 @@ public class Interpreter {
         int flagSet = 0;
         AttrVSValueCondition setCon = new AttrVSValueCondition();
         for (int i = 0; i < tempA.size(); i++) {
-            if(qaq[attrIndex].equals(tempA.get(i).getName())){
-                flagSet =1;
+            if (qaq[attrIndex].equals(tempA.get(i).getName())) {
+                flagSet = 1;
                 Set<Table> t = new HashSet<>();
                 t.add(table);
                 TableAttribute ta = new TableAttribute(t, tempA.get(i));
@@ -711,10 +707,10 @@ public class Interpreter {
         setCon.setFormerTable(table);
         Element e = new Element();
         e.setData(qaq[valueIndex]);
-        if (qaq[valueIndex].contains("'")||qaq[valueIndex].contains("‘"))
+        if (qaq[valueIndex].contains("'") || qaq[valueIndex].contains("‘"))
             e.setType(DataTypeEnum.STRING.getType());
         else {
-            if(qaq[valueIndex].contains("."))
+            if (qaq[valueIndex].contains("."))
                 e.setType(DataTypeEnum.FLOAT.getType());
             else
                 e.setType(DataTypeEnum.INTEGER.getType());
@@ -727,12 +723,14 @@ public class Interpreter {
         setCondition.add(setCon);
 
         //whereCondition
-        attrIndex = 7; symbolIndex = 8; valueIndex = 9;
+        attrIndex = 7;
+        symbolIndex = 8;
+        valueIndex = 9;
         int flagWhere = 0;
         AttrVSValueCondition whereCon = new AttrVSValueCondition();
         for (int i = 0; i < tempA.size(); i++) {
-            if(qaq[attrIndex].equals(tempA.get(i).getName())){
-                flagWhere =1;
+            if (qaq[attrIndex].equals(tempA.get(i).getName())) {
+                flagWhere = 1;
                 Set<Table> t = new HashSet<>();
                 t.add(table);
                 TableAttribute ta = new TableAttribute(t, tempA.get(i));
@@ -747,10 +745,10 @@ public class Interpreter {
         Element el = new Element();
         el.setData(qaq[valueIndex]);
 
-        if (qaq[valueIndex].contains("'")||qaq[valueIndex].contains("‘"))
+        if (qaq[valueIndex].contains("'") || qaq[valueIndex].contains("‘"))
             el.setType(DataTypeEnum.STRING.getType());
         else {
-            if(qaq[valueIndex].contains("."))
+            if (qaq[valueIndex].contains("."))
                 el.setType(DataTypeEnum.FLOAT.getType());
             else
                 el.setType(DataTypeEnum.INTEGER.getType());
@@ -764,13 +762,13 @@ public class Interpreter {
         whereCondition.add(whereCon);
 
         RecordManager rm = new RecordManager();
-        rm.update(table,setCondition,whereCondition,isAnd);
+        rm.update(table, setCondition, whereCondition, isAnd);
     }
 }
 
 
-class Utils{
-    public static PredicateEnum judgeSymbol(String s){
+class Utils {
+    public static PredicateEnum judgeSymbol(String s) {
         if (s.equals(">"))
             return LARGER;
         else if (s.equals("<"))
