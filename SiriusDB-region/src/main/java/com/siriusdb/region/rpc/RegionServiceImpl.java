@@ -112,23 +112,26 @@ public class RegionServiceImpl implements RegionService.Iface {
         } catch (Exception e) {
             return new NotifyStateResponse().setBaseResp(RpcResult.failResp());
         }
-        if (dataServer.getState() == DataServerStateEnum.COPY) {
+        List<String> tableName = new ArrayList<String>();
+        File file1 = new File(this.getClass().getResource("/").getPath());
+        File file2 = new File(file1.getParent());
+        File file3 = new File(file2.getParent());
+        File file4 = new File(file3.getParent());
+        log.warn("此时的项目地址为:");
+        System.out.println(file4);
+        File[] tempList = file4.listFiles();
+        log.warn("temp:{}",tempList);
+        if (dataServer.getState() == DataServerStateEnum.COPY && tempList != null && tempList.length != 0) {
             MasterServerClient masterServerClient = new MasterServerClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
-            List<String> tableName = new ArrayList<String>();
-            File file1 = new File(this.getClass().getResource("/").getPath());
-            File file2 = new File(file1.getParent());
-            File file3 = new File(file2.getParent());
-            File file4 = new File(file3.getParent());
-            log.warn("此时的项目地址为:");
-            System.out.println(file4);
-            File[] tempList = file4.listFiles();
             for (int i = 0; i < tempList.length; i++) {
-                if (tempList[i].isFile()) {
+                if (tempList[i].isFile() && tempList[i].getName().contains(UtilConstant.getHostname()) && !tempList[i].getName().contains("dualMachine")) {
                     tableName.add(tempList[i].toString());
                 }
                 if (tempList[i].isDirectory()) {
                 }
             }
+            log.warn(UtilConstant.getHostname());
+            log.warn("本地文件有：{}",tableName);
             for (int i = 0; i < tableName.size(); i++) {
             /*Table tableTmp = new Table();
             VTable vtableTmp = null;*/
@@ -157,7 +160,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                 } catch (Exception e) {
                     log.warn("state存取失败");
                 }
-                log.warn("本地的table更新完毕，更新后的locatedname为：{}",tableTmp.getMeta().getLocatedServerName());
+                //log.warn("本地的table更新完毕，更新后的locatedname为：{}",tableTmp.getMeta().getLocatedServerName());
             }
         }
         return new NotifyStateResponse()
