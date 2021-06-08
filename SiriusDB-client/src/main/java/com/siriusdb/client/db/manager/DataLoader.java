@@ -21,7 +21,7 @@ import java.util.*;
 @Slf4j
 public class DataLoader {
 
-    public static Table getTable(String tableName) {
+    public static Table getTable(int a,String tableName) {
         Table student = new Table();
         List<Attribute> attr = new LinkedList<>();
         List<Row> data = new LinkedList<>();
@@ -69,23 +69,36 @@ public class DataLoader {
 
     public static void dropTable(Table oldTable) throws TException {
 
-        MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, "127.0.0.1", 2345);
+        MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
         QueryTableMetaInfoResponse res = client1.dropTable(oldTable, UtilConstant.HOST_NAME);
 
-        if (res.meta.get(0).locatedServerName.length() != 0) {
-            oldTable.getMeta().setLocatedServerName(res.meta.get(0).locatedServerName);
-            oldTable.getMeta().setLocatedServerUrl(res.meta.get(0).locatedServerUrl);
-            RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class);
-            client2.trueDropTable(oldTable, res.meta.get(0).locatedServerName);
+        if (res.getMeta() == null || res.getMeta().size() == 0) {
+            log.warn("向Master请求{}表格失败，表格不存在", oldTable.getMeta().getName());
+        } else {
+            DataServer target = new DataServer();
+            target.setHostName(res.getMeta().get(0).getLocatedServerName());
+            target.setHostUrl(res.getMeta().get(0).getLocatedServerUrl());
+            target.parseHostUrl();
+            if (res.meta.get(0).locatedServerName.length() != 0) {
+                oldTable.getMeta().setLocatedServerName(res.meta.get(0).locatedServerName);
+                oldTable.getMeta().setLocatedServerUrl(res.meta.get(0).locatedServerUrl);
+                RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
+                client2.trueDropTable(oldTable, res.meta.get(0).locatedServerName);
+            }
         }
-
     }
 
 
     //real get table function, a is any integer
-    public static Table getTable(int a, String tableName) throws TException {
+    public static Table getTable(String tableName)  {
+
         MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
-        QueryTableMetaInfoResponse res = client1.getTable(tableName, UtilConstant.HOST_NAME);
+        QueryTableMetaInfoResponse res = null;
+        try {
+            res = client1.getTable(tableName, UtilConstant.HOST_NAME);
+        } catch (TException e) {
+            e.printStackTrace();
+        }
         Table ret = null;
         DataServer target = new DataServer();
         if (res.getMeta() == null || res.getMeta().size() == 0) {
@@ -105,7 +118,11 @@ public class DataLoader {
 //                client2.trueCreateTable(newTable, res.locatedServerName);
 
                 RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
-                ret = client2.trueGetTable(tableName, thisTableMeta.getLocatedServerName());
+                try {
+                    ret = client2.trueGetTable(tableName, thisTableMeta.getLocatedServerName());
+                } catch (TException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return ret;

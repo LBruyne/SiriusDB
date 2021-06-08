@@ -18,7 +18,12 @@ public class RecordManagerTable {
     public int fetchColID(TableAttribute tosearch) {
         int ret = -1;
         for (int i = 0; i < attr.size(); i++) {
-            if(tosearch.getTable().containsAll(attr.get(i).getTable()) && tosearch.getAttribute().getType().equals(attr.get(i).getAttribute().getType()) && tosearch.getAttribute().getName().equals(attr.get(i).getAttribute().getName())){
+            boolean x1=tosearch.getTable().containsAll(attr.get(i).getTable());
+            boolean x2=tosearch.getAttribute().getType().equals(attr.get(i).getAttribute().getType());
+            boolean x3=tosearch.getAttribute().getName().equals(attr.get(i).getAttribute().getName());
+//            System.out.println(tosearch.getAttribute().getName());
+//            System.out.println("X1 = "+x1 +"\t X2 = "+x2+"\t X3 = "+x3);
+            if(x1 && x2 && x3 ){
                 ret = i;
             }
         }
