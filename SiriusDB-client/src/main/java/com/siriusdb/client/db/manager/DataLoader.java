@@ -21,7 +21,7 @@ import java.util.*;
 @Slf4j
 public class DataLoader {
 
-    public static Table getTable(String tableName) {
+    public static Table getTable(int a,String tableName) {
         Table student = new Table();
         List<Attribute> attr = new LinkedList<>();
         List<Row> data = new LinkedList<>();
@@ -83,9 +83,15 @@ public class DataLoader {
 
 
     //real get table function, a is any integer
-    public static Table getTable(int a, String tableName) throws TException {
+    public static Table getTable(String tableName)  {
+
         MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
-        QueryTableMetaInfoResponse res = client1.getTable(tableName, UtilConstant.HOST_NAME);
+        QueryTableMetaInfoResponse res = null;
+        try {
+            res = client1.getTable(tableName, UtilConstant.HOST_NAME);
+        } catch (TException e) {
+            e.printStackTrace();
+        }
         Table ret = null;
         DataServer target = new DataServer();
         if (res.getMeta() == null || res.getMeta().size() == 0) {
@@ -105,7 +111,11 @@ public class DataLoader {
 //                client2.trueCreateTable(newTable, res.locatedServerName);
 
                 RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
-                ret = client2.trueGetTable(tableName, thisTableMeta.getLocatedServerName());
+                try {
+                    ret = client2.trueGetTable(tableName, thisTableMeta.getLocatedServerName());
+                } catch (TException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return ret;
