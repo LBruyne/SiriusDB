@@ -5,6 +5,7 @@ import com.siriusdb.common.UtilConstant;
 import com.siriusdb.enums.DataServerStateEnum;
 import com.siriusdb.enums.RpcOperationEnum;
 import com.siriusdb.model.db.Table;
+import com.siriusdb.model.db.TableMeta;
 import com.siriusdb.model.master.DataServer;
 import com.siriusdb.thrift.model.*;
 import com.siriusdb.thrift.service.MasterService;
@@ -84,11 +85,19 @@ public class RegionServiceImpl implements RegionService.Iface {
         DataServer dataServer = DataServer.builder().hostUrl(req.getDualServerUrl()).hostName(req.getDualServerName()).state(DataServerStateEnum.PRIMARY).build();
         dataServer.parseHostUrl();
         String stateCode = Integer.toString(req.getStateCode());
-        switch (stateCode){
-            case "1":dataServer.setState(DataServerStateEnum.PRIMARY);break;
-            case "2":dataServer.setState(DataServerStateEnum.COPY);break;
-            case "0":dataServer.setState(DataServerStateEnum.IDLE);break;
-            case "-1":dataServer.setState(DataServerStateEnum.INVAILID);break;
+        switch (stateCode) {
+            case "1":
+                dataServer.setState(DataServerStateEnum.PRIMARY);
+                break;
+            case "2":
+                dataServer.setState(DataServerStateEnum.COPY);
+                break;
+            case "0":
+                dataServer.setState(DataServerStateEnum.IDLE);
+                break;
+            case "-1":
+                dataServer.setState(DataServerStateEnum.INVAILID);
+                break;
         }
         log.warn("接收到Master通知，状态变更为{}，对偶机为{}:{}", stateCode, dataServer.getHostName(), dataServer.getHostUrl());
 
@@ -102,6 +111,54 @@ public class RegionServiceImpl implements RegionService.Iface {
             objOut.close();
         } catch (Exception e) {
             return new NotifyStateResponse().setBaseResp(RpcResult.failResp());
+        }
+        if (dataServer.getState() == DataServerStateEnum.COPY) {
+            MasterServerClient masterServerClient = new MasterServerClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
+            List<String> tableName = new ArrayList<String>();
+            File file1 = new File(this.getClass().getResource("/").getPath());
+            File file2 = new File(file1.getParent());
+            File file3 = new File(file2.getParent());
+            File file4 = new File(file3.getParent());
+            log.warn("此时的项目地址为:");
+            System.out.println(file4);
+            File[] tempList = file4.listFiles();
+            for (int i = 0; i < tempList.length; i++) {
+                if (tempList[i].isFile()) {
+                    tableName.add(tempList[i].toString());
+                }
+                if (tempList[i].isDirectory()) {
+                }
+            }
+            for (int i = 0; i < tableName.size(); i++) {
+            /*Table tableTmp = new Table();
+            VTable vtableTmp = null;*/
+                File file5 = new File(UtilConstant.getHostname() + tableName.get(i) + ".dat");
+                FileInputStream in;
+                Table tableTmp = new Table();
+                try {
+                    in = new FileInputStream(file5);
+                    ObjectInputStream objIn = new ObjectInputStream(in);
+                    tableTmp = (Table) objIn.readObject();
+                    objIn.close();
+                    tableTmp.getMeta().setLocatedServerName(dataServer.getHostName());
+                    tableTmp.getMeta().setLocatedServerUrl(dataServer.getHostUrl());
+                    VTableMeta vTableMeta = CopyUtils.tableMToVTableM(tableTmp.getMeta());
+                    masterServerClient.notifyTableMetaChange(tableName.get(i), RpcOperationEnum.UPDATE.getCode(), vTableMeta, new Base().setCaller(UtilConstant.getHostname()).setReceiver(MasterConstant.MASTER_HOST_NAME));
+                } catch (Exception e) {
+                    log.warn("state变更失败");
+                }
+                FileOutputStream out1;
+                try {
+                    out1 = new FileOutputStream(file5);
+                    ObjectOutputStream objOut = new ObjectOutputStream(out1);
+                    objOut.writeObject(tableTmp);
+                    objOut.flush();
+                    objOut.close();
+                } catch (Exception e) {
+                    log.warn("state存取失败");
+                }
+                log.warn("本地的table更新完毕，更新后的locatedname为：{}",tableTmp.getMeta().getLocatedServerName());
+            }
         }
         return new NotifyStateResponse()
                 .setBaseResp(RpcResult.successResp());
