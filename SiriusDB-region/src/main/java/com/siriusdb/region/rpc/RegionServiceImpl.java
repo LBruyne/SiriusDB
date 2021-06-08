@@ -185,6 +185,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                     objOut.flush();
                     objOut.close();
                 } catch (Exception e) {
+                    log.warn(e.getMessage(), e);
                     return new NotifyTableChangeResponse()
                             .setBaseResp(RpcResult.failResp());
                 }
@@ -209,6 +210,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                     objOut.flush();
                     objOut.close();
                 } catch (Exception e) {
+                    log.warn(e.getMessage(), e);
                     return new NotifyTableChangeResponse()
                             .setBaseResp(RpcResult.failResp());
                 }
