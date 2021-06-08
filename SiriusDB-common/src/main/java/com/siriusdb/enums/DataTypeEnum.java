@@ -7,11 +7,11 @@ package com.siriusdb.enums;
  */
 public enum DataTypeEnum {
 
-    INTEGER(1, "Integer"),
+    INTEGER(1, "int"),
 
-    FLOAT(2, "Float"),
+    FLOAT(2, "float"),
 
-    STRING(3, "String"),
+    STRING(3, "string"),
 
     ;
 
