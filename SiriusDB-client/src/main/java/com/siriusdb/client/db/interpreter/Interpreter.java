@@ -11,11 +11,13 @@ import com.siriusdb.client.db.manager.DataLoader;
 import com.siriusdb.client.db.manager.RecordManager;
 import com.siriusdb.enums.PredicateEnum;
 import com.siriusdb.exception.BasicBusinessException;
+import com.siriusdb.model.RecordManagerResult;
 import com.siriusdb.model.db.*;
 import com.siriusdb.enums.DataTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 
+import javax.rmi.CORBA.Util;
 import java.io.*;
 import java.util.*;
 
@@ -355,7 +357,7 @@ public class Interpreter {
         }
 
         RecordManager rm = new RecordManager();
-        rm.insert(tempT, elementList);
+        Utils.print(rm.insert(tempT, elementList));;
         // TODO 显示结果
     }
 
@@ -475,7 +477,7 @@ public class Interpreter {
         } else if (qaq.length == 3) {
         }
         RecordManager rm = new RecordManager();
-        rm.delete(tempT, cons, isAnd);
+        Utils.print(rm.delete(tempT, cons, isAnd));;
     }
 
     public static void select(String query) throws BasicBusinessException {
@@ -491,6 +493,11 @@ public class Interpreter {
         List<ICondition> whereCondition = new ArrayList<>();
         boolean isAnd = true;
         boolean isJoin = false;
+
+        for (int i = 0; i < qaq.length; i++) {
+            if (qaq[i].equals("or"))
+                isAnd = false;
+        }
 
         if (qaq.length < 4)
             throw new BasicBusinessException("select error: Invalid query!");
@@ -531,7 +538,7 @@ public class Interpreter {
 
                 for (int i = 0; i < conditions.length; i++) {
                     count += 1;
-                    if (conditions[i].equals("and")) {//and分割
+                    if (conditions[i].equals("and")||conditions[i].equals("or")) {//and分割
                         index = i;
                         if (count != 4)
                             throw new BasicBusinessException("select error: Conditions misformat1!");
@@ -658,7 +665,7 @@ public class Interpreter {
         for (int i = 0; i < whereCondition.size(); i++) {
             System.out.println(whereCondition.get(i));
         }
-        rm.select(selectedAttributes, tables, joinCondition, whereCondition, isAnd);
+        Utils.print(rm.select(selectedAttributes, tables, joinCondition, whereCondition, isAnd));
 
         // TODO 显示结果
     }
@@ -765,7 +772,7 @@ public class Interpreter {
         whereCondition.add(whereCon);
 
         RecordManager rm = new RecordManager();
-        rm.update(table, setCondition, whereCondition, isAnd);
+        Utils.print(rm.update(table, setCondition, whereCondition, isAnd));;
     }
 }
 
@@ -784,5 +791,67 @@ class Utils {
             return EQUAL;
         else
             return notEQUAL;
+    }
+
+    public static void print(RecordManagerResult rmr){
+        System.out.println("Message: "+ rmr.getMessage());
+        RecordManagerTable t = (RecordManagerTable) rmr.getValue();
+        if (t == null)
+            return;
+        List<TableAttribute> attr = new ArrayList<>();
+        List<Row> data = new ArrayList<>();
+        data = t.getData();
+        attr = t.getAttr();
+        int maxSize = -1;
+        for (int i = 0; i < attr.size(); i++) {
+            int tmpSize = ((String)(attr.get(i).getAttribute().getName())).length();
+            if(tmpSize>maxSize)
+                maxSize = tmpSize;
+        }
+        for (int i = 0; i < data.size(); i++) {
+            List<Element> elements = data.get(i).getElements();
+            for (int j = 0; j < elements.size(); j++) {
+                String tmpString = elements.get(j).getData().toString();
+                if (tmpString.length()>maxSize)
+                    maxSize = tmpString.length();
+            }
+        }
+
+        for (int i = 0; i < attr.size()*maxSize + (attr.size()-1)*5; i++) {
+            System.out.print("-");
+        }
+        System.out.println("");
+
+        //printAttr
+        System.out.print(" | ");
+        for (int i = 0; i < attr.size(); i++) {
+            int size = ((String)attr.get(i).getAttribute().getName()).length();
+            System.out.print(attr.get(i).getAttribute().getName());
+            for (int j = size; j < maxSize; j++) {
+                System.out.print(" ");
+            }
+            System.out.print(" | ");
+        }
+        System.out.println("");
+        //printValue
+        for (int i = 0; i < data.size(); i++) {
+            List<Element> elements = data.get(i).getElements();
+            System.out.print(" | ");
+            for (int j = 0; j < elements.size(); j++) {
+                String tmpString = elements.get(j).getData().toString();
+                int size = tmpString.length();
+                System.out.print(tmpString);
+                for (int k = size; k < maxSize; k++) {
+                    System.out.print(" ");
+                }
+                System.out.print(" | ");
+            }
+            System.out.println("");
+        }
+
+        for (int i = 0; i < attr.size()*maxSize + (attr.size()-1)*5; i++) {
+            System.out.print("-");
+        }
+        System.out.println("");
     }
 }
