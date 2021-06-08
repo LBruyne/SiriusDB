@@ -1,8 +1,6 @@
 package com.siriusdb.client;
 
 import com.siriusdb.client.db.interpreter.Interpreter;
-import com.siriusdb.client.db.manager.IndexManager;
-import com.siriusdb.client.db.api.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
 /**

@@ -1,6 +1,5 @@
 package com.siriusdb.client.db.manager;
 
-import com.siriusdb.client.db.api.IRecordManager;
 import com.siriusdb.enums.PredicateEnum;
 import com.siriusdb.model.RecordManagerResult;
 import com.siriusdb.model.db.*;
@@ -17,7 +16,7 @@ import org.apache.thrift.TException;
  * @author: Hu Yangfan
  * @date: 2021/05/16 8:37 下午
  */
-public class RecordManager implements IRecordManager {
+public class RecordManager {
     /*
     private Object data;
 
@@ -413,6 +412,11 @@ public class RecordManager implements IRecordManager {
             table.setData(new LinkedList<>());
             ret.setMessage("成功删除"+workTable.getData().size()+"条记录.");
             ret.setStatus(true);
+            try {
+                DataLoader.alterTable(table);
+            } catch (TException e) {
+                e.printStackTrace();
+            }
         } else {
             List<Integer> st = new LinkedList<>();
             for (int i = 0; i < workTable.getData().size(); i++) {
@@ -437,10 +441,12 @@ public class RecordManager implements IRecordManager {
 
     public RecordManagerResult insert(Table table, List<Element> values) {
         RecordManagerResult ret = new RecordManagerResult();
+        int k=0;
         for (Element each : values) {
             if (each.getType().equals(DataTypeEnum.STRING.getType())) {
                 each.setData(each.getData().toString().replaceAll("'", ""));
             }
+            each.setColumnId(k++);
         }
 
 

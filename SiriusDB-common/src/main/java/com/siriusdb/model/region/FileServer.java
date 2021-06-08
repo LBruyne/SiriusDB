@@ -31,9 +31,9 @@ public class FileServer implements Serializable {
             File file = new File(file3.getParent());
             File[] tempList = file.listFiles();
             for (int i = 0; i < tempList.length; i++) {
-                log.warn(tempList[i].getName());
                 if (tempList[i].isFile() && tempList[i].getName().contains(UtilConstant.getHostname()) && !tempList[i].getName().contains("dualMachine")) {
                     tableName1.add(tempList[i].getName());
+                    log.warn(tempList[i].getName());
                 }
                 if (tempList[i].isDirectory()) {
                 }

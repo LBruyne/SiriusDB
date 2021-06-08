@@ -204,7 +204,7 @@ public class ServiceStrategyExecutor {
         }
 
         static Integer getRunningServerNum() {
-            return getPrimaryServerNum() + getCopyServerNum();
+            return getPrimaryServerNum() + getCopyServerNum() + getIdleServerNum();
         }
 
         static Integer getValidServerNum() {
@@ -312,10 +312,10 @@ public class ServiceStrategyExecutor {
         }
 
         public static boolean isServiceAbnormalState() {
-            if (getRunningServerNum() < 3) return false;         // 条件1：数量充足
-            else if (getServerNotInPair() != null) return false; // 条件2：完成结对
-            else if (getIdleServerNum() == 0) return false;      // 条件3：有空闲机备用
-            else return true;
+            if (getRunningServerNum() < 3) return true;         // 条件1：数量充足
+            else if (getServerNotInPair() != null) return true; // 条件2：完成结对
+            else if (getIdleServerNum() == 0) return true;      // 条件3：有空闲机备用
+            else return false;
         }
 
         public static Boolean isTableExisted(String name) {
