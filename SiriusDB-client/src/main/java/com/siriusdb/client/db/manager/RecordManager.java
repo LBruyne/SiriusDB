@@ -10,6 +10,7 @@ import javax.swing.text.TableView;
 import java.util.*;
 
 import com.siriusdb.enums.DataTypeEnum;
+import org.apache.thrift.TException;
 
 /**
  * @Description: module for record management.
@@ -424,6 +425,11 @@ public class RecordManager implements IRecordManager {
                 workTable.getData().remove(each.intValue());
             ret.setMessage("成功删除"+st.size()+"条记录.");
             ret.setStatus(false);
+            try {
+                DataLoader.alterTable(table);
+            } catch (TException e) {
+                e.printStackTrace();
+            }
         }
         return ret;
 
@@ -478,6 +484,11 @@ public class RecordManager implements IRecordManager {
             }
             ret.setStatus(true);
             ret.setMessage("插入成功！");
+            try {
+                DataLoader.alterTable(table);
+            } catch (TException e) {
+                e.printStackTrace();
+            }
         }
         return ret;
     }
@@ -496,6 +507,13 @@ public class RecordManager implements IRecordManager {
         }
         ret.setStatus(true);
         ret.setMessage("成功更新"+updateCount+"条记录！");
+        if(updateCount>0) {
+            try {
+                DataLoader.alterTable(table);
+            } catch (TException e) {
+                e.printStackTrace();
+            }
+        }
         return ret;
     }
 
