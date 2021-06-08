@@ -12,4 +12,13 @@ public class TableAttribute {
         this.table = tab;
         this.attribute = attr;
     }
+
+    @Override
+    public boolean equals(Object another){
+        if(! (another instanceof  TableAttribute))
+            return false;
+        if(another == this)
+            return true;
+        return table.containsAll(((TableAttribute) another).getTable()) && attribute.equals(((TableAttribute) another).getAttribute());
+    }
 }

@@ -1,6 +1,8 @@
 package com.siriusdb.model.db;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
@@ -31,4 +33,16 @@ public class Attribute implements Serializable {
     public void setId(int id) {
         this.id = id;
     }
+
+    @Override
+    public boolean equals(Object another) {
+        if (!(another instanceof Attribute))
+            return false;
+        if (another == this)
+            return true;
+        return name.equals(((Attribute) another).getName()) && type.equals(((Attribute) another).getType());
+
+    }
+
+
 }

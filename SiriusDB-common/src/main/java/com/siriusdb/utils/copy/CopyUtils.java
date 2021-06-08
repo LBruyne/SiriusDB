@@ -185,6 +185,7 @@ public class CopyUtils {
      */
     public static VElement elementToVElement(Element element) {
         VElement vElement = new VElement();
+        element.setData(element.getData().toString());
         BeanUtils.copyProperties(element, vElement);
         return vElement;
     }

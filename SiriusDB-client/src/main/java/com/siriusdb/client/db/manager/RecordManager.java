@@ -7,11 +7,10 @@ import com.siriusdb.model.db.*;
 import com.sun.org.apache.bcel.internal.generic.LUSHR;
 
 import javax.swing.text.TableView;
-import java.util.HashSet;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
+
 import com.siriusdb.enums.DataTypeEnum;
+
 /**
  * @Description: module for record management.
  * @author: Hu Yangfan
@@ -43,13 +42,20 @@ public class RecordManager implements IRecordManager {
      */
 
 
-//  √√√√√√√√
+    //  √√√√√√√√
     private RecordManagerTable convertFrom(Table table) {
         if (table == null)
             return null;
         RecordManagerTable ret = new RecordManagerTable();
         ret.setTable(table);
         ret.setData(table.getData());
+        for (Row eachRow : table.getData()) {
+            for (Element eachElement : eachRow.getElements()) {
+                if (eachElement.getType().equals(DataTypeEnum.STRING.getType())) {
+                    eachElement.setData(((String) eachElement.getData()).replaceAll("'", ""));
+                }
+            }
+        }
         List<TableAttribute> attr = new LinkedList<>();
         for (Attribute attribute : table.getMeta().getAttributes()) {
             Set<Table> set = new HashSet<>();
@@ -81,12 +87,12 @@ public class RecordManager implements IRecordManager {
                 Object value2 = line_2.getElements(secondTableColID).getData();
                 String type2 = line_2.getElements(secondTableColID).getType();
                 if (type1.equals(type2)) {
-                    if(type1.equals(DataTypeEnum.STRING.getType()))
-                            select = select && judge((String) value1, (String) value2, con.getOperator());
-                    if(type1.equals(DataTypeEnum.INTEGER.getType()))
-                            select = select && judge(Integer.parseInt((String) value1), Integer.parseInt((String) value2), con.getOperator());
-                    if(type1.equals(DataTypeEnum.FLOAT.getType()))
-                            select = select && judge(Float.parseFloat((String) value1), Float.parseFloat((String) value2), con.getOperator());
+                    if (type1.equals(DataTypeEnum.STRING.getType()))
+                        select = select && judge((String) value1, (String) value2, con.getOperator());
+                    if (type1.equals(DataTypeEnum.INTEGER.getType()))
+                        select = select && judge(Integer.parseInt((String) value1), Integer.parseInt((String) value2), con.getOperator());
+                    if (type1.equals(DataTypeEnum.FLOAT.getType()))
+                        select = select && judge(Float.parseFloat((String) value1), Float.parseFloat((String) value2), con.getOperator());
                 } else
                     select = false;
             } else {
@@ -210,12 +216,13 @@ public class RecordManager implements IRecordManager {
                 Element first = thisLine.getElements(firstColID);
                 Element second = thisLine.getElements(secondColID);
                 if (first.getType().equals(second.getType())) {
-                    if (first.getType().equals(DataTypeEnum.STRING.getType()))
-                            decide = decide && (judge((String) (first.getData()), (String) (second.getData()), thisCon.getOperator()));
+                    if (first.getType().equals(DataTypeEnum.STRING.getType())) {
+                        decide = decide && (judge((String) (first.getData()), (String) (second.getData()), thisCon.getOperator()));
+                    }
                     if (first.getType().equals(DataTypeEnum.INTEGER.getType()))
-                            decide = decide && (judge((Integer) (first.getData()), (Integer) (second.getData()), thisCon.getOperator()));
+                        decide = decide && (judge((Integer) (first.getData()), (Integer) (second.getData()), thisCon.getOperator()));
                     if (first.getType().equals(DataTypeEnum.FLOAT.getType()))
-                            decide = decide && (judge((Float) (first.getData()), (Float) (second.getData()), thisCon.getOperator()));
+                        decide = decide && (judge((Float) (first.getData()), (Float) (second.getData()), thisCon.getOperator()));
 
                 }
             } else if (each instanceof AttrVSValueCondition) {
@@ -224,12 +231,14 @@ public class RecordManager implements IRecordManager {
                 Element first = thisLine.getElements(firstColID);
                 Element second = thisCon.getLatterDataElement();
                 if (first.getType().equals(second.getType())) {
-                    if (first.getType().equals(DataTypeEnum.STRING.getType()))
-                            decide = decide && (judge((String) (first.getData()), (String) (second.getData()), thisCon.getCondition()));
+                    if (first.getType().equals(DataTypeEnum.STRING.getType())) {
+                        thisCon.getLatterDataElement().setData(((String) thisCon.getLatterDataElement().getData()).replaceAll("'", ""));
+                        decide = decide && (judge((String) (first.getData()), (String) (second.getData()), thisCon.getCondition()));
+                    }
                     if (first.getType().equals(DataTypeEnum.INTEGER.getType()))
-                            decide = decide && (judge((Integer) (first.getData()), Integer.parseInt ((String)second.getData()), thisCon.getCondition()));
+                        decide = decide && (judge((Integer) (first.getData()), Integer.parseInt((String) second.getData()), thisCon.getCondition()));
                     if (first.getType().equals(DataTypeEnum.FLOAT.getType()))
-                            decide = decide && (judge((Float) (first.getData()), Float.parseFloat ((String) second.getData()), thisCon.getCondition()));
+                        decide = decide && (judge((Float) (first.getData()), Float.parseFloat((String) second.getData()), thisCon.getCondition()));
 //
 
 
@@ -329,6 +338,26 @@ public class RecordManager implements IRecordManager {
         return thisLine;
     }
 
+    private void filterB4Return(List<TableAttribute> selectedAttributes, RecordManagerTable res) {
+        List<Integer> selectedAttributeIndex = new LinkedList<>();
+        Set<String> selectedStrings = new HashSet<>();
+        for (TableAttribute attr : selectedAttributes) {
+            selectedStrings.add(attr.getAttribute().getName());
+        }
+        for (int i = 0; i < res.getAttr().size(); i++) {
+            if (!selectedStrings.contains(res.getAttr().get(i).getAttribute().getName())) {
+                selectedAttributeIndex.add(i);
+            }
+        }
+        Collections.reverse(selectedAttributeIndex);
+        for (Integer eachIndex : selectedAttributeIndex) {
+            res.getAttr().remove(eachIndex.intValue());
+            for (Row each : res.getData()) {
+                each.getElements().remove(eachIndex.intValue());
+            }
+        }
+    }
+
     public RecordManagerResult<RecordManagerTable> select(List<TableAttribute> selectedAttributes, List<Table> tables, List<AttrVSAttrCondition> joinCondition, List<ICondition> whereCondition, boolean isAnd) {
 //
         // preCondition:
@@ -345,9 +374,14 @@ public class RecordManager implements IRecordManager {
         }
         RecordManagerTable res = filterRows(targetTable, whereCondition, isAnd);
 //        filter Rows one by one , collect selected rows
+
+        filterB4Return(selectedAttributes, res);
+
         RecordManagerResult<RecordManagerTable> ret = new RecordManagerResult<>();
 
         ret.setValue(res);
+        ret.setMessage("查询成功");
+        ret.setStatus(true);
 
         return ret;
 
@@ -373,40 +407,96 @@ public class RecordManager implements IRecordManager {
     public RecordManagerResult delete(Table table, List<ICondition> cons, boolean isAnd) {
         // 可能 delete .. from tableA where tableA.attrA != tableA.attrB
         RecordManagerTable workTable = convertFrom(table);
-        Set<Integer> st = new HashSet<>();
-        for (int i = 0; i < workTable.getData().size(); i++) {
-            if (judgeRow(workTable, cons, isAnd, workTable.getData().get(i)) != null) {
-                st.add(i);
+        RecordManagerResult ret= new RecordManagerResult();
+        if (cons == null || cons.size() == 0) {
+            table.setData(new LinkedList<>());
+            ret.setMessage("成功删除"+workTable.getData().size()+"条记录.");
+            ret.setStatus(true);
+        } else {
+            List<Integer> st = new LinkedList<>();
+            for (int i = 0; i < workTable.getData().size(); i++) {
+                if (judgeRow(workTable, cons, isAnd, workTable.getData().get(i)) != null) {
+                    st.add(i);
+                }
             }
+            Collections.reverse(st);
+            for (Integer each : st)
+                workTable.getData().remove(each.intValue());
+            ret.setMessage("成功删除"+st.size()+"条记录.");
+            ret.setStatus(false);
         }
-        for (Integer each : st)
-            workTable.getData().remove(each.intValue());
-        return null;
+        return ret;
+
     }
 
     public RecordManagerResult insert(Table table, List<Element> values) {
-
-        List<Row> rows = table.getData();
-        Row thisLine = new Row();
-        if (values.size() == table.getMeta().getAttributes().size()) {
-            // sth wrong
-        } else {
-            for (Element each : values)
-                thisLine.addElement(each);
-            rows.add(thisLine);
+        RecordManagerResult ret = new RecordManagerResult();
+        for (Element each : values) {
+            if (each.getType().equals(DataTypeEnum.STRING.getType())) {
+                each.setData(each.getData().toString().replaceAll("'", ""));
+            }
         }
-        return null;
+
+
+        RecordManagerTable workTable = convertFrom(table);
+        int primaryKeyCol = table.fetchAttributeColID(table.getMeta().getPrimaryKey());
+        if (primaryKeyCol == -1) {
+            // sth wrong
+            ret.setStatus(false);
+            ret.setMessage("找不到primary key！");
+        } else {
+            for (Row eachRow : workTable.getData()) {
+                boolean duplicate = false;
+                if (eachRow.getElements(primaryKeyCol).getType().equals(DataTypeEnum.INTEGER.getType())) {
+                    duplicate = judge(Integer.parseInt((String) eachRow.getElements(primaryKeyCol).getData()), Integer.parseInt((String) values.get(primaryKeyCol).getData()), PredicateEnum.EQUAL);
+                }
+                if (eachRow.getElements(primaryKeyCol).getType().equals(DataTypeEnum.FLOAT.getType())) {
+                    duplicate = judge(Float.parseFloat((String) eachRow.getElements(primaryKeyCol).getData()), Float.parseFloat((String) values.get(primaryKeyCol).getData()), PredicateEnum.EQUAL);
+                }
+                if (eachRow.getElements(primaryKeyCol).getType().equals(DataTypeEnum.STRING.getType())) {
+                    duplicate = judge((String) eachRow.getElements(primaryKeyCol).getData(), (String) values.get(primaryKeyCol).getData(), PredicateEnum.EQUAL);
+                }
+                if (duplicate) {
+                    // primary key duplicate
+                    ret.setMessage("主键已存在，重复插入！");
+                    ret.setStatus(true);
+                    return ret;
+                }
+
+
+            }
+            List<Row> rows = table.getData();
+            Row thisLine = new Row();
+//        to be modified :
+//        what if primary key already existed?
+            if (values.size() != table.getMeta().getAttributes().size()) {
+                // sth wrong
+            } else {
+                thisLine.setElements(new LinkedList<Element>());
+                thisLine.getElements().addAll(values);
+                rows.add(thisLine);
+            }
+            ret.setStatus(true);
+            ret.setMessage("插入成功！");
+        }
+        return ret;
     }
 
     public RecordManagerResult update(Table table, List<ICondition> setCondition, List<ICondition> whereConditions, boolean isAnd) {
         RecordManagerTable workTable = convertFrom(table);
+        RecordManagerResult ret= new RecordManagerResult();
+        int updateCount=0;
         List<Row> rows = workTable.getData();
         for (int i = 0; i < rows.size(); i++) {
-            if (judgeRow(workTable, whereConditions, isAnd, rows.get(i)) != null) {
-                rows.set(i, setRow(workTable, setCondition, rows.get(i)));
+            Row thisLine = rows.get(i);
+            if (judgeRow(workTable, whereConditions, isAnd, thisLine) != null) {
+                rows.set(i, setRow(workTable, setCondition, thisLine));
+                updateCount++;
             }
         }
-        return null;
+        ret.setStatus(true);
+        ret.setMessage("成功更新"+updateCount+"条记录！");
+        return ret;
     }
 
 }
