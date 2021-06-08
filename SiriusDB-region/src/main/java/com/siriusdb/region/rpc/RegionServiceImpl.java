@@ -40,8 +40,6 @@ public class RegionServiceImpl implements RegionService.Iface {
             File file2 = new File(file1.getParent());
             File file3 = new File(file2.getParent());
             File file = new File(file3.getParent());
-            log.warn("此时的项目地址为:");
-            System.out.println(file);
             File[] tempList = file.listFiles();
             for (int i = 0; i < tempList.length; i++) {
                 if (tempList[i].isFile()) {
