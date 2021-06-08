@@ -5,6 +5,7 @@ import com.siriusdb.model.db.*;
 import com.siriusdb.thrift.model.*;
 import org.springframework.beans.BeanUtils;
 import lombok.extern.slf4j.Slf4j;
+
 import java.util.stream.Collectors;
 
 /**
@@ -48,7 +49,6 @@ public class CopyUtils {
         BeanUtils.copyProperties(table, vtable);
         // 复制attributes属性
         vtable.setAttributes(table.getAttributes().stream().map(attribute -> attrToVAttr(attribute)).collect(Collectors.toList()));
-        log.warn("此次将tablemeta{}赋值给vtblemeta{}",table,vtable);
         return vtable;
     }
 
@@ -64,7 +64,6 @@ public class CopyUtils {
         tableMeta.setAttributes(vTableMeta.getAttributes()
                 .stream()
                 .map(vAttr -> vAttrToAttr(vAttr)).collect(Collectors.toList()));
-        log.warn("此次将vtablemeta:{}赋值给tablemeta:{}",vTableMeta,tableMeta);
         return tableMeta;
     }
 
@@ -84,7 +83,7 @@ public class CopyUtils {
         table.setData(vTable.getData()
                 .stream()
                 .map(vRow -> vRowToRow(vRow)).collect(Collectors.toList()));
-        log.warn("此次将vtable:{}赋值给table:{}",vTable,table);
+        log.warn("此次将vtable:{}赋值给table:{}", vTable, table);
         return table;
     }
 
@@ -104,7 +103,7 @@ public class CopyUtils {
         vTable.setData(table.getData()
                 .stream()
                 .map(row -> rowToVRow(row)).collect(Collectors.toList()));
-        log.warn("此次将table{}赋值给vtble{}",table,vTable);
+        log.warn("此次将table{}赋值给vtble{}", table, vTable);
         return vTable;
     }
 
@@ -168,10 +167,10 @@ public class CopyUtils {
     public static Element vElementToElement(VElement vElement) {
         Element element = new Element();
         BeanUtils.copyProperties(vElement, element);
-        if(vElement.getType().equals(DataTypeEnum.INTEGER.getType())){
+        if (vElement.getType().equals(DataTypeEnum.INTEGER.getType())) {
             element.setData(Integer.parseInt(vElement.getData()));
         }
-        if(vElement.getType().equals(DataTypeEnum.FLOAT.getType())){
+        if (vElement.getType().equals(DataTypeEnum.FLOAT.getType())) {
             element.setData(Float.parseFloat(vElement.getData()));
         }
         return element;
@@ -185,8 +184,8 @@ public class CopyUtils {
      */
     public static VElement elementToVElement(Element element) {
         VElement vElement = new VElement();
-        element.setData(element.getData().toString());
         BeanUtils.copyProperties(element, vElement);
+        vElement.setData(element.getData().toString());
         return vElement;
     }
 
@@ -198,7 +197,6 @@ public class CopyUtils {
      */
     public static VRow rowToVRow(Row row) {
         VRow vRow = new VRow();
-        BeanUtils.copyProperties(row, vRow);
         vRow.setElements(row.getElements().stream().map(element -> elementToVElement(element)).collect(Collectors.toList()));
         return vRow;
     }
@@ -211,7 +209,6 @@ public class CopyUtils {
      */
     public static Row vRowToRow(VRow vRow) {
         Row row = new Row();
-        BeanUtils.copyProperties(vRow, row);
         row.setElements(vRow.getElements().stream().map(vElement -> vElementToElement(vElement)).collect(Collectors.toList()));
         return row;
     }
