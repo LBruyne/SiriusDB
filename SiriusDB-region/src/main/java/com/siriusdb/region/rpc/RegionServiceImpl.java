@@ -135,7 +135,7 @@ public class RegionServiceImpl implements RegionService.Iface {
             for (int i = 0; i < tableName.size(); i++) {
             /*Table tableTmp = new Table();
             VTable vtableTmp = null;*/
-                File file5 = new File(UtilConstant.getHostname() + tableName.get(i) + ".dat");
+                File file5 = new File(tableName.get(i));
                 FileInputStream in;
                 Table tableTmp = new Table();
                 try {
