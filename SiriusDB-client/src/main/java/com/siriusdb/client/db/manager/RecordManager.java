@@ -437,9 +437,11 @@ public class RecordManager implements IRecordManager {
 
     public RecordManagerResult insert(Table table, List<Element> values) {
         RecordManagerResult ret = new RecordManagerResult();
+        int fuck=0;
         for (Element each : values) {
             if (each.getType().equals(DataTypeEnum.STRING.getType())) {
                 each.setData(each.getData().toString().replaceAll("'", ""));
+                each.setColumnId(fuck++);
             }
         }
 
