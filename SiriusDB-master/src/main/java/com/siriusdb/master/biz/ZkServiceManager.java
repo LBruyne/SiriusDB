@@ -16,8 +16,6 @@ import java.util.List;
 @Slf4j
 public class ZkServiceManager implements Runnable {
 
-    private List<String> servers;
-
     @Override
     public void run() {
         this.startMonitor();

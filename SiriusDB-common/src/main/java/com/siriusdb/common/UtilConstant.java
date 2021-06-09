@@ -39,7 +39,7 @@ public class UtilConstant {
     /**
      * RPC超时时间
      */
-    public static final Integer RPC_TIMEOUT = 10000;
+    public static final Integer RPC_TIMEOUT = 40000;
 
     /**
      * 表格数据请求中，代表请求所有表格数据
