@@ -100,11 +100,7 @@ public class MasterServiceServer extends DynamicThriftServer {
      * @return
      */
     public static NotifyTableMetaChangeResponse notifyTableMetaChange(String tableName, VTableMeta vTableMeta, Integer operationCode) {
-        if (ServiceStrategyExecutor.DataHolder.isServiceAbnormalState()) {
-            log.warn("服务处于非正常状态");
-            return new NotifyTableMetaChangeResponse()
-                    .setBaseResp(RpcResult.failResp());
-        } else if (operationCode.equals(RpcOperationEnum.CREATE.getCode())) {
+        if (operationCode.equals(RpcOperationEnum.CREATE.getCode())) {
             // 如果该表格已经存在
             if (ServiceStrategyExecutor.DataHolder.isTableExisted(tableName)) {
                 return new NotifyTableMetaChangeResponse().setBaseResp(RpcResult.hasExistedResp());
