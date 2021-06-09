@@ -139,7 +139,7 @@ public class DataLoader {
         target.setHostUrl(thisTableMeta.getLocatedServerUrl());
         target.parseHostUrl();
 
-        log.warn("向Master请求GET表格成功，表格现在被存储在主机{}:{}:{}", target.getHostName(), target.getIp(), target.getPort());
+        log.warn("Alter Table: 向缓存提取Meta成功，表格现在被存储在主机{}:{}:{}", target.getHostName(), target.getIp(), target.getPort());
 
         if (thisTableMeta.getLocatedServerName().length() != 0) {
 //                newTable.getMeta().setLocatedServerName(res.locatedServerName);
@@ -152,6 +152,7 @@ public class DataLoader {
                 ret = client2.trueGetTable(tableName, thisTableMeta.getLocatedServerName());
             } catch (TException e) {
                 // cache invalid
+                log.warn("Buffer invalid, 重新向Master请求Meta");
                 new refreshBuffer(buffer, findMetaID(tableName)).run();
                 return getTable(tableName);
             }
@@ -176,7 +177,7 @@ public class DataLoader {
         target.setHostUrl(thisTableMeta.getLocatedServerUrl());
         target.parseHostUrl();
 
-        log.warn("Alter Table: 向Master请求GET表格成功，表格现在被存储在主机{}:{}:{}", target.getHostName(), target.getIp(), target.getPort());
+        log.warn("Alter Table: 向缓存提取Meta成功，表格现在被存储在主机{}:{}:{}", target.getHostName(), target.getIp(), target.getPort());
 
         if (thisTableMeta.getLocatedServerName().length() != 0) {
             RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
@@ -188,6 +189,7 @@ public class DataLoader {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             // cache invalid
+            log.warn("Buffer invalid, 重新向Master请求Meta");
             new refreshBuffer(buffer, findMetaID(tableName)).run();
             alterTable(table);
         }
