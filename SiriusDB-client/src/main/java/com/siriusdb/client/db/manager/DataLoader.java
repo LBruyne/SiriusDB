@@ -26,7 +26,7 @@ public class DataLoader {
 
     static {
         fakeInitTable();
-        buffer = new LinkedList<>();
+        buffer = new Vector<>();
     }
 
     private static void fakeSetTable(Table newTable) {
@@ -196,11 +196,6 @@ public class DataLoader {
         if (findMetaID(tableName) != -1) {
             res = buffer.get(metaID);
             new Thread(new refreshBuffer(buffer, metaID)).start();
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         } else {
 
             MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
@@ -212,6 +207,9 @@ public class DataLoader {
             }
             if (res.getMeta() == null || res.getMeta().size() == 0) {
                 log.warn("向Master请求{}表格失败，表格不存在", tableName);
+            }
+            else{
+                buffer.add(res);
             }
         }
         return res;
