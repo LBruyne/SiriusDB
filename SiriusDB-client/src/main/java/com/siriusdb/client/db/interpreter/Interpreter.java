@@ -25,6 +25,9 @@ import static com.siriusdb.enums.PredicateEnum.*;
 
 @Slf4j
 public class Interpreter {
+    //gaizhege!!!
+    static  boolean isFake = false;
+
     public static void initial() {
         try {
             welcome();
@@ -242,7 +245,7 @@ public class Interpreter {
         attrName = attrName.substring(1, attrName.length() - 1);
 
         Table tempT = null;
-        tempT = DataLoader.getTable(false, tableName);
+        tempT = DataLoader.getTable(isFake,tableName);
 
         List<Attribute> tempA = tempT.getMeta().getAttributes();
         if (tempT == null || tempA == null)
@@ -273,7 +276,7 @@ public class Interpreter {
 
         String tableName = qaq[2];
         Table tempT = null;
-        tempT = DataLoader.getTable(false, tableName);
+        tempT = DataLoader.getTable(isFake,tableName);
         if (tempT == null)
             throw new BasicBusinessException("dropTable error: No such table!");
 
@@ -328,7 +331,7 @@ public class Interpreter {
         String[] values = qaq[4].split(",");
 
         Table tempT = null;
-        tempT = DataLoader.getTable(false, tableName);
+        tempT = DataLoader.getTable(isFake,tableName);
         List<Attribute> tempA = tempT.getMeta().getAttributes();
         List<Element> elementList = new ArrayList<>();
         if (tempT == null || tempA == null)
@@ -373,7 +376,7 @@ public class Interpreter {
         String tableName = qaq[2];
 
         Table tempT = null;
-        tempT = DataLoader.getTable(false, tableName);
+        tempT = DataLoader.getTable(isFake,tableName);
 
         List<Attribute> tempA = tempT.getMeta().getAttributes();
         if (tempT == null || tempA == null)
@@ -518,7 +521,7 @@ public class Interpreter {
         {
 
             Table tempT = null;
-            tempT = DataLoader.getTable(false, tableName);
+            tempT = DataLoader.getTable(isFake,tableName);
 
             List<Attribute> tempA = tempT.getMeta().getAttributes();
             if (tempT == null || tempA == null)
@@ -691,7 +694,7 @@ public class Interpreter {
         boolean isAnd = true;
 
         String tableName = qaq[1];
-        table = DataLoader.getTable(false, tableName);
+        table = DataLoader.getTable(isFake,tableName);
 
         List<Attribute> tempA = table.getMeta().getAttributes();
 
