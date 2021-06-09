@@ -115,10 +115,10 @@ public class RegionServiceImpl implements RegionService.Iface {
         File file2 = new File(file1.getParent());
         File file3 = new File(file2.getParent());
         File file4 = new File(file3.getParent());
-        log.warn("此时的项目地址为:");
+        //log.warn("此时的项目地址为:");
         System.out.println(file4);
         File[] tempList = file4.listFiles();
-        log.warn("temp:{}",tempList[2]);
+        //log.warn("temp:{}",tempList[2]);
         if (dataServer.getState() == DataServerStateEnum.COPY && tempList != null && tempList.length != 0) {
             MasterServerClient masterServerClient = new MasterServerClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
             for (int i = 0; i < tempList.length; i++) {
@@ -144,7 +144,7 @@ public class RegionServiceImpl implements RegionService.Iface {
                     tableTmp.getMeta().setLocatedServerName(dataServer.getHostName());
                     tableTmp.getMeta().setLocatedServerUrl(dataServer.getHostUrl());
                     VTableMeta vTableMeta = CopyUtils.tableMToVTableM(tableTmp.getMeta());
-                    masterServerClient.notifyTableMetaChange(tableName.get(i), RpcOperationEnum.UPDATE.getCode(), vTableMeta, new Base().setCaller("SERVER"+UtilConstant.getHostname()).setReceiver(MasterConstant.MASTER_HOST_NAME));
+                    masterServerClient.notifyTableMetaChange(tableTmp.getMeta().getName(), RpcOperationEnum.UPDATE.getCode(), vTableMeta, new Base().setCaller("SERVER"+UtilConstant.getHostname()).setReceiver(MasterConstant.MASTER_HOST_NAME));
                     log.warn("报告master主机地址已经改了：{}",tableTmp.getMeta().getLocatedServerName());
                 } catch (Exception e) {
                     log.warn("state变更失败");
