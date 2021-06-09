@@ -20,31 +20,50 @@ import java.util.*;
 
 @Slf4j
 public class DataLoader {
+    private static Table thisTable=null;
 
-    public static Table getTable(int a,String tableName) {
-        Table student = new Table();
-        List<Attribute> attr = new LinkedList<>();
-        List<Row> data = new LinkedList<>();
-        TableMeta meta = new TableMeta();
-        meta.setName("student");
-        meta.setPrimaryKey("sno");
-        attr.add(new Attribute(0, "sno", DataTypeEnum.STRING.getType()));
-        attr.add(new Attribute(1, "sname", DataTypeEnum.STRING.getType()));
-        attr.add(new Attribute(2, "sage", DataTypeEnum.INTEGER.getType()));
-        attr.add(new Attribute(3, "sgender", DataTypeEnum.FLOAT.getType()));
-        meta.setAttributes(attr);
-        student.setMeta(meta);
+    static {
+        fake_initTable();
+    }
 
-        for (int i = 0; i < 5; i++) {
-            List<Element> thisRow = new LinkedList<>();
-            thisRow.add(new Element("318010001" + i, 0, DataTypeEnum.STRING.getType()));
-            thisRow.add(new Element("cb_" + i, 1, DataTypeEnum.STRING.getType()));
-            thisRow.add(new Element(20 + i, 2, DataTypeEnum.INTEGER.getType()));
-            thisRow.add(new Element(1.0 + i, 3, DataTypeEnum.FLOAT.getType()));
-            data.add(new Row(thisRow));
+    private static void fake_setTable(Table newTable){
+        DataLoader.thisTable = newTable;
+    }
+
+    private static Table fake_getTable(){
+        return DataLoader.thisTable;
+    }
+
+    private static void fake_initTable(){
+        if(DataLoader.thisTable == null){
+            Table student = new Table();
+            List<Attribute> attr = new LinkedList<>();
+            List<Row> data = new LinkedList<>();
+            TableMeta meta = new TableMeta();
+            meta.setName("student");
+            meta.setPrimaryKey("sid");
+            attr.add(new Attribute(0, "sid", DataTypeEnum.INTEGER.getType()));
+            attr.add(new Attribute(1, "sname", DataTypeEnum.STRING.getType()));
+            attr.add(new Attribute(2, "sage", DataTypeEnum.INTEGER.getType()));
+            attr.add(new Attribute(3, "sgender", DataTypeEnum.FLOAT.getType()));
+            meta.setAttributes(attr);
+            student.setMeta(meta);
+
+            for (int i = 0; i < 5; i++) {
+                List<Element> thisRow = new LinkedList<>();
+                thisRow.add(new Element(i, 0, DataTypeEnum.INTEGER.getType()));
+                thisRow.add(new Element("cb_" + i, 1, DataTypeEnum.STRING.getType()));
+                thisRow.add(new Element(20 + i, 2, DataTypeEnum.INTEGER.getType()));
+                thisRow.add(new Element(1.0 + i, 3, DataTypeEnum.FLOAT.getType()));
+                data.add(new Row(thisRow));
+            }
+            student.setData(data);
+            DataLoader.thisTable = student;
         }
-        student.setData(data);
-        return student;
+    }
+
+    public static Table getTable(String tableName) {
+        return fake_getTable();
     }
 
     public static void createTable(Table newTable) throws TException {
@@ -90,7 +109,7 @@ public class DataLoader {
 
 
     //real get table function, a is any integer
-    public static Table getTable(String tableName)  {
+    public static Table getTable(int a, String tableName) {
 
         MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
         QueryTableMetaInfoResponse res = null;
@@ -128,7 +147,7 @@ public class DataLoader {
         return ret;
     }
 
-    public static void alterTable(Table table) throws TException {
+    public static void alterTable(int a, Table table) throws TException {
         String tableName = table.getMeta().getName();
         MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
         QueryTableMetaInfoResponse res = client1.getTable(tableName, UtilConstant.HOST_NAME);
@@ -149,5 +168,9 @@ public class DataLoader {
                 client2.trueRetransmitTable(table, thisTableMeta.getLocatedServerName());
             }
         }
+    }
+
+    public static void alterTable(Table table) throws TException {
+        fake_setTable(table);
     }
 }
