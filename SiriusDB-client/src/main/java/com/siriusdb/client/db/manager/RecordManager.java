@@ -460,10 +460,10 @@ public class RecordManager {
             for (Row eachRow : workTable.getData()) {
                 boolean duplicate = false;
                 if (eachRow.getElements(primaryKeyCol).getType().equals(DataTypeEnum.INTEGER.getType())) {
-                    duplicate = judge(Integer.parseInt((String) eachRow.getElements(primaryKeyCol).getData()), Integer.parseInt((String) values.get(primaryKeyCol).getData()), PredicateEnum.EQUAL);
+                    duplicate = judge((Integer) eachRow.getElements(primaryKeyCol).getData(), Integer.parseInt((String) values.get(primaryKeyCol).getData()), PredicateEnum.EQUAL);
                 }
                 if (eachRow.getElements(primaryKeyCol).getType().equals(DataTypeEnum.FLOAT.getType())) {
-                    duplicate = judge(Float.parseFloat((String) eachRow.getElements(primaryKeyCol).getData()), Float.parseFloat((String) values.get(primaryKeyCol).getData()), PredicateEnum.EQUAL);
+                    duplicate = judge((Float) eachRow.getElements(primaryKeyCol).getData(), Float.parseFloat((String) values.get(primaryKeyCol).getData()), PredicateEnum.EQUAL);
                 }
                 if (eachRow.getElements(primaryKeyCol).getType().equals(DataTypeEnum.STRING.getType())) {
                     duplicate = judge((String) eachRow.getElements(primaryKeyCol).getData(), (String) values.get(primaryKeyCol).getData(), PredicateEnum.EQUAL);
@@ -510,6 +510,10 @@ public class RecordManager {
                 rows.set(i, setRow(workTable, setCondition, thisLine));
                 updateCount++;
             }
+        }
+        for(Row eachRow:table.getData()){
+            for (int i=0;i<eachRow.getElements().size();i++)
+                eachRow.getElements(i).setColumnId(i);
         }
         ret.setStatus(true);
         ret.setMessage("成功更新"+updateCount+"条记录！");

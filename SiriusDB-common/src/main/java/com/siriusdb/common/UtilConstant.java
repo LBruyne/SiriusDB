@@ -31,6 +31,11 @@ public class UtilConstant {
      */
     public static String HOST_NAME = getHostname();
 
+    static {
+        log.warn("本机IP为{}", HOST_IP);
+        log.warn("本机名为{}", HOST_NAME);
+    }
+
     /**
      * RPC超时时间
      */
