@@ -20,22 +20,22 @@ import java.util.*;
 
 @Slf4j
 public class DataLoader {
-    private static Table thisTable=null;
+    private static Table thisTable = null;
 
     static {
-        fake_initTable();
+        fakeInitTable();
     }
 
-    private static void fake_setTable(Table newTable){
+    private static void fakeSetTable(Table newTable) {
         DataLoader.thisTable = newTable;
     }
 
-    private static Table fake_getTable(){
+    private static Table fakeGetTable() {
         return DataLoader.thisTable;
     }
 
-    private static void fake_initTable(){
-        if(DataLoader.thisTable == null){
+    private static void fakeInitTable() {
+        if (DataLoader.thisTable == null) {
             Table student = new Table();
             List<Attribute> attr = new LinkedList<>();
             List<Row> data = new LinkedList<>();
@@ -62,8 +62,12 @@ public class DataLoader {
         }
     }
 
-    public static Table getTable(String tableName) {
-        return fake_getTable();
+    public static Table getTable(Boolean isFakeGetTable, String tableName) {
+        if (isFakeGetTable) {
+            return fakeGetTable();
+        } else {
+            return getTable(tableName);
+        }
     }
 
     public static void createTable(Table newTable) throws TException {
@@ -109,7 +113,7 @@ public class DataLoader {
 
 
     //real get table function, a is any integer
-    public static Table getTable(int a, String tableName) {
+    public static Table getTable(String tableName) {
 
         MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
         QueryTableMetaInfoResponse res = null;
@@ -147,7 +151,7 @@ public class DataLoader {
         return ret;
     }
 
-    public static void alterTable(int a, Table table) throws TException {
+    public static void alterTable(Table table) throws TException {
         String tableName = table.getMeta().getName();
         MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
         QueryTableMetaInfoResponse res = client1.getTable(tableName, UtilConstant.HOST_NAME);
@@ -170,7 +174,11 @@ public class DataLoader {
         }
     }
 
-    public static void alterTable(Table table) throws TException {
-        fake_setTable(table);
+    public static void alterTable(Boolean isFakeAlter, Table table) throws TException {
+        if (isFakeAlter) {
+            fakeSetTable(table);
+        } else {
+            alterTable(table);
+        }
     }
 }

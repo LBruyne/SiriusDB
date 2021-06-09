@@ -83,7 +83,6 @@ public class CopyUtils {
         table.setData(vTable.getData()
                 .stream()
                 .map(vRow -> vRowToRow(vRow)).collect(Collectors.toList()));
-        log.warn("此次将vtable:{}赋值给table:{}", vTable, table);
         return table;
     }
 
@@ -103,7 +102,6 @@ public class CopyUtils {
         vTable.setData(table.getData()
                 .stream()
                 .map(row -> rowToVRow(row)).collect(Collectors.toList()));
-        log.warn("此次将table{}赋值给vtble{}", table, vTable);
         return vTable;
     }
 

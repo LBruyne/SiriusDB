@@ -407,13 +407,13 @@ public class RecordManager {
     public RecordManagerResult delete(Table table, List<ICondition> cons, boolean isAnd) {
         // 可能 delete .. from tableA where tableA.attrA != tableA.attrB
         RecordManagerTable workTable = convertFrom(table);
-        RecordManagerResult ret= new RecordManagerResult();
+        RecordManagerResult ret = new RecordManagerResult();
         if (cons == null || cons.size() == 0) {
             table.setData(new LinkedList<>());
-            ret.setMessage("成功删除"+workTable.getData().size()+"条记录.");
+            ret.setMessage("成功删除" + workTable.getData().size() + "条记录.");
             ret.setStatus(true);
             try {
-                DataLoader.alterTable(table);
+                DataLoader.alterTable(false, table);
             } catch (TException e) {
                 e.printStackTrace();
             }
@@ -427,10 +427,10 @@ public class RecordManager {
             Collections.reverse(st);
             for (Integer each : st)
                 workTable.getData().remove(each.intValue());
-            ret.setMessage("成功删除"+st.size()+"条记录.");
+            ret.setMessage("成功删除" + st.size() + "条记录.");
             ret.setStatus(false);
             try {
-                DataLoader.alterTable(table);
+                DataLoader.alterTable(false, table);
             } catch (TException e) {
                 e.printStackTrace();
             }
@@ -441,7 +441,7 @@ public class RecordManager {
 
     public RecordManagerResult insert(Table table, List<Element> values) {
         RecordManagerResult ret = new RecordManagerResult();
-        int k=0;
+        int k = 0;
         for (Element each : values) {
             if (each.getType().equals(DataTypeEnum.STRING.getType())) {
                 each.setData(each.getData().toString().replaceAll("'", ""));
@@ -491,7 +491,7 @@ public class RecordManager {
             ret.setStatus(true);
             ret.setMessage("插入成功！");
             try {
-                DataLoader.alterTable(table);
+                DataLoader.alterTable(false, table);
             } catch (TException e) {
                 e.printStackTrace();
             }
@@ -501,8 +501,8 @@ public class RecordManager {
 
     public RecordManagerResult update(Table table, List<ICondition> setCondition, List<ICondition> whereConditions, boolean isAnd) {
         RecordManagerTable workTable = convertFrom(table);
-        RecordManagerResult ret= new RecordManagerResult();
-        int updateCount=0;
+        RecordManagerResult ret = new RecordManagerResult();
+        int updateCount = 0;
         List<Row> rows = workTable.getData();
         for (int i = 0; i < rows.size(); i++) {
             Row thisLine = rows.get(i);
@@ -511,15 +511,15 @@ public class RecordManager {
                 updateCount++;
             }
         }
-        for(Row eachRow:table.getData()){
-            for (int i=0;i<eachRow.getElements().size();i++)
+        for (Row eachRow : table.getData()) {
+            for (int i = 0; i < eachRow.getElements().size(); i++)
                 eachRow.getElements(i).setColumnId(i);
         }
         ret.setStatus(true);
-        ret.setMessage("成功更新"+updateCount+"条记录！");
-        if(updateCount>0) {
+        ret.setMessage("成功更新" + updateCount + "条记录！");
+        if (updateCount > 0) {
             try {
-                DataLoader.alterTable(table);
+                DataLoader.alterTable(false, table);
             } catch (TException e) {
                 e.printStackTrace();
             }

@@ -113,7 +113,7 @@ public class IndexManager<T> {
             List<Index> list = tmpTable.getIndexes();
             list.add(newIndex);
             try {
-                DataLoader.alterTable(tmpTable);
+                DataLoader.alterTable(false, tmpTable);
             } catch (TException e) {
                 e.printStackTrace();
                 log.warn("索引{}创建失败",newIndex.getName());
@@ -128,7 +128,7 @@ public class IndexManager<T> {
             List<Index> list = tmpTable.getIndexes();
             list.remove(oldIndex);
             try {
-                DataLoader.alterTable(tmpTable);
+                DataLoader.alterTable(false, tmpTable);
             } catch (TException e) {
                 e.printStackTrace();
                 log.warn("索引{}删除失败",oldIndex.getName());
