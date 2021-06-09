@@ -27,6 +27,7 @@ import static com.siriusdb.enums.PredicateEnum.*;
 public class Interpreter {
     //gaizhege!!!
     static  boolean isFake = false;
+    static ArrayList<String> index = new ArrayList();
 
     public static void initial() {
         try {
@@ -245,7 +246,7 @@ public class Interpreter {
         attrName = attrName.substring(1, attrName.length() - 1);
 
         Table tempT = null;
-        tempT = DataLoader.getTable(isFake,tableName);
+        tempT = DataLoader.getTable(true,tableName);
 
         List<Attribute> tempA = tempT.getMeta().getAttributes();
         if (tempT == null || tempA == null)
@@ -262,6 +263,7 @@ public class Interpreter {
 
 
         // TODO: API for createIndex
+        index.add(indexName);
 
         System.out.println("Success: Index " + indexName + " has been created!");
     }
@@ -299,8 +301,19 @@ public class Interpreter {
 
         String indexName = qaq[2];
         // TODO: API for dropTable
+        int flag = 0;
+        for (int i = 0; i < index.size(); i++) {
+            if (indexName.equals(index.get(i))){
+                flag=1;
+                index.remove(i);
+                break;
+            }
+        }
+        if (flag == 0)
+            throw new BasicBusinessException("dropIndex error: No existed index!");
 
-        System.out.println("Success: Index " + indexName + " has been dropped!");
+        if (flag ==1)
+            System.out.println("Success: Index " + indexName + " has been dropped!");
     }
 
     public static void insert(String query) throws BasicBusinessException {
