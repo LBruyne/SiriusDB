@@ -294,12 +294,16 @@ public class Interpreter {
     public static void dropIndex(String query) throws BasicBusinessException {
         System.out.println("Dropping index ...");
         String[] qaq = query.split(" ");
+        if (qaq.length<5)
+            throw new BasicBusinessException("dropIndex error: Invalid query!");
         if (qaq.length == 2)
             throw new BasicBusinessException("dropIndex error: Not specify table name!");
-        if (qaq.length != 3)
-            throw new BasicBusinessException("dropIndex error: Invalid query!");
+
+        if (!qaq[1].equals("index") || !qaq[3].equals("on"))
+            throw new BasicBusinessException("dropIndex error: Incorrect format!");
 
         String indexName = qaq[2];
+        String tableName = qaq[4];
         // TODO: API for dropTable
         int flag = 0;
         for (int i = 0; i < index.size(); i++) {
