@@ -9,7 +9,7 @@ public enum PredicateEnum {
 
     SMALLERorEQUAL(4, "<="),
 
-    EQUAL(5, "=="),
+    EQUAL(5, "="),
 
     notEQUAL(6, "!="),
 

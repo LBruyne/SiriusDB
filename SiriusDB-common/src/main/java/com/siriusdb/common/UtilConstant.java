@@ -19,27 +19,37 @@ public class UtilConstant {
      * 本机主机地址
      * TODO：部署时修改为真实的
      */
-    public static String HOST_URL = getHostAddress() + ":2345";
+    public static String HOST_URL = getHostAddress() + ":" + RegionConstant.port.toString();
+
+    /**
+     * 主机IP
+     */
+    public static String HOST_IP = getHostAddress();
 
     /**
      * 随机的本机主机名
      */
     public static String HOST_NAME = getHostname();
 
+    static {
+        log.warn("本机IP为{}", HOST_IP);
+        log.warn("本机名为{}", HOST_NAME);
+    }
+
     /**
      * RPC超时时间
      */
-    public static final Integer RPC_TIMEOUT = 3000;
+    public static final Integer RPC_TIMEOUT = 10000;
 
     /**
      * 表格数据请求中，代表请求所有表格数据
      */
-    public static final String ALL_TABLE = "ALL";
+    public static final String ALL_TABLE = "ALL_TABLE";
 
     /**
      * 表格数据请求中，代表所有列数据
      */
-    public static final String ALL_COLUMN = "ALL";
+    public static final String ALL_COLUMN = "ALL_TABLE";
 
     /**
      * 找不到

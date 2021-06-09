@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 
 import java.io.*;
-import java.sql.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -60,8 +59,8 @@ public class ServiceStrategyExecutor {
                     execInvalidStrategy(server);
                     break;
             }
-            DataHolder.write();
-        } catch (IOException | TException e) {
+            // DataHolder.write();
+        } catch (TException e) {
             log.warn(e.getMessage(), e);
         }
     }
@@ -71,10 +70,14 @@ public class ServiceStrategyExecutor {
             // 该机器为主件机或者副本机
             if (DataHolder.getIdleServerNum() == 0) {
                 // 没有备用机器，非正常状态
-                DataHolder.getDataServerById(server.getDualServerId()).setDualServerId(MasterConstant.NO_DUAL_SERVER);
-                server.serverInvalid();
-                log.warn("服务器数量不足");
-                throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "服务器失效后没有备用机器，系统非正常状态");
+                if(DataHolder.getDataServerById(server.getDualServerId()) == null) {
+                    throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "主件机或副件机没有配偶");
+                } else {
+                    DataHolder.getDataServerById(server.getDualServerId()).setDualServerId(MasterConstant.NO_DUAL_SERVER);
+                    server.serverInvalid();
+                    log.warn("服务器数量不足");
+                    log.warn("服务器失效后没有备用机器，系统非正常状态");
+                }
             } else {
                 // 有备用机器，进行一次结对
                 DataServer serverNotInPair = DataHolder.getDataServerById(server.getDualServerId()); // 孤单的服务器
@@ -94,7 +97,7 @@ public class ServiceStrategyExecutor {
             }
         } else {
             server.serverInvalid();
-            throw new BasicBusinessException(ErrorCodeEnum.BASIC_VALIDATION_FAILED.getCode(), "失效的服务器原本的状态不合法");
+            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "失效的服务器原本的状态不合法");
         }
     }
 
@@ -119,11 +122,11 @@ public class ServiceStrategyExecutor {
                 DataHolder.remakeServerPair(server, serverNotInPair);
                 log.warn("服务器{}和服务器{}重新结对", server.getHostName(), serverNotInPair.getHostName());
             }
-            throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "目前数据服务器数量不足,服务处于非正常状态");
+            log.warn("目前数据服务器数量不足,服务处于非正常状态");
         } else {
             // 服务器数量足够
             // 如果目前数据服务器不成对存在，与不成对的那一台服务器结对
-            log.warn("当前服务器数量充足");
+            log.warn("当前服务器数量充足，有{}台，其中有效的服务器有{}台", DataHolder.dataServers.size(), DataHolder.getValidServerNum());
             DataServer serverNotInPair = DataHolder.getServerNotInPair();
             if (serverNotInPair != null) {
                 // 发现有服务器不成对存在，与未结对的机器进行结对
@@ -201,7 +204,7 @@ public class ServiceStrategyExecutor {
         }
 
         static Integer getRunningServerNum() {
-            return getPrimaryServerNum() + getCopyServerNum();
+            return getPrimaryServerNum() + getCopyServerNum() + getIdleServerNum();
         }
 
         static Integer getValidServerNum() {
@@ -213,7 +216,7 @@ public class ServiceStrategyExecutor {
                 // 运行中
                 if (server.getState() == DataServerStateEnum.PRIMARY || server.getState() == DataServerStateEnum.COPY) {
                     // 但没有对偶机器
-                    if (server.getDualServerId() == MasterConstant.NO_DUAL_SERVER) {
+                    if (server.getDualServerId().equals(MasterConstant.NO_DUAL_SERVER)) {
                         log.warn("查询到目前数据服务器{}处于未结对状态", server);
                         return server;
                     }
@@ -257,7 +260,7 @@ public class ServiceStrategyExecutor {
         public static void makeServerPairFromIdleServer(DataServer server) throws TException {
             DataServer server2 = getOneServerInIdle(server);
             if (server2 == null)
-                throw new BasicBusinessException(ErrorCodeEnum.FAIL.getCode(), "不存在其他闲置服务器");
+                log.warn("不存在其他闲置服务器");
 
             server.makePair(server2);
 
@@ -286,15 +289,16 @@ public class ServiceStrategyExecutor {
             // 建立一个目标是server服务器的客户端
             RegionServiceClient client = new RegionServiceClient(RegionService.Client.class, server.getIp(), server.getPort());
             // 通知机器状态变化
-            client.notifyStateChange(serverNotInPair, serverNotInPair.getHostName());
+            client.notifyStateChange(server, server.getHostName());
 
             // 建立一个目标是serverNotInPair服务器的客户端
             client = new RegionServiceClient(RegionService.Client.class, serverNotInPair.getIp(), serverNotInPair.getPort());
             // 通知机器状态变化
             client.notifyStateChange(serverNotInPair, serverNotInPair.getHostName());
+            log.warn("一台闲置服务器和一台孤单的机器完成结对：{}，{}", server.getHostName(), serverNotInPair.getHostName());
             // 通知机器数据复制
             client.execTableCopy(Stream.of(UtilConstant.ALL_TABLE).collect(Collectors.toList()), server, serverNotInPair.getHostName());
-            log.warn("一台闲置服务器和一台孤单的机器完成结对：{}，{}", server.getHostName(), serverNotInPair.getHostName());
+            log.warn("从服务器{}向服务器{}完成数据复制", serverNotInPair.getHostName(), server.getHostName());
         }
 
         public static TableMeta findTable(String name) {
@@ -308,10 +312,10 @@ public class ServiceStrategyExecutor {
         }
 
         public static boolean isServiceAbnormalState() {
-            if (getRunningServerNum() < 3) return false;         // 条件1：数量充足
-            else if (getServerNotInPair() != null) return false; // 条件2：完成结对
-            else if (getIdleServerNum() == 0) return false;      // 条件3：有空闲机备用
-            else return true;
+            if (getRunningServerNum() < 3) return true;         // 条件1：数量充足
+            else if (getServerNotInPair() != null) return true; // 条件2：完成结对
+            else if (getIdleServerNum() == 0) return true;      // 条件3：有空闲机备用
+            else return false;
         }
 
         public static Boolean isTableExisted(String name) {
@@ -368,7 +372,7 @@ public class ServiceStrategyExecutor {
             }).collect(Collectors.toList());
 
             // 查找最小值对应的ID
-            return counts.indexOf(Collections.min(counts));
+            return primaryServers.get(counts.indexOf(Collections.min(counts))).getId();
         }
 
         public static void read() throws IOException, ClassNotFoundException {

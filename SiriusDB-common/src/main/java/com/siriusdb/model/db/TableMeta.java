@@ -26,4 +26,15 @@ public class TableMeta implements Serializable {
     private String locatedServerUrl;
 
     private List<Attribute> attributes;
+
+    @Override
+    public boolean equals(Object another){
+        if (! (another instanceof TableMeta))
+            return false;
+        if(another == this)
+            return true;
+        return name.equals(((TableMeta) another).getName()) && primaryKey.equals(((TableMeta) another).getPrimaryKey()) && attributes.equals(((TableMeta) another).getAttributes());
+    }
+
 }
+

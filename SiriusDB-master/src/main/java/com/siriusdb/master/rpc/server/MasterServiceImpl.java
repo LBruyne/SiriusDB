@@ -25,7 +25,7 @@ public class MasterServiceImpl implements MasterService.Iface {
         List<String> tables = req.getName();
         log.warn("接收到对于表格元数据查询请求头{}，请求体{}", base, tables);
 
-        if(!verifyBase(base)) {
+        if (!verifyBase(base)) {
             log.warn("请求对象和本机不符合");
             return new QueryTableMetaInfoResponse()
                     .setMeta(null)
@@ -44,7 +44,7 @@ public class MasterServiceImpl implements MasterService.Iface {
         Integer operationCode = req.getOperationCode();
         log.warn("接收到对于表格元数据变更通知的请求头{}，目标表格{}，操作码{}", base, tableName, operationCode);
 
-        if(!verifyBase(base)) {
+        if (!verifyBase(base)) {
             log.warn("请求对象和本机不符合");
             return new NotifyTableMetaChangeResponse()
                     .setBaseResp(RpcResult.failResp());
@@ -60,7 +60,7 @@ public class MasterServiceImpl implements MasterService.Iface {
         String name = req.getName();
         log.warn("接收到对于表格新建请求的请求头{}，目标表格名{}", base, name);
 
-        if(!verifyBase(base)) {
+        if (!verifyBase(base)) {
             log.warn("请求对象和本机不符合");
             return new QueryCreateTableResponse()
                     .setBaseResp(RpcResult.failResp());
@@ -72,9 +72,8 @@ public class MasterServiceImpl implements MasterService.Iface {
     private Boolean verifyBase(Base base) {
         // 对请求头进行验证
         // 这里简单的对hostname进行验证
-        // TODO: 添加更多验证，如caller是否在Client列表中等
         String receiver = base.getReceiver();
-        if(!receiver.equals(MasterConstant.MASTER_HOST_NAME)) {
+        if (!receiver.equals(MasterConstant.MASTER_HOST_NAME)) {
             return false;
         }
         return true;

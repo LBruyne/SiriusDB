@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Row {
+public class Row implements Serializable {
 
     private List<Element> elements;
 
@@ -20,6 +21,11 @@ public class Row {
     public Element getElements(int index){
         return elements.get(index);
     }; // 得到对应下标的属性值
+
+    public void replaceElements(int indexToBeReplaced, Element newEle){
+        elements.remove(indexToBeReplaced);
+        elements.add(indexToBeReplaced,newEle);
+    }
 
 /*    Row row = new Row();
     Element<String> element = new Element<String>();

@@ -9,12 +9,15 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Vector;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.thrift.TException;
 
 /**
  * @Auther: ylx
  * @Date: 2021/05/20/15:01
  * @Description: The module for Index Management.
  */
+@Slf4j
 public class IndexManager<T> {
 
 //    private static LinkedHashMap<String, BPTree<DataTypeEnum, Row>> BPTreeMap = new LinkedHashMap<>();
@@ -105,16 +108,34 @@ public class IndexManager<T> {
         return tmpTreeList;
     }
 
-    public static boolean create_index(Index newIndex, Table tmpTable) throws NullPointerException{
-        List<Index> list = tmpTable.getIndexes();
-        list.add(newIndex);
-        return true;
+    public static void createIndex(Index newIndex, Table tmpTable) throws NullPointerException {
+        if(newIndex.getName().length() != 0){
+            List<Index> list = tmpTable.getIndexes();
+            list.add(newIndex);
+            try {
+                DataLoader.alterTable(false, tmpTable);
+            } catch (TException e) {
+                e.printStackTrace();
+                log.warn("索引{}创建失败",newIndex.getName());
+            }
+            log.warn("索引{}创建成功",newIndex.getName());
+        }
+        else log.warn("索引未填入");
     }
 
-    public static boolean drop_index(Index oldIndex, Table tmpTable) throws NullPointerException{
-        List<Index> list = tmpTable.getIndexes();
-        list.remove(oldIndex);
-        return true;
+    public static void dropIndex(Index oldIndex, Table tmpTable) throws NullPointerException{
+        if(oldIndex.getName().length() != 0){
+            List<Index> list = tmpTable.getIndexes();
+            list.remove(oldIndex);
+            try {
+                DataLoader.alterTable(false, tmpTable);
+            } catch (TException e) {
+                e.printStackTrace();
+                log.warn("索引{}删除失败",oldIndex.getName());
+            }
+            log.warn("索引{}删除成功",oldIndex.getName());
+        }
+        else log.warn("索引未填入");
     }
 
     public static void hello() {

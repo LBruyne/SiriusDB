@@ -5,6 +5,7 @@ import com.siriusdb.utils.zk.CuratorClientHolder;
 import com.siriusdb.utils.zk.ZkUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.CreateMode;
+import com.siriusdb.common.MasterConstant;
 
 /**
  * @Description: ZooKeeper 服务管理逻辑
@@ -22,7 +23,7 @@ public class ZkServiceManager implements Runnable {
     private void serviceRegister() {
         try {
             // 向ZooKeeper注册临时节点
-            CuratorClientHolder curatorClientHolder = new CuratorClientHolder();
+            CuratorClientHolder curatorClientHolder = new CuratorClientHolder(MasterConstant.MASTER_SERVER_IP+":2181");
             curatorClientHolder.createNode(ZkUtil.getRegisterPath(), UtilConstant.HOST_URL, CreateMode.EPHEMERAL);
 
             // 阻塞该线程，直到发生异常或者主动退出

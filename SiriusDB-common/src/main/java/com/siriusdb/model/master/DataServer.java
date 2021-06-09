@@ -4,8 +4,10 @@ import com.siriusdb.common.MasterConstant;
 import com.siriusdb.enums.DataServerStateEnum;
 import com.siriusdb.enums.ErrorCodeEnum;
 import com.siriusdb.exception.BasicBusinessException;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -18,6 +20,8 @@ import java.io.Serializable;
 @Data
 @Builder
 @Slf4j
+@NoArgsConstructor
+@AllArgsConstructor
 public class DataServer implements Serializable {
 
     private Integer id;
@@ -111,9 +115,10 @@ public class DataServer implements Serializable {
         } else {
             this.setState(DataServerStateEnum.PRIMARY);
             server.setState(DataServerStateEnum.COPY);
-            this.setDualServerId(server.getDualServerId());
-            server.setDualServerId(this.getDualServerId());
+            this.setDualServerId(server.getId());
+            server.setDualServerId(this.getId());
             log.warn("{}的配偶是{}", this.getHostName(), server.getHostName());
         }
     }
+
 }

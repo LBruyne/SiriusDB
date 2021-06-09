@@ -24,4 +24,27 @@ public class Table implements Serializable {
      */
     private List<Row> data;
 
+    @Override
+    public boolean equals(Object another) {
+        if (!(another instanceof Table))
+            return false;
+        if (another == this)
+            return true;
+        return meta.equals(((Table) another).getMeta()) && data.equals(((Table) another).getData());
+    }
+
+    @Override
+    public int hashCode() {
+        return data.size();
+    }
+
+    public int fetchAttributeColID(String attributeName) {
+        int ret = -1;
+        for (int i = 0; i < meta.getAttributes().size(); i++) {
+            if (meta.getAttributes().get(i).getName().equals(attributeName))
+                ret = i;
+        }
+        return ret;
+    }
+
 }

@@ -6,7 +6,7 @@ namespace java com.siriusdb.thrift.model
  * 请求体：向Master请求创建一个表格
  */
 struct QueryCreateTableRequest {
-    1: required string name,        // table的名字
+    1: optional string name,        // table的名字
     255: required Base.Base base
 }
 
@@ -14,8 +14,8 @@ struct QueryCreateTableRequest {
  * 响应体：向Master请求创建一个表格
  */
 struct QueryCreateTableResponse {
-    1: required string locatedServerName,
-    2: required string locatedServerUrl,
+    1: optional string locatedServerName,
+    2: optional string locatedServerUrl,
     255: required Base.BaseResp baseResp
 }
 
@@ -23,7 +23,7 @@ struct QueryCreateTableResponse {
  * 根据表格名服务器请求相应表格数据
  */
 struct QueryTableDataRequest {
-    1: required list<string> tableNames,
+    1: optional list<string> tableNames,
     255: required Base.Base base,
 }
 
@@ -39,7 +39,7 @@ struct QueryTableDataResponse {
  * 根据表格名查询相应表格元数据
  */
 struct QueryTableMetaInfoRequest {
-    1: required list<string> name,
+    1: optional list<string> name,
     255: required Base.Base base
 }
 
@@ -55,12 +55,11 @@ struct QueryTableMetaInfoResponse {
  * Master告知Region当前状态请求
  */
 struct NotifyStateRequest {
-    1: required i32 stateCode,
-    2: required string dualServerName,
-    3: required string dualServerUrl,
+    1: optional i32 stateCode,
+    2: optional string dualServerName,
+    3: optional string dualServerUrl,
     255: required Base.Base base
 }
-
 /**
  * Master告知Region当前状态响应
  */
@@ -72,9 +71,9 @@ struct NotifyStateResponse {
  * Region告知Server TableMeta变化请求
  */
 struct NotifyTableMetaChangeRequest {
-    1: required string tableName,
-    2: required i32 operationCode,
-    3: required Table.VTableMeta tableMeta
+    1: optional string tableName,
+    2: optional i32 operationCode,
+    3: optional Table.VTableMeta tableMeta
     255: required Base.Base base
 }
 
@@ -89,9 +88,9 @@ struct NotifyTableMetaChangeResponse {
  * A告知B Table变化请求
  */
 struct NotifyTableChangeRequest {
-    1: required list<string> tableNames,
-    2: required i32 operationCode,
-    3: required list<Table.VTable> tables,
+    1: optional list<string> tableNames,
+    2: optional i32 operationCode,
+    3: optional list<Table.VTable> tables,
     255: required Base.Base base
 }
 
@@ -106,9 +105,9 @@ struct NotifyTableChangeResponse {
  * master告知region表格复制请求
  */
 struct ExecTableCopyRequest {
-    1: required string targetName,
-    2: required string targetUrl,
-    3: required list<string> tableNames,
+    1: optional string targetName,
+    2: optional string targetUrl,
+    3: optional list<string> tableNames,
     255: required Base.Base base
 }
 

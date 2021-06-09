@@ -1,23 +1,18 @@
 package com.siriusdb.master.rpc.client;
 
 import com.siriusdb.common.MasterConstant;
-import com.siriusdb.common.UtilConstant;
 import com.siriusdb.enums.ErrorCodeEnum;
 import com.siriusdb.enums.RpcResultCodeEnum;
 import com.siriusdb.exception.BasicBusinessException;
 import com.siriusdb.master.biz.zk.ServiceStrategyExecutor;
-import com.siriusdb.model.db.Attribute;
-import com.siriusdb.model.db.TableMeta;
 import com.siriusdb.model.master.DataServer;
 import com.siriusdb.thrift.model.*;
 import com.siriusdb.thrift.service.RegionService;
 import com.siriusdb.utils.rpc.DynamicThriftClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
-import org.springframework.beans.BeanUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @Description: MasterServer的RPC客户端

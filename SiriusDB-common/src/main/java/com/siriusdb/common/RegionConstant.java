@@ -7,4 +7,6 @@ package com.siriusdb.common;
  */
 public class RegionConstant {
 
+    public static final Integer port = 2355;
+
 }
