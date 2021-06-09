@@ -110,6 +110,7 @@ public class DataLoader {
                 oldTable.getMeta().setLocatedServerUrl(res.meta.get(0).locatedServerUrl);
                 RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
                 client2.trueDropTable(oldTable, res.meta.get(0).locatedServerName);
+                dropTableCache(oldTable);
             }
         }
     }
@@ -180,6 +181,13 @@ public class DataLoader {
             client2.trueRetransmitTable(table, thisTableMeta.getLocatedServerName());
         }
 
+        new Thread(new refreshBuffer(buffer,findMetaID(tableName))).start();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public static void alterTable(Boolean isFakeGetTable, Table table) throws TException {
@@ -196,6 +204,11 @@ public class DataLoader {
         if (findMetaID(tableName) != -1) {
             res = buffer.get(metaID);
             new Thread(new refreshBuffer(buffer, metaID)).start();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } else {
 
             MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
@@ -207,8 +220,7 @@ public class DataLoader {
             }
             if (res.getMeta() == null || res.getMeta().size() == 0) {
                 log.warn("向Master请求{}表格失败，表格不存在", tableName);
-            }
-            else{
+            } else {
                 buffer.add(res);
             }
         }
@@ -228,6 +240,16 @@ public class DataLoader {
                 return i;
         }
         return -1;
+    }
+
+    private static void dropTableCache(Table table) {
+        int id = -1;
+        for (int i = 0; i < buffer.size(); i++) {
+            if (buffer.get(i).getMeta().get(0).getName().equals(table.getMeta().getName()))
+                id = i;
+        }
+        if (id != -1)
+            buffer.remove(id);
     }
 
 }
