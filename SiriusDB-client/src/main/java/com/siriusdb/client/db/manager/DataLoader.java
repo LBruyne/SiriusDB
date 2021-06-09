@@ -151,7 +151,9 @@ public class DataLoader {
             try {
                 ret = client2.trueGetTable(tableName, thisTableMeta.getLocatedServerName());
             } catch (TException e) {
-                e.printStackTrace();
+                // cache invalid
+                new refreshBuffer(buffer, findMetaID(tableName)).run();
+                return getTable(tableName);
             }
         }
 
@@ -181,11 +183,13 @@ public class DataLoader {
             client2.trueRetransmitTable(table, thisTableMeta.getLocatedServerName());
         }
 
-        new Thread(new refreshBuffer(buffer,findMetaID(tableName))).start();
+        new Thread(new refreshBuffer(buffer, findMetaID(tableName))).start();
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            // cache invalid
+            new refreshBuffer(buffer, findMetaID(tableName)).run();
+            alterTable(table);
         }
 
     }
@@ -203,12 +207,6 @@ public class DataLoader {
         QueryTableMetaInfoResponse res = null;
         if (findMetaID(tableName) != -1) {
             res = buffer.get(metaID);
-            new Thread(new refreshBuffer(buffer, metaID)).start();
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         } else {
 
             MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
