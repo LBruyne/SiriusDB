@@ -120,12 +120,12 @@ public class RegionServiceImpl implements RegionService.Iface {
         log.warn("此时的项目地址为:");
         System.out.println(file4);
         File[] tempList = file4.listFiles();
-        log.warn("temp:{}",tempList);
+        log.warn("temp:{}",tempList[2]);
         if (dataServer.getState() == DataServerStateEnum.COPY && tempList != null && tempList.length != 0) {
             MasterServerClient masterServerClient = new MasterServerClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
             for (int i = 0; i < tempList.length; i++) {
                 if (tempList[i].isFile() && tempList[i].getName().contains(UtilConstant.getHostname()) && !tempList[i].getName().contains("dualMachine")) {
-                    tableName.add(tempList[i].toString());
+                    tableName.add(tempList[i].getName());
                 }
                 if (tempList[i].isDirectory()) {
                 }
@@ -146,7 +146,8 @@ public class RegionServiceImpl implements RegionService.Iface {
                     tableTmp.getMeta().setLocatedServerName(dataServer.getHostName());
                     tableTmp.getMeta().setLocatedServerUrl(dataServer.getHostUrl());
                     VTableMeta vTableMeta = CopyUtils.tableMToVTableM(tableTmp.getMeta());
-                    masterServerClient.notifyTableMetaChange(tableName.get(i), RpcOperationEnum.UPDATE.getCode(), vTableMeta, new Base().setCaller(UtilConstant.getHostname()).setReceiver(MasterConstant.MASTER_HOST_NAME));
+                    masterServerClient.notifyTableMetaChange(tableName.get(i), RpcOperationEnum.UPDATE.getCode(), vTableMeta, new Base().setCaller("SERVER"+UtilConstant.getHostname()).setReceiver(MasterConstant.MASTER_HOST_NAME));
+                    log.warn("报告master主机地址已经改了：{}",tableTmp.getMeta().getLocatedServerName());
                 } catch (Exception e) {
                     log.warn("state变更失败");
                 }
@@ -213,7 +214,7 @@ public class RegionServiceImpl implements RegionService.Iface {
             for (int i = 0; i < tableNames.size(); i++) {
                 if(dataServerDual.getState() == DataServerStateEnum.PRIMARY) {
                     masterServerClient.notifyTableMetaChange(tableNames.get(i), RpcOperationEnum.DELETE.getCode(), vTableList.get(i).getMeta(), new Base()
-                            .setCaller(UtilConstant.getHostname())
+                            .setCaller("SERVER"+UtilConstant.getHostname())
                             .setReceiver(MasterConstant.MASTER_HOST_NAME));
                 }
                 File file = new File(UtilConstant.getHostname() + tableNames.get(i) + ".dat");
@@ -226,7 +227,7 @@ public class RegionServiceImpl implements RegionService.Iface {
             for (int i = 0; i < tableNames.size(); i++) {
                 if(dataServerDual.getState() == DataServerStateEnum.PRIMARY) {
                     masterServerClient.notifyTableMetaChange(tableNames.get(i), RpcOperationEnum.UPDATE.getCode(), vTableList.get(i).getMeta(), new Base()
-                            .setCaller(UtilConstant.getHostname())
+                            .setCaller("SERVER"+UtilConstant.getHostname())
                             .setReceiver(MasterConstant.MASTER_HOST_NAME));
                 }
                 File file = new File(UtilConstant.getHostname() + tableNames.get(i) + ".dat");
@@ -255,7 +256,7 @@ public class RegionServiceImpl implements RegionService.Iface {
             for (int i = 0; i < vTableList.size(); i++) {
                 if(dataServerDual.getState() == DataServerStateEnum.PRIMARY) {
                     masterServerClient.notifyTableMetaChange(tableNames.get(i), RpcOperationEnum.CREATE.getCode(), vTableList.get(i).getMeta(), new Base()
-                            .setCaller(UtilConstant.getHostname())
+                            .setCaller("SERVER"+UtilConstant.getHostname())
                             .setReceiver(MasterConstant.MASTER_HOST_NAME));
                 }
                 VTable vTableTmp = vTableList.get(i);
@@ -293,12 +294,12 @@ public class RegionServiceImpl implements RegionService.Iface {
         NotifyTableChangeRequest notifyTableChangeRequest = new NotifyTableChangeRequest()
                 .setTableNames(req.getTableNames())
                 .setOperationCode(RpcOperationEnum.CREATE.getCode())
-                .setTables(fileServer.readFile())
+                .setTables(fileServer.readFile(dataServer.getState(),dataServer.getHostName(),dataServer.getHostUrl()))
                 .setBase(new Base()
                         .setCaller("SERVER"+UtilConstant.getHostname())
                         .setReceiver(req.getTargetName()));
         //遍历一下
-        log.warn("向{}传递数据变更请求，数据表格有{}，操作为{},table为{}", req.getTargetName(), req.getTableNames(), RpcOperationEnum.CREATE.getCode(),fileServer.readFile()); //TODO
+        log.warn("向{}传递数据变更请求，数据表格有{}，操作为{},table为{}", req.getTargetName(), req.getTableNames(), RpcOperationEnum.CREATE.getCode(),fileServer.readFile(dataServer.getState(),dataServer.getHostName(),dataServer.getHostUrl())); //TODO
         regionServerClient.notifyTableChange(notifyTableChangeRequest);
         return new ExecTableCopyResponse()
                 .setBaseResp(RpcResult.successResp());

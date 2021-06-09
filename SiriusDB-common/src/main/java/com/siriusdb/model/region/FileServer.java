@@ -1,6 +1,8 @@
 package com.siriusdb.model.region;
 
+import com.siriusdb.common.MasterConstant;
 import com.siriusdb.common.UtilConstant;
+import com.siriusdb.enums.DataServerStateEnum;
 import com.siriusdb.exception.BasicBusinessException;
 import com.siriusdb.model.db.Table;
 import com.siriusdb.thrift.model.VTable;
@@ -21,7 +23,8 @@ public class FileServer implements Serializable {
 
     private List<String> fileList;
 
-    public List<VTable> readFile() {
+    public List<VTable> readFile(
+            DataServerStateEnum state,String name,String url) {
         List<VTable> tableList = new ArrayList<>();
         List<String> tableName1 = new ArrayList<String>();
         if (fileList.get(0).equals(UtilConstant.ALL_TABLE)) {
@@ -60,12 +63,22 @@ public class FileServer implements Serializable {
             }
             vtableTmp = CopyUtils.tableToVTable(tableTmp);
             VTableMeta vTableMeta = vtableTmp.getMeta();
-            vtableTmp.setMeta(new VTableMeta()
-                    .setAttributes(vTableMeta.getAttributes())
-                    .setLocatedServerName(UtilConstant.getHostname())
-                    .setLocatedServerUrl(UtilConstant.HOST_URL)
-                    .setName(vTableMeta.getName())
-                    .setPrimaryKey(vTableMeta.getPrimaryKey()));
+            if(state == DataServerStateEnum.PRIMARY) {
+                vtableTmp.setMeta(new VTableMeta()
+                        .setAttributes(vTableMeta.getAttributes())
+                        .setLocatedServerName(UtilConstant.getHostname())
+                        .setLocatedServerUrl(UtilConstant.HOST_URL)
+                        .setName(vTableMeta.getName())
+                        .setPrimaryKey(vTableMeta.getPrimaryKey()));
+            }
+            else if(state == DataServerStateEnum.COPY){
+                vtableTmp.setMeta(new VTableMeta()
+                        .setAttributes(vTableMeta.getAttributes())
+                        .setLocatedServerName(name)
+                        .setLocatedServerUrl(url)
+                        .setName(vTableMeta.getName())
+                        .setPrimaryKey(vTableMeta.getPrimaryKey()));
+            }
             log.warn("Fileserver:此次添加的表为:{}",vtableTmp);
             tableList.add(vtableTmp);
         }
