@@ -20,7 +20,7 @@ public class ZkConstant {
     /**
      * ZooKeeper集群访问的端口
      */
-    public static final String ZOOKEEPER_HOST = UtilConstant.HOST_IP + ":2181";
+    public static final String ZOOKEEPER_HOST = MasterConstant.MASTER_SERVER_IP + ":2181";
 
     /**
      * ZooKeeper会话超时时间

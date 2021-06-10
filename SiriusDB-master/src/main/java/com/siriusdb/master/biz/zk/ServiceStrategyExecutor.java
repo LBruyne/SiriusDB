@@ -208,7 +208,7 @@ public class ServiceStrategyExecutor {
         }
 
         static Integer getValidServerNum() {
-            return getIdleServerNum() + getRunningServerNum();
+            return getRunningServerNum();
         }
 
         static DataServer getServerNotInPair() {

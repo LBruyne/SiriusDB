@@ -69,8 +69,8 @@ public abstract class DynamicThriftServer {
             // 生成server对象
             server = new TThreadPoolServer(new TThreadPoolServer.Args(transport)
                     .processor(processor)
-                    .maxWorkerThreads(20)
-                    .minWorkerThreads(10)
+                    .maxWorkerThreads(100)
+                    .minWorkerThreads(5)
                     .protocolFactory(new TBinaryProtocol.Factory())
                     .transportFactory(new TTransportFactory()));
             log.warn("RPC服务端创建：{}", processor.getClass());

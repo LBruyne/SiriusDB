@@ -22,8 +22,11 @@ import java.util.*;
 public class DataLoader {
     private static Table thisTable = null;
 
+    private static List<QueryTableMetaInfoResponse> buffer = null;
+
     static {
         fakeInitTable();
+        buffer = new Vector<>();
     }
 
     private static void fakeSetTable(Table newTable) {
@@ -107,6 +110,7 @@ public class DataLoader {
                 oldTable.getMeta().setLocatedServerUrl(res.meta.get(0).locatedServerUrl);
                 RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
                 client2.trueDropTable(oldTable, res.meta.get(0).locatedServerName);
+                dropTableCache(oldTable);
             }
         }
     }
@@ -115,70 +119,168 @@ public class DataLoader {
     //real get table function, a is any integer
     public static Table getTable(String tableName) {
 
-        MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
-        QueryTableMetaInfoResponse res = null;
-        try {
-            res = client1.getTable(tableName, UtilConstant.HOST_NAME);
-        } catch (TException e) {
-            e.printStackTrace();
-        }
+//        MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
+//        QueryTableMetaInfoResponse res = null;
+//        try {
+//            res = client1.getTable(tableName, UtilConstant.HOST_NAME);
+//        } catch (TException e) {
+//            e.printStackTrace();
+//        }
+//        Table ret = null;
+//        DataServer target = new DataServer();
+//        if (res.getMeta() == null || res.getMeta().size() == 0) {
+//            log.warn("向Master请求{}表格失败，表格不存在", tableName);
         Table ret = null;
+        QueryTableMetaInfoResponse res = realFindTable(tableName);
         DataServer target = new DataServer();
-        if (res.getMeta() == null || res.getMeta().size() == 0) {
-            log.warn("向Master请求{}表格失败，表格不存在", tableName);
-        } else {
-            VTableMeta thisTableMeta = res.getMeta().get(0);
-            target.setHostName(thisTableMeta.getLocatedServerName());
-            target.setHostUrl(thisTableMeta.getLocatedServerUrl());
-            target.parseHostUrl();
 
-            log.warn("向Master请求GET表格成功，表格现在被存储在主机{}:{}:{}", target.getHostName(), target.getIp(), target.getPort());
+        VTableMeta thisTableMeta = res.getMeta().get(0);
+        target.setHostName(thisTableMeta.getLocatedServerName());
+        target.setHostUrl(thisTableMeta.getLocatedServerUrl());
+        target.parseHostUrl();
 
-            if (thisTableMeta.getLocatedServerName().length() != 0) {
+        log.warn("Alter Table: 向缓存提取Meta成功，表格现在被存储在主机{}:{}:{}", target.getHostName(), target.getIp(), target.getPort());
+
+        if (thisTableMeta.getLocatedServerName().length() != 0) {
 //                newTable.getMeta().setLocatedServerName(res.locatedServerName);
 //                newTable.getMeta().setLocatedServerUrl(res.locatedServerUrl);
 //                RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
 //                client2.trueCreateTable(newTable, res.locatedServerName);
 
-                RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
-                try {
-                    ret = client2.trueGetTable(tableName, thisTableMeta.getLocatedServerName());
-                } catch (TException e) {
-                    e.printStackTrace();
-                }
+            RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
+            try {
+                ret = client2.trueGetTable(tableName, thisTableMeta.getLocatedServerName());
+            } catch (TException e) {
+                // cache invalid
+                log.warn("Buffer invalid, 重新向Master请求Meta");
+                new refreshBuffer(buffer, findMetaID(tableName)).run();
+                return getTable(tableName);
             }
         }
+
         return ret;
     }
 
     public static void alterTable(Table table) throws TException {
         String tableName = table.getMeta().getName();
-        MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
-        QueryTableMetaInfoResponse res = client1.getTable(tableName, UtilConstant.HOST_NAME);
-        Table ret = null;
+//        MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
+//        QueryTableMetaInfoResponse res = client1.getTable(tableName, UtilConstant.HOST_NAME);
+//        Table ret = null;
+//        DataServer target = new DataServer();
+//        if (res.getMeta() == null || res.getMeta().size() == 0) {
+//            log.warn("Alter Table: 向Master请求{}表格失败，表格不存在", tableName);
+//        } else {
+        QueryTableMetaInfoResponse res = realFindTable(tableName);
         DataServer target = new DataServer();
-        if (res.getMeta() == null || res.getMeta().size() == 0) {
-            log.warn("Alter Table: 向Master请求{}表格失败，表格不存在", tableName);
-        } else {
-            VTableMeta thisTableMeta = res.getMeta().get(0);
-            target.setHostName(thisTableMeta.getLocatedServerName());
-            target.setHostUrl(thisTableMeta.getLocatedServerUrl());
-            target.parseHostUrl();
+        VTableMeta thisTableMeta = res.getMeta().get(0);
+        target.setHostName(thisTableMeta.getLocatedServerName());
+        target.setHostUrl(thisTableMeta.getLocatedServerUrl());
+        target.parseHostUrl();
 
-            log.warn("Alter Table: 向Master请求GET表格成功，表格现在被存储在主机{}:{}:{}", target.getHostName(), target.getIp(), target.getPort());
+        log.warn("Alter Table: 向缓存提取Meta成功，表格现在被存储在主机{}:{}:{}", target.getHostName(), target.getIp(), target.getPort());
 
-            if (thisTableMeta.getLocatedServerName().length() != 0) {
-                RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
-                client2.trueRetransmitTable(table, thisTableMeta.getLocatedServerName());
-            }
+        if (thisTableMeta.getLocatedServerName().length() != 0) {
+            RegionServiceClient client2 = new RegionServiceClient(RegionService.Client.class, target.getIp(), target.getPort());
+            client2.trueRetransmitTable(table, thisTableMeta.getLocatedServerName());
         }
+
+        new Thread(new refreshBuffer(buffer, findMetaID(tableName))).start();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // cache invalid
+            log.warn("Buffer invalid, 重新向Master请求Meta");
+            new refreshBuffer(buffer, findMetaID(tableName)).run();
+            alterTable(table);
+        }
+
     }
 
-    public static void alterTable(Boolean isFakeAlter, Table table) throws TException {
-        if (isFakeAlter) {
+    public static void alterTable(Boolean isFakeGetTable, Table table) throws TException {
+        if (isFakeGetTable) {
             fakeSetTable(table);
         } else {
             alterTable(table);
         }
+    }
+
+    private static QueryTableMetaInfoResponse findTable(String tableName) {
+        int metaID = findMetaID(tableName);
+        QueryTableMetaInfoResponse res = null;
+        if (findMetaID(tableName) != -1) {
+            res = buffer.get(metaID);
+        } else {
+
+            MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
+
+            try {
+                res = client1.getTable(tableName, UtilConstant.HOST_NAME);
+            } catch (TException e) {
+                e.printStackTrace();
+            }
+            if (res.getMeta() == null || res.getMeta().size() == 0) {
+                log.warn("向Master请求{}表格失败，表格不存在", tableName);
+            } else {
+                buffer.add(res);
+            }
+        }
+        return res;
+    }
+
+    private static QueryTableMetaInfoResponse realFindTable(String tableName) {
+        QueryTableMetaInfoResponse res = findTable(tableName);
+        if (res == null)
+            res = findTable(tableName);
+        return res;
+    }
+
+    private static int findMetaID(String tableName) {
+        for (int i = 0; i < buffer.size(); i++) {
+            if (buffer.get(i).getMeta().get(0).getName().equals(tableName))
+                return i;
+        }
+        return -1;
+    }
+
+    private static void dropTableCache(Table table) {
+        int id = -1;
+        for (int i = 0; i < buffer.size(); i++) {
+            if (buffer.get(i).getMeta().get(0).getName().equals(table.getMeta().getName()))
+                id = i;
+        }
+        if (id != -1)
+            buffer.remove(id);
+    }
+
+}
+
+class refreshBuffer implements Runnable {
+    private List<QueryTableMetaInfoResponse> ls;
+    private int renew_ID;
+
+    refreshBuffer(List<QueryTableMetaInfoResponse> list, int id) {
+        ls = list;
+        renew_ID = id;
+    }
+
+    @Override
+    public void run() {
+        QueryTableMetaInfoResponse res = null;
+
+        MasterServiceClient client1 = new MasterServiceClient(MasterService.Client.class, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
+
+        try {
+            res = client1.getTable(ls.get(renew_ID).getMeta().get(0).getName(), UtilConstant.HOST_NAME);
+        } catch (TException e) {
+            e.printStackTrace();
+        }
+        if (res.getMeta() == null || res.getMeta().size() == 0) {
+//            log.warn("向Master请求{}表格失败，表格不存在", tableName);
+            ls.remove(res);
+        } else {
+            ls.set(renew_ID, res);
+        }
+
+
     }
 }

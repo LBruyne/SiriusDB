@@ -25,7 +25,6 @@ public class ZkServiceMonitor implements PathChildrenCacheListener {
 
     @Override
     public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
-        String hostName, hostUrl;
         String eventPath = pathChildrenCacheEvent.getData() != null ? pathChildrenCacheEvent.getData().getPath() : null;
 
         // 接收到事件，对事件类型进行判断并执行相应策略

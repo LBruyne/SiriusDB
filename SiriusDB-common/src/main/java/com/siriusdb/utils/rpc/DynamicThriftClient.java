@@ -56,6 +56,12 @@ public abstract class DynamicThriftClient<T> {
         initClient(ts, MasterConstant.MASTER_SERVER_IP, MasterConstant.MASTER_SERVER_PORT);
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
+    }
+
     /**
      * 客户端使用完后进行关闭
      */
@@ -102,5 +108,4 @@ public abstract class DynamicThriftClient<T> {
             log.warn(e.getMessage(), e);
         }
     }
-
 }
